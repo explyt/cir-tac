@@ -1,4 +1,10 @@
-extern "C" enum MlirCIROpCode {
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum CIROpCode {
   AllocaOp,
   BinOp,
   StoreOp,
@@ -9,3 +15,7 @@ extern "C" enum MlirCIROpCode {
 
   UnknownOp,
 };
+
+#ifdef __cplusplus
+}
+#endif

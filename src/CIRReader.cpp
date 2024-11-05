@@ -25,4 +25,3 @@ CIRModule CIRReader::loadFromFile(const std::filesystem::path &path) {
   return CIRModule(
       mlir::parseSourceFile<mlir::ModuleOp>(path.c_str(), parseConfig));
 }
-

@@ -2,7 +2,9 @@ add_library(CIRCAPI
   CIRReader.cpp
   CIRModule.cpp
   CIRFunction.cpp
-  CAPI/CIR.cpp
+  CIRInst.cpp
 )
 
-target_link_libraries(CIRCAPI MLIRCIR MLIRParser MLIRSupport)
+add_subdirectory(CAPI)
+
+target_link_libraries(CIRCAPI CAPIImpl MLIRCIR MLIRParser MLIRSupport)

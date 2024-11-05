@@ -27,8 +27,11 @@ include_directories(include)
 
 add_definitions(${LLVM_DEFINITIONS})
 
-add_executable(mlir-c-test main.cpp)
-
-# Link with own CAPI implementation
 add_subdirectory(src)
+
+add_executable(mlir-test main.cpp)
+target_link_libraries(mlir-test CIRCAPI)
+
+# CAPI test
+add_executable(mlir-c-test main.c)
 target_link_libraries(mlir-c-test CIRCAPI)

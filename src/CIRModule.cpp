@@ -7,20 +7,21 @@
 #include <mlir/IR/OwningOpRef.h>
 #include <type_traits>
 
-CIRModule::CIRModule(mlir::OwningOpRef<mlir::ModuleOp> &&recModule)
-    : theModule(std::move(recModule)) {}
+CIRModule::CIRModule(mlir::OwningOpRef<mlir::ModuleOp> &&refModule)
+    : theModule(std::move(refModule)), dl(*theModule) {
+  std::ignore = functionsList();
+}
 
-std::vector<CIRFunction> CIRModule::functionsList() const {
-  std::vector<CIRFunction> result;
-
-  auto &bodyRegion = (*theModule).getBodyRegion();
-  for (auto &bodyBlock : bodyRegion) {
-    for (auto &function : bodyBlock) {
-      assert(llvm::isa<mlir::cir::FuncOp>(&function));
-      auto rawCIRFunction = llvm::dyn_cast<mlir::cir::FuncOp>(&function);
-      result.emplace_back(rawCIRFunction);
+const std::vector<CIRFunction> &CIRModule::functionsList() const {
+  if (!functions.has_value()) {
+    functions.emplace();
+    auto &bodyRegion = (*theModule).getBodyRegion();
+    for (auto &bodyBlock : bodyRegion) {
+      for (auto &function : bodyBlock) {
+        assert(llvm::isa<mlir::cir::FuncOp>(&function));
+        functions->emplace_back(function, theModule);
+      }
     }
   }
-
-  return result;
+  return *functions;
 }

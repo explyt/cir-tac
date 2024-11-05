@@ -3,15 +3,23 @@
 #include <mlir-c/IR.h>
 #include <mlir-c/Support.h>
 
+#include "CAPI/CIRModule.h"
 #include "CIRInstOpCode.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-MLIR_DECLARE_CAPI_DIALECT_REGISTRATION(CIR, cir);
+struct CIRReaderRef {
+  uintptr_t innerRef;
+};
 
-MLIR_CAPI_EXPORTED MlirCIROpCode mlirCIRdetermineOpCode(MlirOperation op);
+struct CIRReaderRef CIRCreateReader();
+void CIRDestroyReader(struct CIRReaderRef ref);
+
+struct CIRModuleRef loadModuleFromFile(struct CIRReaderRef ref,
+                                       const char *name);
+void CIRDestroyModule(struct CIRModuleRef ref);
 
 #ifdef __cplusplus
 }
