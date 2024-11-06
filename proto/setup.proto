@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package protocir;
+option java_package = "org.jacodb.impl.grpc";
+
+message CIRModuleID { string id = 1; }
+
+message CIRGlobalID {
+  CIRModuleID module_id = 1;
+  string id = 2;
+}
+
+message CIRFunctionID {
+  CIRModuleID module_id = 1;
+  string id = 2;
+}
+
+message CIRBlockID { uint64 id = 1; }
+
+message CIRTypeID {
+  CIRModuleID module_id = 1;
+  string id = 2;
+}
+
+message CIROpID { uint64 id = 1; }
+
+message CIRValue {
+  CIRTypeID type = 1;
+  oneof value {
+    CIROpResult op_result = 2;
+    CIRBlockArgument block_argument = 3;
+  }
+}
+
+message CIROpResult {
+  CIROpID owner = 1;
+  uint64 result_number = 2;
+}
+
+message CIRBlockArgument {
+  CIRBlockID owner = 1;
+  uint64 arg_number = 2;
+}
+
+message CIRValues { repeated CIRValue range = 1; }
