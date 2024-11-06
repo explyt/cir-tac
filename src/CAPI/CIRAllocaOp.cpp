@@ -3,6 +3,7 @@
 #include "CAPI/CIRType.h"
 
 #include "CXX/CIRInst.h"
+#include "CXX/CIRModule.h"
 #include "CXX/CIRType.h"
 
 #include "CIRInstOpCode.h"

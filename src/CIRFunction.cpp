@@ -10,8 +10,7 @@
 const std::vector<CIRInst> &CIRFunction::instructionsList() const {
   if (!instructions.has_value()) {
     instructions.emplace();
-    auto cirFunction = dyn_cast<mlir::cir::FuncOp>(function);
-    for (auto &block : cirFunction.getFunctionBody()) {
+    for (auto &block : function.getFunctionBody()) {
       for (auto &op : block) {
         instructions->emplace_back(op, theModule);
       }
@@ -22,11 +21,17 @@ const std::vector<CIRInst> &CIRFunction::instructionsList() const {
 }
 
 const CIRFunction CIRFunction::fromRef(struct CIRFunctionRef ref) {
-  auto &func = *reinterpret_cast<mlir::Operation *>(ref.innerRef);
+  auto func = mlir::cir::FuncOp::getFromOpaquePointer(
+      reinterpret_cast<void *>(ref.innerRef));
   return CIRFunction(func, CIRModule::fromRef(ref.moduleInnerRef));
 }
 
 CIRFunctionRef CIRFunction::toRef() const {
-  return CIRFunctionRef{reinterpret_cast<uintptr_t>(&function),
-                        theModule.toRef(), instructions->size()};
+  return CIRFunctionRef{
+      reinterpret_cast<uintptr_t>(function.getAsOpaquePointer()),
+      theModule.toRef(), instructions->size()};
+}
+
+CIRType CIRFunction::getReturnType() const {
+  return CIRType(function.getFunctionType().getReturnType(), theModule);
 }

@@ -1,4 +1,4 @@
-add_library(CAPIImpl
+add_library(CIRCAPIImpl
   CIR.cpp
   CIRAllocaOp.cpp
   CIRCallOp.cpp

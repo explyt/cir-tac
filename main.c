@@ -33,15 +33,17 @@ int main(int argc, char *argv[]) {
       case BinOp:
         printf("binop\n");
         break;
-      case StoreOp:
+      case StoreOp: {
         printf("store\n");
         break;
+      }
       case LoadOp:
         printf("load\n");
         break;
       case CallOp: {
         struct CIRFunctionRef called = CIRCallOpCalledFunction(inst);
-        printf("call %s\n", CIRFunctionGetName(called));
+        printf("call %s : %s\n", CIRFunctionGetName(called),
+               CIRTypeGetName(CIRFunctionGetReturnType(called)));
         break;
       }
       case ConstantOp:

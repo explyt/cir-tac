@@ -5,7 +5,9 @@
 #include "CAPI/CIRType.h"
 
 #include "CXX/CIRInst.h"
+#include "CXX/CIRModule.h"
 #include "CXX/CIRType.h"
+
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <mlir/IR/AttrTypeSubElements.h>
 #include <mlir/IR/BuiltinOps.h>

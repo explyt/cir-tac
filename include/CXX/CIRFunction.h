@@ -5,6 +5,7 @@
 #include "CAPI/CIRModule.h"
 
 #include "CXX/CIRInst.h"
+#include "CXX/CIRType.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <llvm/Support/Casting.h>
@@ -18,7 +19,7 @@ class CIRModule;
 
 class CIRFunction {
 public:
-  CIRFunction(mlir::Operation &function, const CIRModule &theModule)
+  CIRFunction(mlir::cir::FuncOp function, const CIRModule &theModule)
       : function(function), theModule(theModule) {
     std::ignore = instructionsList();
   }
@@ -28,13 +29,14 @@ public:
   static const CIRFunction fromRef(struct CIRFunctionRef ref);
   CIRFunctionRef toRef() const;
 
-  const char *getName() const {
-    auto funcOp = llvm::dyn_cast<mlir::cir::FuncOp>(function);
-    return funcOp.getName().data();
-  }
+  const char *getName() const { return function.getName().data(); }
+
+  CIRType getReturnType() const;
 
 private:
+  // FIXME: use cache in module or like that
   mutable std::optional<std::vector<CIRInst>> instructions;
-  mlir::Operation &function;
+  // TODO: FuncOp::getName() is non const o_0
+  mutable mlir::cir::FuncOp function;
   const CIRModule &theModule;
 };
