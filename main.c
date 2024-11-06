@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
         break;
       }
       case LoadOp:
-        printf("load\n");
+        printf("load : %s\n", CIRTypeGetName(CIRLoadOpType(inst)));
         break;
       case CallOp: {
         struct CIRFunctionRef called = CIRCallOpCalledFunction(inst);
@@ -51,7 +51,8 @@ int main(int argc, char *argv[]) {
         printf("constant\n");
         break;
       case ReturnOp: {
-        printf("return\n");
+        struct CIRTypeRef retType = CIRReturnOpGetType(inst);
+        printf("return : %s\n", CIRTypeGetName(retType));
         break;
       }
       case UnknownOp:
