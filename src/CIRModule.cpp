@@ -8,7 +8,7 @@
 #include <type_traits>
 
 CIRModule::CIRModule(mlir::OwningOpRef<mlir::ModuleOp> &&refModule)
-    : theModule(std::move(refModule)), dl(*theModule) {
+    : dl(*refModule), theModule(std::move(refModule)) {
   std::ignore = functionsList();
 }
 
@@ -19,7 +19,7 @@ const std::vector<CIRFunction> &CIRModule::functionsList() const {
     for (auto &bodyBlock : bodyRegion) {
       for (auto &function : bodyBlock) {
         assert(llvm::isa<mlir::cir::FuncOp>(&function));
-        functions->emplace_back(function, theModule);
+        functions->emplace_back(function, *this);
       }
     }
   }

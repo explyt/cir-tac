@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "CAPI/CIRInst.h"
+#include "CAPI/CIRModule.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,13 +11,9 @@ extern "C" {
 
 struct CIRFunctionRef {
   uintptr_t innerRef;
-  uintptr_t innerModuleRef;
+  struct CIRModuleRef moduleInnerRef;
   size_t instructionsNum;
 };
-
-struct CIRInstRef CIRFunctionGetInst(struct CIRFunctionRef funcRef, size_t idx);
-
-const char *CIRFunctionGetName(struct CIRFunctionRef funcRef);
 
 #ifdef __cplusplus
 }

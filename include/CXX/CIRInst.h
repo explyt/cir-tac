@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CAPI/CIRInst.h"
+#include "CAPI/CIRModule.h"
 #include "CIRInstOpCode.h"
 
 #include <mlir/IR/BuiltinOps.h>
@@ -8,11 +9,13 @@
 
 #include <cinttypes>
 #include <mlir/IR/OwningOpRef.h>
+
+class CIRModule;
+
 class CIRInst {
 public:
-  CIRInst(mlir::Operation &inst,
-          const mlir::OwningOpRef<mlir::ModuleOp> &theModule)
-      : inst(inst), theModule(theModule) {}
+  CIRInst(mlir::Operation &inst, const CIRModule &moduleRef)
+      : inst(inst), theModule(moduleRef) {}
 
   template <typename T> const T get() const {
     return llvm::dyn_cast<const T>(&inst);
@@ -20,20 +23,10 @@ public:
 
   CIROpCode opcode() const;
 
-  static const CIRInst fromRef(CIRInstRef instRef) {
-    auto &operation = *reinterpret_cast<mlir::Operation *>(instRef.innerRef);
-    auto &theModule =
-        *reinterpret_cast<const mlir::OwningOpRef<mlir::ModuleOp> *>(
-            instRef.innerModuleRef);
-    return CIRInst(operation, theModule);
-  }
-
-  CIRInstRef toRef() const {
-    return CIRInstRef{reinterpret_cast<uintptr_t>(&inst),
-                      reinterpret_cast<uintptr_t>(&theModule), opcode()};
-  }
+  static const CIRInst fromRef(CIRInstRef instRef);
+  CIRInstRef toRef() const;
 
 private:
   mlir::Operation &inst;
-  const mlir::OwningOpRef<mlir::ModuleOp> &theModule;
+  const CIRModule &theModule;
 };

@@ -24,8 +24,9 @@ public:
     return CIRModuleRef{reinterpret_cast<uintptr_t>(this), functions->size()};
   }
 
+  mlir::DataLayout dl;
+
 private:
   mutable std::optional<std::vector<CIRFunction>> functions;
   mlir::OwningOpRef<mlir::ModuleOp> theModule;
-  mlir::DataLayout dl;
 };

@@ -1,7 +1,11 @@
 #pragma once
 
 #include "CAPI/CIRInst.h"
+#include "CAPI/CIRInstAPI.h"
+
 #include "CXX/CIRInst.h"
+#include "CXX/CIRModule.h"
+
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 
 struct CIRInstRef CIRStoreOpAddress(struct CIRInstRef instRef) {
@@ -11,10 +15,8 @@ struct CIRInstRef CIRStoreOpAddress(struct CIRInstRef instRef) {
   auto address = cirStoreOp.getAddr();
   auto opAddress = address.getDefiningOp();
 
-  auto &theModule = reinterpret_cast<mlir::OwningOpRef<mlir::ModuleOp> &>(
-      instRef.innerModuleRef);
-
-  return CIRInst(*opAddress, theModule).toRef();
+  return CIRInst(*opAddress, CIRModule::fromRef(instRef.moduleInnerRef))
+      .toRef();
 }
 
 struct CIRInstRef CIRStoreOpValue(struct CIRInstRef instRef) {
@@ -24,8 +26,5 @@ struct CIRInstRef CIRStoreOpValue(struct CIRInstRef instRef) {
   auto value = cirStoreOp.getValue();
   auto opValue = value.getDefiningOp();
 
-  auto &theModule = reinterpret_cast<mlir::OwningOpRef<mlir::ModuleOp> &>(
-      instRef.innerModuleRef);
-
-  return CIRInst(*opValue, theModule).toRef();
+  return CIRInst(*opValue, CIRModule::fromRef(instRef.moduleInnerRef)).toRef();
 }

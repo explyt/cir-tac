@@ -1,4 +1,6 @@
 #include "CXX/CIRFunction.h"
+#include "CXX/CIRModule.h"
+
 #include "CAPI/CIRInst.h"
 #include "CIRInstOpCode.h"
 
@@ -17,4 +19,14 @@ const std::vector<CIRInst> &CIRFunction::instructionsList() const {
   }
 
   return *instructions;
+}
+
+const CIRFunction CIRFunction::fromRef(struct CIRFunctionRef ref) {
+  auto &func = *reinterpret_cast<mlir::Operation *>(ref.innerRef);
+  return CIRFunction(func, CIRModule::fromRef(ref.moduleInnerRef));
+}
+
+CIRFunctionRef CIRFunction::toRef() const {
+  return CIRFunctionRef{reinterpret_cast<uintptr_t>(&function),
+                        theModule.toRef(), instructions->size()};
 }

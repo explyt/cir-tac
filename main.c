@@ -4,6 +4,11 @@
 #include "CAPI/CIRModule.h"
 #include "CAPI/CIRType.h"
 
+#include "CAPI/CIRFunctionAPI.h"
+#include "CAPI/CIRInstAPI.h"
+#include "CAPI/CIRModuleAPI.h"
+#include "CAPI/CIRTypeAPI.h"
+
 #include <assert.h>
 #include <stdio.h>
 
@@ -21,7 +26,8 @@ int main(int argc, char *argv[]) {
 
       switch (inst.opcode) {
       case AllocaOp: {
-        printf("alloca %s\n", CIRTypeGetName(CIRAllocaOpType(inst)));
+        printf("alloca %s %ld\n", CIRTypeGetName(CIRAllocaOpType(inst)),
+               CIRTypeGetSize(CIRAllocaOpType(inst)));
         break;
       }
       case BinOp:
@@ -51,5 +57,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  CIRDestroyModule(module);
   CIRDestroyReader(reader);
 }

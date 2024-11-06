@@ -1,10 +1,13 @@
 #include "CAPI/CIRFunction.h"
 #include "CAPI/CIRInst.h"
+#include "CAPI/CIRFunctionAPI.h"
+
 #include "CIRInstOpCode.h"
 #include "CXX/CIRFunction.h"
 #include "CXX/CIRInst.h"
+
 #include <cassert>
-#include <sys/_types/_uintptr_t.h>
+#include <cinttypes>
 
 struct CIRInstRef CIRFunctionGetInst(struct CIRFunctionRef funcRef,
                                      size_t idx) {

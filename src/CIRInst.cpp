@@ -1,4 +1,6 @@
 #include "CXX/CIRInst.h"
+#include "CXX/CIRModule.h"
+
 #include "CIRInstOpCode.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
@@ -25,3 +27,13 @@ CIROpCode CIRInst::opcode() const {
   return CIROpCode::UnknownOp;
 }
 #undef TRY_RESOLVE_TO
+
+const CIRInst CIRInst::fromRef(CIRInstRef instRef) {
+  auto &operation = *reinterpret_cast<mlir::Operation *>(instRef.innerRef);
+  return CIRInst(operation, CIRModule::fromRef(instRef.moduleInnerRef));
+}
+
+CIRInstRef CIRInst::toRef() const {
+  return CIRInstRef{reinterpret_cast<uintptr_t>(&inst), theModule.toRef(),
+                    opcode()};
+}

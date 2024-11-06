@@ -1,6 +1,9 @@
-#include "CAPI/CIRModule.h"
 #include "CXX/CIRModule.h"
-#include <sys/_types/_uintptr_t.h>
+
+#include "CAPI/CIRModule.h"
+#include "CAPI/CIRModuleAPI.h"
+
+#include <cinttypes>
 
 CIRFunctionRef CIRModuleGetFunction(struct CIRModuleRef moduleRef, size_t idx) {
   auto &module = CIRModule::fromRef(moduleRef);

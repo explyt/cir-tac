@@ -1,8 +1,12 @@
 #pragma once
 
 #include "CAPI/CIRInst.h"
+#include "CAPI/CIRInstAPI.h"
+
 #include "CXX/CIRFunction.h"
 #include "CXX/CIRInst.h"
+#include "CXX/CIRModule.h"
+
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 
 struct CIRFunctionRef CIRCallOpCalledFunction(struct CIRInstRef instRef) {
@@ -10,8 +14,6 @@ struct CIRFunctionRef CIRCallOpCalledFunction(struct CIRInstRef instRef) {
   auto cirCallInst = cirInst.get<mlir::cir::CallOp>();
   auto called = cirCallInst.resolveCallable();
 
-  auto &theModule = reinterpret_cast<mlir::OwningOpRef<mlir::ModuleOp> &>(
-      instRef.innerModuleRef);
-
-  return CIRFunction(*called, theModule).toRef();
+  return CIRFunction(*called, CIRModule::fromRef(instRef.moduleInnerRef))
+      .toRef();
 }
