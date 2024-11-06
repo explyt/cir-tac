@@ -15,7 +15,7 @@ $ cd build
 $ cmake -GNinja \
 $ -DLLVM_ENABLE_PROJECTS="clang;mlir" \ 
 $ -DCLANG_ENABLE_CIR=ON ..
-$ ninja build
+$ ninja
 ```
 
 **Note**: On 06.11.2024 building with `ninja` is required to build `clangir`.
