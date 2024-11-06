@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 
-#include "CAPI/CIRInst.h"
 #include "CAPI/CIRModule.h"
 
 #ifdef __cplusplus

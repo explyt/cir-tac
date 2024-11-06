@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
     for (size_t instIdx = 0; instIdx < function.instructionsNum; ++instIdx) {
       struct CIRInstRef inst = CIRFunctionGetInst(function, instIdx);
 
+      // printf("%%%ld = ", inst.idxInOwningFunction);
       switch (inst.opcode) {
       case AllocaOp: {
         printf("alloca %s %ld\n", CIRTypeGetName(CIRAllocaOpType(inst)),
@@ -50,7 +51,6 @@ int main(int argc, char *argv[]) {
         printf("constant\n");
         break;
       case ReturnOp: {
-        CIRReturnOpGetValue(inst);
         printf("return\n");
         break;
       }

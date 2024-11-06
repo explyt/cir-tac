@@ -10,12 +10,12 @@
 #include <cinttypes>
 #include <mlir/IR/OwningOpRef.h>
 
-class CIRModule;
+class CIRFunction;
 
 class CIRInst {
 public:
-  CIRInst(mlir::Operation &inst, const CIRModule &moduleRef)
-      : inst(inst), theModule(moduleRef) {}
+  CIRInst(mlir::Operation &inst, const CIRFunction &owner)
+      : inst(inst), owner(owner) {}
 
   template <typename T> const T get() const {
     return llvm::dyn_cast<const T>(&inst);
@@ -28,5 +28,5 @@ public:
 
 private:
   mlir::Operation &inst;
-  const CIRModule &theModule;
+  const CIRFunction &owner;
 };

@@ -12,10 +12,11 @@ struct CIRInstRef CIRReturnOpGetValue(struct CIRInstRef instRef) {
   auto &cirInst = CIRInst::fromRef(instRef);
   auto cirReturnOp = cirInst.get<mlir::cir::ReturnOp>();
   if (cirReturnOp->getNumOperands() == 0) {
-    return CIRInstRef{0, instRef.moduleInnerRef, UnknownOp};
+    return CIRInstRef{0, instRef.functionInnerRef, UnknownOp};
   }
 
   assert(cirReturnOp->getNumOperands() == 1);
   auto returnOp = cirReturnOp->getOperand(0).getDefiningOp();
-  return CIRInst(*returnOp, CIRModule::fromRef(instRef.moduleInnerRef)).toRef();
+  return CIRInst(*returnOp, CIRFunction::fromRef(instRef.functionInnerRef))
+      .toRef();
 }

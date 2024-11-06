@@ -13,7 +13,8 @@ struct CIRFunctionRef CIRCallOpCalledFunction(struct CIRInstRef instRef) {
   auto cirCallInst = cirInst.get<mlir::cir::CallOp>();
   auto called = cirCallInst.resolveCallable();
 
-  return CIRFunction(llvm::dyn_cast<mlir::cir::FuncOp>(called),
-                     CIRModule::fromRef(instRef.moduleInnerRef))
+  return CIRFunction(
+             llvm::dyn_cast<mlir::cir::FuncOp>(called),
+             CIRModule::fromRef(instRef.functionInnerRef.moduleInnerRef))
       .toRef();
 }

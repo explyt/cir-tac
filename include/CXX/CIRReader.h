@@ -14,11 +14,11 @@ public:
 
   CIRModule loadFromFile(const std::filesystem::path &path);
 
-  static const CIRReader &fromRef(CIRReaderRef reader) {
+  static CIRReader &fromRef(CIRReaderRef reader) {
     return *reinterpret_cast<CIRReader *>(reader.innerRef);
   }
 
-  CIRReaderRef toRef() const {
+  CIRReaderRef toRef() {
     return CIRReaderRef{reinterpret_cast<uintptr_t>(this)};
   }
 

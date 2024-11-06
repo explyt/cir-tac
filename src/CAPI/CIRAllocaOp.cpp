@@ -16,7 +16,9 @@ CIRTypeRef CIRAllocaOpType(struct CIRInstRef instRef) {
   auto cirAllocaOp = cirOp.get<mlir::cir::AllocaOp>();
   auto type = cirAllocaOp.getAllocaType();
 
-  return CIRType(type, CIRModule::fromRef(instRef.moduleInnerRef)).toRef();
+  return CIRType(type,
+                 CIRModule::fromRef(instRef.functionInnerRef.moduleInnerRef))
+      .toRef();
 }
 
 CIRInstRef CIRAllocaSize(struct CIRInstRef instRef) {
@@ -29,7 +31,7 @@ CIRInstRef CIRAllocaSize(struct CIRInstRef instRef) {
     auto opSize = cirAllocaOp.getDynAllocSize();
 
     return CIRInst(*opSize.getDefiningOp(),
-                   CIRModule::fromRef(instRef.moduleInnerRef))
+                   CIRFunction::fromRef(instRef.functionInnerRef))
         .toRef();
   }
 }

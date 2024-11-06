@@ -30,10 +30,10 @@ CIROpCode CIRInst::opcode() const {
 
 const CIRInst CIRInst::fromRef(CIRInstRef instRef) {
   auto &operation = *reinterpret_cast<mlir::Operation *>(instRef.innerRef);
-  return CIRInst(operation, CIRModule::fromRef(instRef.moduleInnerRef));
+  return CIRInst(operation, CIRFunction::fromRef(instRef.functionInnerRef));
 }
 
 CIRInstRef CIRInst::toRef() const {
-  return CIRInstRef{reinterpret_cast<uintptr_t>(&inst), theModule.toRef(),
+  return CIRInstRef{reinterpret_cast<uintptr_t>(&inst), owner.toRef(),
                     opcode()};
 }

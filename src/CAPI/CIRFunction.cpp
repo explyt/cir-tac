@@ -13,18 +13,18 @@ struct CIRInstRef CIRFunctionGetInst(struct CIRFunctionRef funcRef,
                                      size_t idx) {
   assert(idx < funcRef.instructionsNum);
 
-  auto &function = CIRFunction::fromRef(funcRef);
+  auto function = CIRFunction::fromRef(funcRef);
   auto &inst = function.instructionsList()[idx];
 
   return inst.toRef();
 }
 
 const char *CIRFunctionGetName(struct CIRFunctionRef funcRef) {
-  auto &function = CIRFunction::fromRef(funcRef);
+  auto function = CIRFunction::fromRef(funcRef);
   return function.getName();
 }
 
 CIRTypeRef CIRFunctionGetReturnType(CIRFunctionRef funcRef) {
-  auto &function = CIRFunction::fromRef(funcRef);
+  auto function = CIRFunction::fromRef(funcRef);
   return function.getReturnType().toRef();
 }

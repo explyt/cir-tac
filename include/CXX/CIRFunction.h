@@ -36,7 +36,8 @@ public:
 private:
   // FIXME: use cache in module or like that
   mutable std::optional<std::vector<CIRInst>> instructions;
-  // TODO: FuncOp::getName() is non const o_0
+
+  // TODO: FuncOp::getName() is non const-qualified o_0
   mutable mlir::cir::FuncOp function;
   const CIRModule &theModule;
 };

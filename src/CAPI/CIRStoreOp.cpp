@@ -13,7 +13,7 @@ struct CIRInstRef CIRStoreOpAddress(struct CIRInstRef instRef) {
   auto address = cirStoreOp.getAddr();
   auto opAddress = address.getDefiningOp();
 
-  return CIRInst(*opAddress, CIRModule::fromRef(instRef.moduleInnerRef))
+  return CIRInst(*opAddress, CIRFunction::fromRef(instRef.functionInnerRef))
       .toRef();
 }
 
@@ -24,5 +24,6 @@ struct CIRInstRef CIRStoreOpValue(struct CIRInstRef instRef) {
   auto value = cirStoreOp.getValue();
   auto opValue = value.getDefiningOp();
 
-  return CIRInst(*opValue, CIRModule::fromRef(instRef.moduleInnerRef)).toRef();
+  return CIRInst(*opValue, CIRFunction::fromRef(instRef.functionInnerRef))
+      .toRef();
 }

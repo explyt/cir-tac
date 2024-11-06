@@ -16,10 +16,10 @@ void CIRDestroyReader(CIRReaderRef readerRef) {
 }
 
 CIRModuleRef loadModuleFromFile(CIRReaderRef readerRef, const char *name) {
-  auto reader = reinterpret_cast<CIRReader *>(readerRef.innerRef);
+  auto &reader = CIRReader::fromRef(readerRef);
 
   try {
-    auto module = new CIRModule(reader->loadFromFile(name));
+    auto module = new CIRModule(reader.loadFromFile(name));
     return module->toRef();
   } catch (...) {
     return CIRModuleRef{reinterpret_cast<uintptr_t>(nullptr)};

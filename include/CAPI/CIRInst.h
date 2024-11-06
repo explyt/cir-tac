@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#include "CAPI/CIRModule.h"
+#include "CAPI/CIRFunction.h"
 #include "CIRInstOpCode.h"
 
 #ifdef __cplusplus
@@ -11,7 +11,7 @@ extern "C" {
 
 struct CIRInstRef {
   uintptr_t innerRef;
-  struct CIRModuleRef moduleInnerRef;
+  struct CIRFunctionRef functionInnerRef;
   enum CIROpCode opcode;
 };
 

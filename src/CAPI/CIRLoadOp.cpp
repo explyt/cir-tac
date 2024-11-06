@@ -18,7 +18,7 @@ struct CIRInstRef CIRLoadOpAddress(struct CIRInstRef instRef) {
   auto address = cirLoadInst.getAddr();
   auto addressValue = address.getDefiningOp();
   //
-  return CIRInst(*addressValue, CIRModule::fromRef(instRef.moduleInnerRef))
+  return CIRInst(*addressValue, CIRFunction::fromRef(instRef.functionInnerRef))
       .toRef();
 }
 
@@ -29,6 +29,7 @@ struct CIRTypeRef CIRLoadOpType(struct CIRInstRef instRef) {
   auto address = cirLoadInst.getAddr();
   auto addressType = address.getType();
 
-  return CIRType(addressType, CIRModule::fromRef(instRef.moduleInnerRef))
+  return CIRType(addressType,
+                 CIRModule::fromRef(instRef.functionInnerRef.moduleInnerRef))
       .toRef();
 }

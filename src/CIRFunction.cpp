@@ -12,7 +12,7 @@ const std::vector<CIRInst> &CIRFunction::instructionsList() const {
     instructions.emplace();
     for (auto &block : function.getFunctionBody()) {
       for (auto &op : block) {
-        instructions->emplace_back(op, theModule);
+        instructions->emplace_back(op, *this);
       }
     }
   }
