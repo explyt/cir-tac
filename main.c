@@ -49,9 +49,11 @@ int main(int argc, char *argv[]) {
       case ConstantOp:
         printf("constant\n");
         break;
-      case ReturnOp:
+      case ReturnOp: {
+        CIRReturnOpGetValue(inst);
         printf("return\n");
         break;
+      }
       case UnknownOp:
         printf("unknown\n");
         break;

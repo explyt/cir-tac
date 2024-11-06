@@ -31,6 +31,9 @@ struct CIRTypeRef CIRStoreOpType(struct CIRInstRef instRef);
 
 struct CIRInstRef CIRStoreOpValue(struct CIRInstRef instRef);
 
+// ReturnOp
+struct CIRInstRef CIRReturnOpGetValue(struct CIRInstRef instRef);
+
 #ifdef __cplusplus
 }
 #endif

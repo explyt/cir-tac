@@ -1,5 +1,3 @@
-#pragma once
-
 #include "CAPI/CIRInst.h"
 #include "CAPI/CIRInstAPI.h"
 #include "CAPI/CIRType.h"
