@@ -37,3 +37,5 @@ add_executable(mlir-c-test main.c)
 target_link_libraries(mlir-c-test CIRCAPI)
 
 install(TARGETS CIRCAPI PUBLIC_HEADER)
+install(DIRECTORY include/CAPI DESTINATION include)
+install(FILES include/CIRInstOpCode.h DESTINATION include)
