@@ -35,3 +35,6 @@ target_link_libraries(mlir-test CIRCAPI)
 # CAPI test
 add_executable(mlir-c-test main.c)
 target_link_libraries(mlir-c-test CIRCAPI)
+
+install(TARGETS CIRCAPI)
+install(DIRECTORY include DESTINATION include)
