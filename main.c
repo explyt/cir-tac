@@ -43,8 +43,17 @@ int main(int argc, char *argv[]) {
         break;
       case CallOp: {
         struct CIRFunctionRef called = CIRCallOpCalledFunction(inst);
-        printf("call %s : %s\n", CIRFunctionGetName(called),
-               CIRTypeGetName(CIRFunctionGetReturnType(called)));
+        printf("call %s ", CIRFunctionGetName(called));
+        printf("(");
+        for (size_t argIdx = 0; argIdx < called.argumentsNum; ++argIdx) {
+          if (argIdx != 0) {
+            printf(", ");
+          }
+          struct CIRTypeRef argumentTypeRef =
+              CIRFunctionGetArgumentType(called, argIdx);
+          printf("%s", CIRTypeGetName(argumentTypeRef));
+        }
+        printf(") -> %s\n", CIRTypeGetName(CIRFunctionGetReturnType(called)));
         break;
       }
       case ConstantOp:

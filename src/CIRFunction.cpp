@@ -3,6 +3,7 @@
 
 #include "CAPI/CIRInst.h"
 #include "CIRInstOpCode.h"
+#include "CXX/CIRType.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <mlir/Support/TypeID.h>
@@ -29,9 +30,13 @@ const CIRFunction CIRFunction::fromRef(struct CIRFunctionRef ref) {
 CIRFunctionRef CIRFunction::toRef() const {
   return CIRFunctionRef{
       reinterpret_cast<uintptr_t>(function.getAsOpaquePointer()),
-      theModule.toRef(), instructions->size()};
+      theModule.toRef(), instructions->size(), function.getNumArguments()};
 }
 
 CIRType CIRFunction::getReturnType() const {
   return CIRType(function.getFunctionType().getReturnType(), theModule);
+}
+
+CIRType CIRFunction::getArgumentType(std::size_t argNum) const {
+  return CIRType(function.getArgumentTypes()[argNum], theModule);
 }

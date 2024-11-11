@@ -12,6 +12,7 @@ struct CIRFunctionRef {
   uintptr_t innerRef;
   struct CIRModuleRef moduleInnerRef;
   size_t instructionsNum;
+  size_t argumentsNum;
 };
 
 #ifdef __cplusplus

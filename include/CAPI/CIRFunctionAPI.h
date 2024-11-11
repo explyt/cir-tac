@@ -16,6 +16,9 @@ const char *CIRFunctionGetName(struct CIRFunctionRef funcRef);
 
 struct CIRTypeRef CIRFunctionGetReturnType(struct CIRFunctionRef funcRef);
 
+struct CIRTypeRef CIRFunctionGetArgumentType(struct CIRFunctionRef funcRef,
+                                             size_t argNum);
+
 #ifdef __cplusplus
 }
 #endif

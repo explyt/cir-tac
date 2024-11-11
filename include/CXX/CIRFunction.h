@@ -32,6 +32,7 @@ public:
   const char *getName() const { return function.getName().data(); }
 
   CIRType getReturnType() const;
+  CIRType getArgumentType(std::size_t argNum) const;
 
 private:
   // FIXME: use cache in module or like that

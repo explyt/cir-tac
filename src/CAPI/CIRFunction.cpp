@@ -28,3 +28,9 @@ CIRTypeRef CIRFunctionGetReturnType(CIRFunctionRef funcRef) {
   auto function = CIRFunction::fromRef(funcRef);
   return function.getReturnType().toRef();
 }
+
+struct CIRTypeRef CIRFunctionGetArgumentType(struct CIRFunctionRef funcRef,
+                                             size_t argNum) {
+  auto function = CIRFunction::fromRef(funcRef);
+  return function.getArgumentType(argNum).toRef();
+}

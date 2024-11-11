@@ -20,6 +20,8 @@ struct CIRInstRef CIRAllocaSize(struct CIRInstRef instRef);
 
 // CallOp
 struct CIRFunctionRef CIRCallOpCalledFunction(struct CIRInstRef instRef);
+struct CIRInstRef CIRCallOpGetArgument(struct CIRInstRef instRef,
+                                       size_t argNum);
 
 // LoadOp
 struct CIRTypeRef CIRLoadOpType(struct CIRInstRef instRef);
