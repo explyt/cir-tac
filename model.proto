@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package protocir;
+option java_package = "org.jacodb.impl.grpc";
+
+message CIRModuleID {
+  string id = 1;
+}
+
+message CIRFunctionID {
+  CIRModuleID module_id = 1;
+  uint64 id = 2;
+}
+
+message CIRTypeID {
+  CIRModuleID module_id = 1;
+  uint64 id = 2;
+}
+
+message CIROpID {
+  uint64 line = 1;
+}
+
+message CIROp {
+  oneof operation {
+    CIRAllocaOp alloca = 1;
+    CIRBinOp bin = 2;
+    CIRStoreOp store = 3;
+    CIRLoadOp load = 4;
+    CIRCallOp call = 5;
+    CIRConstantOp constant = 6;
+    CIRReturnOp return = 7;
+  }
+}
+
+
+message CIRAllocaOp {
+  CIROpID base = 1;
+  CIRTypeID type = 2;
+  uint64 alignment = 3;
+}
+
+message CIRBinOp {
+  CIROpID base = 1;
+  CIRTypeID type = 2;
+}
+
+message CIRStoreOp {
+  CIROpID base = 1;
+  CIROpID address = 2;
+  CIROpID value = 3;
+  CIRTypeID type = 4;
+}
+
+message CIRLoadOp {
+  CIROpID base = 1;
+  CIROpID address = 2;
+  CIRTypeID type = 3;
+}
+
+message CIRCallOp {
+  CIROpID base = 1;
+  CIRFunctionID called = 2;
+  repeated CIROpID arguments = 3;
+}
+
+message CIRConstantOp {
+  CIROpID base = 1;
+}
+
+message CIRReturnOp {
+  CIROpID base = 1;
+  CIROpID value = 2;
+  CIRTypeID type = 3;
+}
+
+message CIRFunction {
+  CIRFunctionID id = 1;
+  string name = 2;
+  repeated CIROp operations = 3;
+  repeated CIRTypeID arguments_types = 4;
+  optional CIRTypeID return_type = 5;
+}
+
+message CIRType {
+  CIRTypeID id = 1;
+  string name = 2;
+}
+
+message CIRModule {
+  CIRModuleID id = 1;
+  repeated CIRFunction functions = 2;
+  repeated CIRType types = 2;
+}
