@@ -18,8 +18,8 @@ const std::vector<CIRFunction> &CIRModule::functionsList() const {
     auto &bodyRegion = (*theModule).getBodyRegion();
     for (auto &bodyBlock : bodyRegion) {
       for (auto &function : bodyBlock) {
-        assert(llvm::isa<mlir::cir::FuncOp>(&function));
-        functions->emplace_back(cast<mlir::cir::FuncOp>(function), *this);
+        assert(llvm::isa<cir::FuncOp>(&function));
+        functions->emplace_back(cast<cir::FuncOp>(function), *this);
       }
     }
   }

@@ -4,7 +4,7 @@
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <mlir/CAPI/Registration.h>
-#include <sys/_types/_uintptr_t.h>
+#include <cinttypes>
 
 CIRReaderRef CIRCreateReader() {
   auto reader = new CIRReader();

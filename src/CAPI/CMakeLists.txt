@@ -1,4 +1,4 @@
-add_library(CIRCAPIImpl
+add_library(CIRCAPIImpl STATIC
   CIR.cpp
   CIRAllocaOp.cpp
   CIRCallOp.cpp

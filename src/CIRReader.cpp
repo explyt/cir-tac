@@ -9,7 +9,7 @@
 
 CIRReader::CIRReader() {
   mlir::DialectRegistry registry;
-  registry.insert<mlir::cir::CIRDialect>();
+  registry.insert<cir::CIRDialect>();
 
   context.appendDialectRegistry(registry);
   context.allowUnregisteredDialects();

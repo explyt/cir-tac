@@ -20,7 +20,7 @@
 
 int main(int argc, char *argv[]) {
   // mlir::DialectRegistry registry;
-  // registry.insert<mlir::cir::CIRDialect, mlir::DLTIDialect,
+  // registry.insert<cir::CIRDialect, mlir::DLTIDialect,
   //                 mlir::LLVM::LLVMDialect>();
 
   // mlir::MLIRContext ctx(registry, mlir::MLIRContext::Threading::DISABLED);
@@ -40,9 +40,9 @@ int main(int argc, char *argv[]) {
   //     auto &funcRegion = func.getRegion(0);
   //     auto &funcBody = funcRegion.getBlocks().front().getOperations();
   //     for (auto &op : funcBody) {
-  //       // if (dynamic_cast<mlir::cir::AllocaOp *>(op)) {
+  //       // if (dynamic_cast<cir::AllocaOp *>(op)) {
   //       // }
-  //       if (llvm::isa<mlir::cir::AllocaOp>(op)) {
+  //       if (llvm::isa<cir::AllocaOp>(op)) {
   //         llvm::errs() << "ALLOCA!\n";
   //       }
 

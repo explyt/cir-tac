@@ -7,7 +7,7 @@
 
 #define TRY_RESOLVE_TO(ID, OP_KIND)                                            \
   do {                                                                         \
-    if (ID == mlir::TypeID::get<mlir::cir::OP_KIND>()) {                       \
+    if (ID == mlir::TypeID::get<cir::OP_KIND>()) {                       \
       return CIROpCode::OP_KIND;                                               \
     }                                                                          \
   } while (false)

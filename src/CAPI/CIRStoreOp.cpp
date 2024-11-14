@@ -8,7 +8,7 @@
 
 struct CIRInstRef CIRStoreOpAddress(struct CIRInstRef instRef) {
   auto cirInst = CIRInst::fromRef(instRef);
-  auto cirStoreOp = cirInst.get<mlir::cir::StoreOp>();
+  auto cirStoreOp = cirInst.get<cir::StoreOp>();
 
   auto address = cirStoreOp.getAddr();
   auto opAddress = address.getDefiningOp();
@@ -19,7 +19,7 @@ struct CIRInstRef CIRStoreOpAddress(struct CIRInstRef instRef) {
 
 struct CIRInstRef CIRStoreOpValue(struct CIRInstRef instRef) {
   auto cirInst = CIRInst::fromRef(instRef);
-  auto cirStoreOp = cirInst.get<mlir::cir::StoreOp>();
+  auto cirStoreOp = cirInst.get<cir::StoreOp>();
 
   auto value = cirStoreOp.getValue();
   auto opValue = value.getDefiningOp();

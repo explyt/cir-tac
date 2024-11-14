@@ -13,7 +13,7 @@
 
 struct CIRInstRef CIRLoadOpAddress(struct CIRInstRef instRef) {
   auto cirInst = CIRInst::fromRef(instRef);
-  auto cirLoadInst = cirInst.get<mlir::cir::LoadOp>();
+  auto cirLoadInst = cirInst.get<cir::LoadOp>();
 
   auto address = cirLoadInst.getAddr();
   auto addressValue = address.getDefiningOp();
@@ -24,7 +24,7 @@ struct CIRInstRef CIRLoadOpAddress(struct CIRInstRef instRef) {
 
 struct CIRTypeRef CIRLoadOpType(struct CIRInstRef instRef) {
   auto cirInst = CIRInst::fromRef(instRef);
-  auto cirLoadInst = cirInst.get<mlir::cir::LoadOp>();
+  auto cirLoadInst = cirInst.get<cir::LoadOp>();
 
   auto address = cirLoadInst.getAddr();
   auto addressType = address.getType();

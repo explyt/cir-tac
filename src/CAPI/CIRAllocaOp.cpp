@@ -13,7 +13,7 @@
 
 CIRTypeRef CIRAllocaOpType(struct CIRInstRef instRef) {
   auto cirOp = CIRInst::fromRef(instRef);
-  auto cirAllocaOp = cirOp.get<mlir::cir::AllocaOp>();
+  auto cirAllocaOp = cirOp.get<cir::AllocaOp>();
   auto type = cirAllocaOp.getAllocaType();
 
   return CIRType(type,
@@ -23,7 +23,7 @@ CIRTypeRef CIRAllocaOpType(struct CIRInstRef instRef) {
 
 CIRInstRef CIRAllocaSize(struct CIRInstRef instRef) {
   auto cirOp = CIRInst::fromRef(instRef);
-  auto cirAllocaOp = cirOp.get<mlir::cir::AllocaOp>();
+  auto cirAllocaOp = cirOp.get<cir::AllocaOp>();
   // FIXME:
   assert(false && "NYI");
 
@@ -38,6 +38,6 @@ CIRInstRef CIRAllocaSize(struct CIRInstRef instRef) {
 
 size_t CIRAllocaOpAlignment(struct CIRInstRef instRef) {
   auto cirOp = CIRInst::fromRef(instRef);
-  auto cirAllocaOp = cirOp.get<mlir::cir::AllocaOp>();
+  auto cirAllocaOp = cirOp.get<cir::AllocaOp>();
   return cirAllocaOp.getAlignment().value_or(0);
 }

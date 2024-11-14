@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.20)
 
 project(mlit-c-test)
 
@@ -29,12 +29,12 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_subdirectory(src)
 
-add_executable(mlir-test main.cpp)
-target_link_libraries(mlir-test CIRCAPI)
+# add_executable(mlir-test main.cpp)
+# target_link_libraries(mlir-test CIRCAPI)
 
 # CAPI test
-add_executable(mlir-c-test main.c)
-target_link_libraries(mlir-c-test CIRCAPI)
+# add_executable(mlir-c-test main.c)
+# target_link_libraries(mlir-c-test CIRCAPI)
 
 # FIXME: Link libraries to single one with `ar`
 install(TARGETS CIRCAPIImpl CIRCAPI PUBLIC_HEADER)

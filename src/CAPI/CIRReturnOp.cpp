@@ -13,7 +13,7 @@
 
 struct CIRInstRef CIRReturnOpGetValue(struct CIRInstRef instRef) {
   auto cirInst = CIRInst::fromRef(instRef);
-  auto cirReturnOp = cirInst.get<mlir::cir::ReturnOp>();
+  auto cirReturnOp = cirInst.get<cir::ReturnOp>();
   if (cirReturnOp->getNumOperands() == 0) {
     return CIRInstRef{0, instRef.functionInnerRef, UnknownOp};
   }
@@ -26,7 +26,7 @@ struct CIRInstRef CIRReturnOpGetValue(struct CIRInstRef instRef) {
 
 struct CIRTypeRef CIRReturnOpGetType(struct CIRInstRef instRef) {
   auto cirInst = CIRInst::fromRef(instRef);
-  auto cirReturnOp = cirInst.get<mlir::cir::ReturnOp>();
+  auto cirReturnOp = cirInst.get<cir::ReturnOp>();
 
   auto owner = CIRFunction::fromRef(instRef.functionInnerRef);
   return owner.getReturnType().toRef();

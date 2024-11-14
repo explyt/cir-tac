@@ -19,7 +19,7 @@ class CIRModule;
 
 class CIRFunction {
 public:
-  CIRFunction(mlir::cir::FuncOp function, const CIRModule &theModule)
+  CIRFunction(cir::FuncOp function, const CIRModule &theModule)
       : function(function), theModule(theModule) {
     std::ignore = instructionsList();
   }
@@ -39,6 +39,6 @@ private:
   mutable std::optional<std::vector<CIRInst>> instructions;
 
   // TODO: FuncOp::getName() is non const-qualified o_0
-  mutable mlir::cir::FuncOp function;
+  mutable cir::FuncOp function;
   const CIRModule &theModule;
 };
