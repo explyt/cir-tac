@@ -90,5 +90,5 @@ message CIRType {
 message CIRModule {
   CIRModuleID id = 1;
   repeated CIRFunction functions = 2;
-  repeated CIRType types = 2;
+  repeated CIRType types = 3;
 }
