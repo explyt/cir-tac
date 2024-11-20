@@ -38,8 +38,9 @@ add_subdirectory(proto)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${Protobuf_INCLUDE_DIRS})
 
-# add_executable(mlir-test main.cpp)
-# target_link_libraries(mlir-test CIRCAPI)
+# Protobuf serialization test
+add_executable(mlir-test main.cpp)
+target_link_libraries(mlir-test CIRCAPI proto)
 
 # CAPI test
 # add_executable(mlir-c-test main.c)
