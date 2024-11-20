@@ -9,4 +9,4 @@ add_library(CIRCAPI STATIC
 add_subdirectory(CAPI)
 
 # TODO: Figure out which libraries are required
-target_link_libraries(CIRCAPIImpl CIRCAPI MLIRCIR MLIRParser MLIRSupport)
+target_link_libraries(CIRCAPI CIRCAPIImpl MLIRCIR MLIRParser MLIRSupport)
