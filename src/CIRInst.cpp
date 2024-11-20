@@ -5,28 +5,27 @@
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 
-#define TRY_RESOLVE_TO(ID, OP_KIND)                                            \
-  do {                                                                         \
-    if (ID == mlir::TypeID::get<cir::OP_KIND>()) {                       \
-      return CIROpCode::OP_KIND;                                               \
-    }                                                                          \
-  } while (false)
+#include <llvm/ADT/TypeSwitch.h>
+
+#define CASE(OP_KIND)                                                          \
+  Case<cir::OP_KIND>([](cir::OP_KIND) { return CIROpCode::OP_KIND; })
 
 CIROpCode CIRInst::opcode() const {
-  auto opTypeID = inst.getName().getTypeID();
-
-  // FIXME: Do switch : case
-  TRY_RESOLVE_TO(opTypeID, AllocaOp);
-  TRY_RESOLVE_TO(opTypeID, BinOp);
-  TRY_RESOLVE_TO(opTypeID, LoadOp);
-  TRY_RESOLVE_TO(opTypeID, StoreOp);
-  TRY_RESOLVE_TO(opTypeID, ConstantOp);
-  TRY_RESOLVE_TO(opTypeID, CallOp);
-  TRY_RESOLVE_TO(opTypeID, ReturnOp);
+  CIROpCode result =
+      llvm::TypeSwitch<mlir::Operation *, CIROpCode>(&inst)
+          .Case<cir ::AllocaOp>(
+              [](cir ::AllocaOp) { return CIROpCode ::AllocaOp; })
+          .CASE(BinOp)
+          .CASE(LoadOp)
+          .CASE(StoreOp)
+          .CASE(ConstantOp)
+          .CASE(CallOp)
+          .CASE(ReturnOp)
+          .Default([](mlir::Operation *op) { return CIROpCode::UnknownOp; });
 
   return CIROpCode::UnknownOp;
 }
-#undef TRY_RESOLVE_TO
+#undef CASE
 
 const CIRInst CIRInst::fromRef(CIRInstRef instRef) {
   auto &operation = *reinterpret_cast<mlir::Operation *>(instRef.innerRef);
