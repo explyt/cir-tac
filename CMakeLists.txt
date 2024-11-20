@@ -29,6 +29,15 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_subdirectory(src)
 
+find_package(Protobuf REQUIRED CONFIG)
+message(STATUS "Found Protobuf ${Protobuf_PACKAGE_VERSION}")
+message(STATUS "Using Protobuf.cmake in: ${Protobuf_DIR}")
+
+add_subdirectory(proto)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${Protobuf_INCLUDE_DIRS})
+
 # add_executable(mlir-test main.cpp)
 # target_link_libraries(mlir-test CIRCAPI)
 
