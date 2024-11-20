@@ -29,3 +29,7 @@ $ cmake -DCLANGIR_BUILD_DIR=${PATH_TO_CLANGIR_BUILD} .. && make
 ```
 
 This will produce a static library called `CIRCAPI`, which contains the CAPI implementation.
+
+**Note**: On 21.11.2024 we are decided to use Protobuf model instead of CAPI.
+
+The `.proto` file locates there: `proto/model.proto`. The build produces `build/proto/model.pb.cc` and `build/proto/model.pb.h` files.
