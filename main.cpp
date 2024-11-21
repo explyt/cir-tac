@@ -16,16 +16,16 @@
 #include <mlir/IR/Visitors.h>
 #include <mlir/Parser/Parser.h>
 
+#include <llvm/ADT/DenseMap.h>
 #include <llvm/ADT/TypeSwitch.h>
 #include <llvm/Support/Casting.h>
 
 #include <cinttypes>
 #include <iostream>
-#include <unordered_map>
 #include <vector>
 
-using indexed_types = std::unordered_map<uint64_t, mlir::Type>;
-using intern_type_cache = std::unordered_map<mlir::Type, uint64_t>;
+using indexed_types = llvm::DenseMap<uint64_t, mlir::Type>;
+using intern_type_cache = llvm::DenseMap<mlir::Type, uint64_t>;
 
 uint64_t internType(intern_type_cache &cache, mlir::Type type) {
   if (!cache.contains(type)) {
@@ -58,8 +58,8 @@ int main(int argc, char *argv[]) {
   pModuleID.set_allocated_id(&moduleId);
   pModule.set_allocated_id(&pModuleID);
   unsigned long func_idx = 0;
-  std::unordered_map<uint64_t, mlir::Type> indexToType;
-  std::unordered_map<mlir::Type, uint64_t> internCache;
+  indexed_types indexToType;
+  intern_type_cache internCache;
   auto &bodyRegion = (*module).getBodyRegion();
   for (auto &bodyBlock : bodyRegion) {
     for (auto &func : bodyBlock) {
