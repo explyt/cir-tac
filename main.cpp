@@ -73,13 +73,18 @@ int main(int argc, char *argv[]) {
         for (auto &inst : block) {
           auto pInst = pFunction.add_operations();
           llvm::TypeSwitch<mlir::Operation *>(&inst)
-              .Case<cir::AllocaOp>([](cir::AllocaOp) {})
+              .Case<cir::AllocaOp>([&inst_line, pInst, &pModuleID, &internCache](cir::AllocaOp op) {
+                protocir::CIRAllocaOp pAllocaOp;
+                protocir::CIROpID pOpID;
+                pOpID.set_line(inst_line++);
+                pAllocaOp.mutable_base()->CopyFrom(pOpID);
+                protocir::CIRTypeID pTypeID;
+                pTypeID.mutable_module_id()->CopyFrom(pModuleID);
+                pTypeID.set_id(internType(internCache, op.getAllocaType()));
+                pAllocaOp.mutable_type()->CopyFrom(pTypeID);
+                pInst->mutable_alloca()->CopyFrom(pAllocaOp);
+              })
               .Default([](mlir::Operation *) {});
-          protocir::CIRAllocaOp pAllocaOp;
-          protocir::CIROpID pOpID;
-          pOpID.set_line(inst_line++);
-          pAllocaOp.set_allocated_base(&pOpID);
-          pInst->set_allocated_alloca(&pAllocaOp);
         }
       }
     }
