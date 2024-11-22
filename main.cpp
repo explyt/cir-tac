@@ -32,6 +32,9 @@ using TypeCache = llvm::DenseMap<mlir::Type, uint64_t>;
 using IDToOperation = llvm::DenseMap<uint64_t, mlir::Operation *>;
 using OperationCache = llvm::DenseMap<mlir::Operation *, uint64_t>;
 
+using IDToFunction = llvm::DenseMap<uint64_t, mlir::Operation *>;
+using FunctionCache = llvm::DenseMap<mlir::Operation *, uint64_t>;
+
 uint64_t internType(TypeCache &cache, mlir::Type type) {
   if (!cache.contains(type)) {
     cache[type] = cache.size();
@@ -49,12 +52,12 @@ uint64_t internOperation(OperationCache &cache, mlir::Operation *operation) {
 void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
                         protocir::CIRModuleID pModuleID, TypeCache &typeCache,
                         OperationCache &opCache) {
-  auto instLine = internOperation(opCache, &inst);
+  auto instID = internOperation(opCache, &inst);
   llvm::TypeSwitch<mlir::Operation *>(&inst)
       .Case<cir::AllocaOp>(
-          [instLine, pInst, pModuleID, &typeCache](cir::AllocaOp op) {
+          [instID, pInst, pModuleID, &typeCache](cir::AllocaOp op) {
             protocir::CIRAllocaOp pAllocaOp;
-            pAllocaOp.mutable_base()->set_line(instLine);
+            pAllocaOp.mutable_base()->set_id(instID);
             protocir::CIRTypeID pTypeID;
             pTypeID.mutable_module_id()->CopyFrom(pModuleID);
             pTypeID.set_id(internType(typeCache, op.getAllocaType()));
@@ -64,39 +67,50 @@ void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
             }
             pInst->mutable_alloca()->CopyFrom(pAllocaOp);
           })
-      .Case<cir::BinOp>(
-          [instLine, pInst, pModuleID, &typeCache](cir::BinOp op) {
-            protocir::CIRBinOp pBinOp;
-            pBinOp.mutable_base()->set_line(instLine);
-          })
+      .Case<cir::BinOp>([instID, pInst, pModuleID, &typeCache](cir::BinOp op) {
+        protocir::CIRBinOp pBinOp;
+        pBinOp.mutable_base()->set_id(instID);
+      })
       .Case<cir::LoadOp>(
-          [instLine, pInst, pModuleID, &typeCache, &opCache](cir::LoadOp op) {
+          [instID, pInst, pModuleID, &typeCache, &opCache](cir::LoadOp op) {
             protocir::CIRLoadOp pLoadOp;
-            pLoadOp.mutable_base()->set_line(instLine);
+            pLoadOp.mutable_base()->set_id(instID);
             auto addressLine =
                 internOperation(opCache, op.getAddr().getDefiningOp());
-            pLoadOp.mutable_address()->set_line(addressLine);
+            pLoadOp.mutable_address()->set_id(addressLine);
             auto resultTypeID = internType(typeCache, op.getResult().getType());
             pLoadOp.mutable_result_type()->set_id(resultTypeID);
           })
-      .Case<cir::StoreOp>([instLine, pInst, pModuleID, &typeCache,
+      .Case<cir::StoreOp>([instID, pInst, pModuleID, &typeCache,
                            &opCache](cir::StoreOp op) {
         protocir::CIRStoreOp pStoreOp;
-        pStoreOp.mutable_base()->set_line(instLine);
+        pStoreOp.mutable_base()->set_id(instID);
         auto addressLine =
             internOperation(opCache, op.getAddr().getDefiningOp());
-        pStoreOp.mutable_address()->set_line(addressLine);
+        pStoreOp.mutable_address()->set_id(addressLine);
         auto valueLine = internOperation(opCache, op.getAddr().getDefiningOp());
-        pStoreOp.mutable_value()->set_line(valueLine);
+        pStoreOp.mutable_value()->set_id(valueLine);
       })
-      .Case<cir::ConstantOp>([instLine, pInst, pModuleID, &typeCache,
-                              &opCache](cir::ConstantOp op) {
-        protocir::CIRConstantOp pConstantOp;
-      })
-      .Case<cir::CallOp>([instLine, pInst, pModuleID, &typeCache, &opCache](
-                             cir::CallOp op) { protocir::CIRCallOp pCallOp; })
+      .Case<cir::ConstantOp>(
+          [instID, pInst, pModuleID, &typeCache, &opCache](cir::ConstantOp op) {
+            protocir::CIRConstantOp pConstantOp;
+            pConstantOp.mutable_base()->set_id(instID);
+            auto resultTypeID = internType(typeCache, op.getResult().getType());
+            pConstantOp.mutable_result_type()->set_id(resultTypeID);
+          })
+      .Case<cir::CallOp>(
+          [instID, pInst, pModuleID, &typeCache, &opCache](cir::CallOp op) {
+            protocir::CIRCallOp pCallOp;
+            pCallOp.mutable_base()->set_id(instID);
+            if (op.getCallee().has_value()) {
+              auto callee = op.getCallee().value();
+              *pCallOp.mutable_callee() = callee.str();
+            }
+            // if (auto callable = op.resolveCallable()) {
+            // }
+          })
       .Case<cir::ReturnOp>(
-          [instLine, pInst, pModuleID, &typeCache, &opCache](cir::ReturnOp op) {
+          [instID, pInst, pModuleID, &typeCache, &opCache](cir::ReturnOp op) {
             protocir::CIRReturnOp pReturnOp;
           })
       .Default([](mlir::Operation *) { llvm_unreachable("NIY"); });
