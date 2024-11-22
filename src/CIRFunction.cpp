@@ -22,8 +22,8 @@ const std::vector<CIRInst> &CIRFunction::instructionsList() const {
 }
 
 const CIRFunction CIRFunction::fromRef(struct CIRFunctionRef ref) {
-  auto func = cir::FuncOp::getFromOpaquePointer(
-      reinterpret_cast<void *>(ref.innerRef));
+  auto func =
+      cir::FuncOp::getFromOpaquePointer(reinterpret_cast<void *>(ref.innerRef));
   return CIRFunction(func, CIRModule::fromRef(ref.moduleInnerRef));
 }
 
