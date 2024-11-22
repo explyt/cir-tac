@@ -79,10 +79,16 @@ void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
             auto resultTypeID = internType(typeCache, op.getResult().getType());
             pLoadOp.mutable_result_type()->set_id(resultTypeID);
           })
-      .Case<cir::StoreOp>(
-          [instLine, pInst, pModuleID, &typeCache, &opCache](cir::StoreOp op) {
-            protocir::CIRStoreOp pStoreOp;
-          })
+      .Case<cir::StoreOp>([instLine, pInst, pModuleID, &typeCache,
+                           &opCache](cir::StoreOp op) {
+        protocir::CIRStoreOp pStoreOp;
+        pStoreOp.mutable_base()->set_line(instLine);
+        auto addressLine =
+            internOperation(opCache, op.getAddr().getDefiningOp());
+        pStoreOp.mutable_address()->set_line(addressLine);
+        auto valueLine = internOperation(opCache, op.getAddr().getDefiningOp());
+        pStoreOp.mutable_value()->set_line(valueLine);
+      })
       .Case<cir::ConstantOp>([instLine, pInst, pModuleID, &typeCache,
                               &opCache](cir::ConstantOp op) {
         protocir::CIRConstantOp pConstantOp;
