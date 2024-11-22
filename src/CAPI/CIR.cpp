@@ -2,9 +2,9 @@
 #include "CXX/CIRModule.h"
 #include "CXX/CIRReader.h"
 
+#include <cinttypes>
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <mlir/CAPI/Registration.h>
-#include <cinttypes>
 
 CIRReaderRef CIRCreateReader() {
   auto reader = new CIRReader();
