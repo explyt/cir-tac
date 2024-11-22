@@ -38,40 +38,41 @@ message CIRAllocaOp {
   CIROpID base = 1;
   CIRTypeID alloca_type = 2;
   optional uint64 alignment = 3;
+  CIRTypeID result_type = 4;
 }
 
 message CIRBinOp {
   CIROpID base = 1;
-  CIRTypeID type = 2;
+  CIRTypeID result_type = 2;
 }
 
 message CIRStoreOp {
   CIROpID base = 1;
   CIROpID address = 2;
   CIROpID value = 3;
-  CIRTypeID type = 4;
 }
 
 message CIRLoadOp {
   CIROpID base = 1;
   CIROpID address = 2;
-  CIRTypeID type = 3;
+  CIRTypeID result_type = 3;
 }
 
 message CIRCallOp {
   CIROpID base = 1;
   CIRFunctionID called = 2;
   repeated CIROpID arguments = 3;
+  CIRTypeID result_type = 4;
 }
 
 message CIRConstantOp {
   CIROpID base = 1;
+  CIRTypeID result_type = 2;
 }
 
 message CIRReturnOp {
   CIROpID base = 1;
   CIROpID value = 2;
-  CIRTypeID type = 3;
 }
 
 message CIRFunction {
