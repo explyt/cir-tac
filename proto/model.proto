@@ -15,7 +15,7 @@ message CIRTypeID {
   uint64 id = 2;
 }
 
-message CIROpID { uint64 line = 1; }
+message CIROpID { uint64 id = 1; }
 
 message CIROp {
   oneof operation {
