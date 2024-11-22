@@ -13,8 +13,7 @@
 CIROpCode CIRInst::opcode() const {
   CIROpCode result =
       llvm::TypeSwitch<mlir::Operation *, CIROpCode>(&inst)
-          .Case<cir ::AllocaOp>(
-              [](cir ::AllocaOp) { return CIROpCode ::AllocaOp; })
+          .CASE(AllocaOp)
           .CASE(BinOp)
           .CASE(LoadOp)
           .CASE(StoreOp)
