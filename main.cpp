@@ -12,6 +12,7 @@
 #include <mlir/IR/Dialect.h>
 #include <mlir/IR/MLIRContext.h>
 #include <mlir/IR/OpImplementation.h>
+#include <mlir/IR/Operation.h>
 #include <mlir/IR/Types.h>
 #include <mlir/IR/Visitors.h>
 #include <mlir/Parser/Parser.h>
@@ -32,6 +33,29 @@ uint64_t internType(intern_type_cache &cache, mlir::Type type) {
     cache[type] = cache.size();
   }
   return cache.at(type);
+}
+
+void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
+                        unsigned long &inst_line,
+                        protocir::CIRModuleID pModuleID,
+                        intern_type_cache &internCache) {
+  llvm::TypeSwitch<mlir::Operation *>(&inst)
+      .Case<cir::AllocaOp>(
+          [&inst_line, pInst, pModuleID, &internCache](cir::AllocaOp op) {
+            protocir::CIRAllocaOp pAllocaOp;
+            protocir::CIROpID pOpID;
+            pOpID.set_line(inst_line++);
+            pAllocaOp.mutable_base()->CopyFrom(pOpID);
+            protocir::CIRTypeID pTypeID;
+            pTypeID.mutable_module_id()->CopyFrom(pModuleID);
+            pTypeID.set_id(internType(internCache, op.getAllocaType()));
+            pAllocaOp.mutable_type()->CopyFrom(pTypeID);
+            if (op.getAlignment().has_value()) {
+              pAllocaOp.set_alignment(op.getAlignment().value());
+            }
+            pInst->mutable_alloca()->CopyFrom(pAllocaOp);
+          })
+      .Default([](mlir::Operation *) {});
 }
 
 int main(int argc, char *argv[]) {
@@ -55,8 +79,8 @@ int main(int argc, char *argv[]) {
   protocir::CIRModule pModule;
   protocir::CIRModuleID pModuleID;
   std::string moduleId = "myModule";
-  pModuleID.set_allocated_id(&moduleId);
-  pModule.set_allocated_id(&pModuleID);
+  *pModuleID.mutable_id() = moduleId;
+  pModule.mutable_id()->CopyFrom(pModuleID);
   unsigned long func_idx = 0;
   indexed_types indexToType;
   intern_type_cache internCache;
@@ -65,26 +89,13 @@ int main(int argc, char *argv[]) {
     for (auto &func : bodyBlock) {
       protocir::CIRFunction pFunction;
       protocir::CIRFunctionID pFunctionID;
-      pFunctionID.set_id(++func_idx);
-      pFunctionID.set_allocated_module_id(&pModuleID);
-      pFunction.set_allocated_id(&pFunctionID);
+      pFunction.mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
+      pFunction.mutable_id()->set_id(++func_idx);
       unsigned long inst_line = 0;
       for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
         for (auto &inst : block) {
           auto pInst = pFunction.add_operations();
-          llvm::TypeSwitch<mlir::Operation *>(&inst)
-              .Case<cir::AllocaOp>([&inst_line, pInst, &pModuleID, &internCache](cir::AllocaOp op) {
-                protocir::CIRAllocaOp pAllocaOp;
-                protocir::CIROpID pOpID;
-                pOpID.set_line(inst_line++);
-                pAllocaOp.mutable_base()->CopyFrom(pOpID);
-                protocir::CIRTypeID pTypeID;
-                pTypeID.mutable_module_id()->CopyFrom(pModuleID);
-                pTypeID.set_id(internType(internCache, op.getAllocaType()));
-                pAllocaOp.mutable_type()->CopyFrom(pTypeID);
-                pInst->mutable_alloca()->CopyFrom(pAllocaOp);
-              })
-              .Default([](mlir::Operation *) {});
+          serializeOperation(inst, pInst, inst_line, pModuleID, internCache);
         }
       }
     }
