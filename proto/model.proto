@@ -55,9 +55,10 @@ message CIRLoadOp {
 
 message CIRCallOp {
   CIROpID base = 1;
-  CIRFunctionID called = 2;
+  optional string callee = 2;
   repeated CIROpID arguments = 3;
   CIRTypeID result_type = 4;
+  optional CIRFunctionID callable = 5;
 }
 
 message CIRConstantOp {
