@@ -37,7 +37,7 @@ message CIROp {
 message CIRAllocaOp {
   CIROpID base = 1;
   CIRTypeID type = 2;
-  uint64 alignment = 3;
+  optional uint64 alignment = 3;
 }
 
 message CIRBinOp {
