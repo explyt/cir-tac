@@ -3,9 +3,7 @@ syntax = "proto3";
 package protocir;
 option java_package = "org.jacodb.impl.grpc";
 
-message CIRModuleID {
-  string id = 1;
-}
+message CIRModuleID { string id = 1; }
 
 message CIRFunctionID {
   CIRModuleID module_id = 1;
@@ -17,9 +15,7 @@ message CIRTypeID {
   uint64 id = 2;
 }
 
-message CIROpID {
-  uint64 line = 1;
-}
+message CIROpID { uint64 line = 1; }
 
 message CIROp {
   oneof operation {
@@ -32,7 +28,6 @@ message CIROp {
     CIRReturnOp return = 7;
   }
 }
-
 
 message CIRAllocaOp {
   CIROpID base = 1;
