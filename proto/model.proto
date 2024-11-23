@@ -68,7 +68,7 @@ message CIRConstantOp {
 
 message CIRReturnOp {
   CIROpID base = 1;
-  CIROpID value = 2;
+  repeated CIROpID input = 2;
 }
 
 message CIRFunction {
