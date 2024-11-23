@@ -26,6 +26,8 @@ message CIROp {
     CIRCallOp call = 5;
     CIRConstantOp constant = 6;
     CIRReturnOp return = 7;
+    CIRGetGlobalOp get_global = 8;
+    CIRCastOp cast = 9;
   }
 }
 
@@ -57,7 +59,7 @@ message CIRCallOp {
   CIROpID base = 1;
   optional string callee = 2;
   repeated CIROpID arguments = 3;
-  CIRTypeID result_type = 4;
+  optional CIRTypeID result_type = 4;
   optional CIRFunctionID callable = 5;
 }
 
@@ -69,6 +71,17 @@ message CIRConstantOp {
 message CIRReturnOp {
   CIROpID base = 1;
   repeated CIROpID input = 2;
+}
+
+message CIRGetGlobalOp {
+  CIROpID base = 1;
+  string name = 2;
+}
+
+message CIRCastOp {
+  CIROpID base = 1;
+  CIROpID src = 2;
+  CIRTypeID result_type = 3;
 }
 
 message CIRFunction {
