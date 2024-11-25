@@ -125,7 +125,8 @@ void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
           pCallOp.mutable_result_type()->set_id(resultTypeID);
         }
         if (auto callable = op.resolveCallable()) {
-          auto callableID = internFunction(functionCache, cast<cir::FuncOp>(callable));
+          auto callableID =
+              internFunction(functionCache, cast<cir::FuncOp>(callable));
         }
         pInst->mutable_call()->CopyFrom(pCallOp);
       })
@@ -195,6 +196,8 @@ int main(int argc, char *argv[]) {
       protocir::CIRFunctionID pFunctionID;
       pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
       pFunction->mutable_id()->set_id(++func_idx);
+      std::string functionName = cast<cir::FuncOp>(func).getSymName().str();
+      *pFunction->mutable_name() = functionName;
       OperationCache opCache;
       for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
         for (auto &inst : block) {
