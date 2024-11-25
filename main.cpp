@@ -206,7 +206,18 @@ int main(int argc, char *argv[]) {
                              functionCache);
         }
       }
+      for (auto &type : cast<cir::FuncOp>(func).getArgumentTypes()) {
+        auto pType = pFunction->add_arguments_types();
+        pType->mutable_module_id()->CopyFrom(pModuleID);
+        pType->set_id(internType(typeCache, type));
+      }
     }
+  }
+  for (auto &type : typeCache) {
+    auto pType = pModule.add_types();
+    pType->mutable_id()->set_id(type.getSecond());
+    pType->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
+    *pType->mutable_name() = type.getFirst().getAbstractType().getName().str();
   }
   std::string binary;
   pModule.SerializeToString(&binary);
