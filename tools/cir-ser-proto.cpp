@@ -1,6 +1,3 @@
-#include "CXX/CIRModule.h"
-#include "CXX/CIRReader.h"
-
 #include "proto/model.pb.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
