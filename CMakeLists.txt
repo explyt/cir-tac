@@ -21,6 +21,15 @@ message(STATUS "Using ClangConfig.cmake in: ${CLANG_DIR}")
 include_directories(SYSTEM ${CLANG_INCLUDE_DIRS})
 include_directories(SYSTEM ${MLIR_INCLUDE_DIRS})
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
+list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+
+include(AddLLVM)
+include(AddMLIR)
+include(HandleLLVMOptions)
+include(TableGen)
 
 find_package(Protobuf REQUIRED CONFIG)
 message(STATUS "Found Protobuf ${Protobuf_PACKAGE_VERSION}")
