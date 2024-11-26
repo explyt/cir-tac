@@ -1,7 +1,14 @@
 include(FindProtobuf)
 find_package(Protobuf REQUIRED CONFIG)
 include_directories(${PROTOBUF_INCLUDE_DIR})
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER model.proto)
+
+set(PROTOS
+    model.proto
+    op.proto
+    setup.proto
+)
+
+protobuf_generate_cpp(PROTO_SRC PROTO_HEADER ${PROTOS})
 add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
 target_link_libraries(
     proto ${Protobuf_LIBRARIES}

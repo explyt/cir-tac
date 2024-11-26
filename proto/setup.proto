@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package protocir;
+option java_package = "org.jacodb.impl.grpc";
+
+message CIRModuleID { string id = 1; }
+
+message CIRFunctionID {
+  CIRModuleID module_id = 1;
+  uint64 id = 2;
+}
+
+message CIRTypeID {
+  CIRModuleID module_id = 1;
+  uint64 id = 2;
+}
+
+message CIROpID { uint64 id = 1; }
