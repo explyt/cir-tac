@@ -5,6 +5,7 @@ include_directories(${PROTOBUF_INCLUDE_DIR})
 set(PROTOS
     model.proto
     op.proto
+    opgen.proto
     setup.proto
 )
 
