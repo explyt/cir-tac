@@ -189,6 +189,11 @@ int main(int argc, char *argv[]) {
   auto &bodyRegion = (*module).getBodyRegion();
   for (auto &bodyBlock : bodyRegion) {
     for (auto &func : bodyBlock) {
+      std::ignore = internFunction(functionCache, cast<cir::FuncOp>(func));
+    }
+  }
+  for (auto &bodyBlock : bodyRegion) {
+    for (auto &func : bodyBlock) {
       protocir::CIRFunction *pFunction = pModule.add_functions();
       protocir::CIRFunctionID pFunctionID;
       pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
@@ -196,6 +201,11 @@ int main(int argc, char *argv[]) {
       std::string functionName = cast<cir::FuncOp>(func).getSymName().str();
       *pFunction->mutable_name() = functionName;
       OperationCache opCache;
+      for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
+        for (auto &inst : block) {
+          std::ignore = internOperation(opCache, &inst);
+        }
+      }
       for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
         for (auto &inst : block) {
           auto pInst = pFunction->add_operations();
