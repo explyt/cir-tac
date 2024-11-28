@@ -8,603 +8,890 @@ option java_package = "org.jacodb.impl.grpc";
 import "setup.proto";
 
 message CIRAbsOp {
-  string src = 1;
+  CIROpID src = 1;
+
+  optional string poison = 2;
 }
 
 message CIRAllocExceptionOp {
+
+  string size = 1;
 }
 
 message CIRAllocaOp {
-  string dynAllocSize = 1;
+  optional CIROpID dynAllocSize = 1;
+
+  CIRTypeID allocaType = 2;
+  string name = 3;
+  optional string init = 4;
+  optional string constant = 5;
+  optional string alignment = 6;
+  optional string annotations = 7;
+  optional string ast = 8;
 }
 
 message CIRArrayCtor {
-  string addr = 1;
+  CIROpID addr = 1;
+
 }
 
 message CIRArrayDtor {
-  string addr = 1;
+  CIROpID addr = 1;
+
 }
 
 message CIRAssumeAlignedOp {
-  string pointer = 1;
-  string offset = 2;
+  CIROpID pointer = 1;
+  optional CIROpID offset = 2;
+
+  string alignment = 3;
 }
 
 message CIRAssumeOp {
-  string predicate = 1;
+  CIROpID predicate = 1;
+
 }
 
 message CIRAssumeSepStorageOp {
-  string ptr1 = 1;
-  string ptr2 = 2;
+  CIROpID ptr1 = 1;
+  CIROpID ptr2 = 2;
+
 }
 
 message CIRAtomicCmpXchg {
-  string ptr = 1;
-  string expected = 2;
-  string desired = 3;
+  CIROpID ptr = 1;
+  CIROpID expected = 2;
+  CIROpID desired = 3;
+
+  string succ_order = 4;
+  string fail_order = 5;
+  optional string weak = 6;
+  optional string is_volatile = 7;
 }
 
 message CIRAtomicFetch {
-  string ptr = 1;
-  string val = 2;
+  CIROpID ptr = 1;
+  CIROpID val = 2;
+
+  string binop = 3;
+  string mem_order = 4;
+  optional string is_volatile = 5;
+  optional string fetch_first = 6;
 }
 
 message CIRAtomicXchg {
-  string ptr = 1;
-  string val = 2;
+  CIROpID ptr = 1;
+  CIROpID val = 2;
+
+  string mem_order = 3;
+  optional string is_volatile = 4;
 }
 
 message CIRAwaitOp {
+
+  string kind = 1;
 }
 
 message CIRBaseClassAddrOp {
-  string derived_addr = 1;
+  CIROpID derived_addr = 1;
+
+  string offset = 2;
+  optional string assume_not_null = 3;
 }
 
 message CIRBinOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
+  string kind = 3;
+  optional string no_unsigned_wrap = 4;
+  optional string no_signed_wrap = 5;
 }
 
 message CIRBinOpOverflowOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
+  string kind = 3;
 }
 
 message CIRBitClrsbOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRBitClzOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRBitCtzOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRBitFfsOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRBitParityOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRBitPopcountOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRBrCondOp {
-  string cond = 1;
-  string destOperandsTrue = 2;
-  string destOperandsFalse = 3;
+  CIROpID cond = 1;
+  repeated CIROpID destOperandsTrue = 2;
+  repeated CIROpID destOperandsFalse = 3;
+
 }
 
 message CIRBrOp {
-  string destOperands = 1;
+  repeated CIROpID destOperands = 1;
+
 }
 
 message CIRBreakOp {
+
 }
 
 message CIRByteswapOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRInlineAsmOp {
-  string operands = 1;
+  repeated CIROpID operands = 1;
+
+  string asm_string = 2;
+  string constraints = 3;
+  optional string side_effects = 4;
+  string asm_flavor = 5;
+  string operand_attrs = 6;
+  string operands_segments = 7;
 }
 
 message CIRCallOp {
-  string arg_ops = 1;
+  repeated CIROpID arg_ops = 1;
+
+  optional string exception = 2;
+  optional string callee = 3;
+  string calling_conv = 4;
+  string extra_attrs = 5;
+  optional string ast = 6;
 }
 
 message CIRCaseOp {
+
+  string value = 1;
+  string kind = 2;
 }
 
 message CIRCastOp {
-  string src = 1;
+  CIROpID src = 1;
+
+  string kind = 2;
 }
 
 message CIRCatchParamOp {
-  string exception_ptr = 1;
+  optional CIROpID exception_ptr = 1;
+
+  optional string kind = 2;
 }
 
 message CIRCeilOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRClearCacheOp {
-  string begin = 1;
-  string end = 2;
+  CIROpID begin = 1;
+  CIROpID end = 2;
+
 }
 
 message CIRCmpOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
+  string kind = 3;
 }
 
 message CIRCmpThreeWayOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
+  string info = 3;
 }
 
 message CIRComplexBinOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
+  string kind = 3;
+  string range = 4;
+  optional string promoted = 5;
 }
 
 message CIRComplexCreateOp {
-  string real = 1;
-  string imag = 2;
+  CIROpID real = 1;
+  CIROpID imag = 2;
+
 }
 
 message CIRComplexImagOp {
-  string operand = 1;
+  CIROpID operand = 1;
+
 }
 
 message CIRComplexImagPtrOp {
-  string operand = 1;
+  CIROpID operand = 1;
+
 }
 
 message CIRComplexRealOp {
-  string operand = 1;
+  CIROpID operand = 1;
+
 }
 
 message CIRComplexRealPtrOp {
-  string operand = 1;
+  CIROpID operand = 1;
+
 }
 
 message CIRConditionOp {
-  string condition = 1;
+  CIROpID condition = 1;
+
 }
 
 message CIRConstantOp {
+
+  string value = 1;
 }
 
 message CIRContinueOp {
+
 }
 
 message CIRCopyOp {
-  string dst = 1;
-  string src = 2;
+  CIROpID dst = 1;
+  CIROpID src = 2;
+
+  optional string is_volatile = 3;
+  optional string tbaa = 4;
 }
 
 message CIRCopysignOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
 }
 
 message CIRCosOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRDerivedClassAddrOp {
-  string base_addr = 1;
+  CIROpID base_addr = 1;
+
+  string offset = 2;
+  optional string assume_not_null = 3;
 }
 
 message CIRDoWhileOp {
+
 }
 
 message CIRDynamicCastOp {
-  string src = 1;
+  CIROpID src = 1;
+
+  string kind = 2;
+  optional string info = 3;
+  optional string relative_layout = 4;
 }
 
 message CIREhInflightOp {
+
+  optional string cleanup = 1;
+  optional string sym_type_list = 2;
 }
 
 message CIREhTypeIdOp {
+
+  string type_sym = 1;
 }
 
 message CIRExp2Op {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRExpOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRExpectOp {
-  string val = 1;
-  string expected = 2;
+  CIROpID val = 1;
+  CIROpID expected = 2;
+
+  optional string prob = 3;
 }
 
 message CIRFAbsOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRFMaxOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
 }
 
 message CIRFMinOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
 }
 
 message CIRFModOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
 }
 
 message CIRFloorOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRForOp {
+
 }
 
 message CIRFrameAddrOp {
-  string level = 1;
+  CIROpID level = 1;
+
 }
 
 message CIRFreeExceptionOp {
-  string ptr = 1;
+  CIROpID ptr = 1;
+
 }
 
 message CIRFuncOp {
+
+  string sym_name = 1;
+  string global_visibility = 2;
+  CIRTypeID function_type = 3;
+  optional string builtin = 4;
+  optional string coroutine = 5;
+  optional string lambda = 6;
+  optional string no_proto = 7;
+  optional string dsolocal = 8;
+  string linkage = 9;
+  string calling_conv = 10;
+  string extra_attrs = 11;
+  optional string sym_visibility = 12;
+  optional string comdat = 13;
+  optional string arg_attrs = 14;
+  optional string res_attrs = 15;
+  optional string aliasee = 16;
+  optional string global_ctor = 17;
+  optional string global_dtor = 18;
+  optional string annotations = 19;
+  optional string ast = 20;
 }
 
 message CIRGetBitfieldOp {
-  string addr = 1;
+  CIROpID addr = 1;
+
+  string bitfield_info = 2;
+  optional string is_volatile = 3;
 }
 
 message CIRGetGlobalOp {
+
+  string name = 1;
+  optional string tls = 2;
 }
 
 message CIRGetMemberOp {
-  string addr = 1;
+  CIROpID addr = 1;
+
+  string name = 2;
+  string index_attr = 3;
 }
 
 message CIRGetMethodOp {
-  string method = 1;
-  string object = 2;
+  CIROpID method = 1;
+  CIROpID object = 2;
+
 }
 
 message CIRGetRuntimeMemberOp {
-  string addr = 1;
-  string member = 2;
+  CIROpID addr = 1;
+  CIROpID member = 2;
+
 }
 
 message CIRGlobalOp {
+
+  string sym_name = 1;
+  string global_visibility = 2;
+  optional string sym_visibility = 3;
+  CIRTypeID sym_type = 4;
+  string linkage = 5;
+  optional string addr_space = 6;
+  optional string tls_model = 7;
+  optional string initial_value = 8;
+  optional string comdat = 9;
+  optional string constant = 10;
+  optional string dsolocal = 11;
+  optional string alignment = 12;
+  optional string ast = 13;
+  optional string section = 14;
+  optional string annotations = 15;
 }
 
 message CIRGotoOp {
+
+  string label = 1;
 }
 
 message CIRIfOp {
-  string condition = 1;
+  CIROpID condition = 1;
+
 }
 
 message CIRIsConstantOp {
-  string val = 1;
+  CIROpID val = 1;
+
 }
 
 message CIRIsFPClassOp {
-  string src = 1;
+  CIROpID src = 1;
+
+  string flags = 2;
 }
 
 message CIRIterBeginOp {
-  string container = 1;
+  CIROpID container = 1;
+
+  string original_fn = 2;
 }
 
 message CIRIterEndOp {
-  string container = 1;
+  CIROpID container = 1;
+
+  string original_fn = 2;
 }
 
 message CIRLLVMIntrinsicCallOp {
-  string arg_ops = 1;
+  repeated CIROpID arg_ops = 1;
+
+  string intrinsic_name = 2;
 }
 
 message CIRLLrintOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRLLroundOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRLabelOp {
+
+  string label = 1;
 }
 
 message CIRLoadOp {
-  string addr = 1;
+  CIROpID addr = 1;
+
+  optional string isDeref = 2;
+  optional string is_volatile = 3;
+  optional string alignment = 4;
+  optional string mem_order = 5;
+  optional string tbaa = 6;
 }
 
 message CIRLog10Op {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRLog2Op {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRLogOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRLrintOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRLroundOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRMemChrOp {
-  string src = 1;
-  string pattern = 2;
-  string len = 3;
+  CIROpID src = 1;
+  CIROpID pattern = 2;
+  CIROpID len = 3;
+
 }
 
 message CIRMemCpyInlineOp {
-  string dst = 1;
-  string src = 2;
+  CIROpID dst = 1;
+  CIROpID src = 2;
+
+  string len = 3;
 }
 
 message CIRMemCpyOp {
-  string dst = 1;
-  string src = 2;
-  string len = 3;
+  CIROpID dst = 1;
+  CIROpID src = 2;
+  CIROpID len = 3;
+
 }
 
 message CIRMemMoveOp {
-  string dst = 1;
-  string src = 2;
-  string len = 3;
+  CIROpID dst = 1;
+  CIROpID src = 2;
+  CIROpID len = 3;
+
 }
 
 message CIRMemSetInlineOp {
-  string dst = 1;
-  string val = 2;
-}
+  CIROpID dst = 1;
+  CIROpID val = 2;
 
-message CIRMemSetOp {
-  string dst = 1;
-  string val = 2;
   string len = 3;
 }
 
+message CIRMemSetOp {
+  CIROpID dst = 1;
+  CIROpID val = 2;
+  CIROpID len = 3;
+
+}
+
 message CIRNearbyintOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRObjSizeOp {
-  string ptr = 1;
+  CIROpID ptr = 1;
+
+  string kind = 2;
+  optional string dynamic = 3;
 }
 
 message CIRPowOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
 }
 
 message CIRPrefetchOp {
-  string addr = 1;
+  CIROpID addr = 1;
+
+  string locality = 2;
+  optional string isWrite = 3;
 }
 
 message CIRPtrDiffOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
 }
 
 message CIRPtrMaskOp {
-  string ptr = 1;
-  string mask = 2;
+  CIROpID ptr = 1;
+  CIROpID mask = 2;
+
 }
 
 message CIRPtrStrideOp {
-  string base = 1;
-  string stride = 2;
+  CIROpID base = 1;
+  CIROpID stride = 2;
+
 }
 
 message CIRResumeOp {
-  string exception_ptr = 1;
-  string type_id = 2;
+  optional CIROpID exception_ptr = 1;
+  optional CIROpID type_id = 2;
+
+  optional string rethrow = 3;
 }
 
 message CIRReturnAddrOp {
-  string level = 1;
+  CIROpID level = 1;
+
 }
 
 message CIRReturnOp {
-  string input = 1;
+  repeated CIROpID input = 1;
+
 }
 
 message CIRRintOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRRotateOp {
-  string src = 1;
-  string amt = 2;
+  CIROpID src = 1;
+  CIROpID amt = 2;
+
+  optional string left = 3;
 }
 
 message CIRRoundOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRScopeOp {
+
 }
 
 message CIRSelectOp {
-  string condition = 1;
-  string true_value = 2;
-  string false_value = 3;
+  CIROpID condition = 1;
+  CIROpID true_value = 2;
+  CIROpID false_value = 3;
+
 }
 
 message CIRSetBitfieldOp {
-  string addr = 1;
-  string src = 2;
+  CIROpID addr = 1;
+  CIROpID src = 2;
+
+  string bitfield_info = 3;
+  optional string is_volatile = 4;
 }
 
 message CIRShiftOp {
-  string value = 1;
-  string amount = 2;
+  CIROpID value = 1;
+  CIROpID amount = 2;
+
+  optional string isShiftleft = 3;
 }
 
 message CIRSignBitOp {
-  string input = 1;
+  CIROpID input = 1;
+
 }
 
 message CIRSinOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRSqrtOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRStackRestoreOp {
-  string ptr = 1;
+  CIROpID ptr = 1;
+
 }
 
 message CIRStackSaveOp {
+
 }
 
 message CIRStdFindOp {
-  string first = 1;
-  string last = 2;
-  string pattern = 3;
+  CIROpID first = 1;
+  CIROpID last = 2;
+  CIROpID pattern = 3;
+
+  string original_fn = 4;
 }
 
 message CIRStoreOp {
-  string value = 1;
-  string addr = 2;
+  CIROpID value = 1;
+  CIROpID addr = 2;
+
+  optional string is_volatile = 3;
+  optional string alignment = 4;
+  optional string mem_order = 5;
+  optional string tbaa = 6;
 }
 
 message CIRSwitchFlatOp {
-  string condition = 1;
-  string defaultOperands = 2;
-  string caseOperands = 3;
+  CIROpID condition = 1;
+  repeated CIROpID defaultOperands = 2;
+  repeated CIROpID caseOperands = 3;
+
+  string case_values = 4;
+  string case_operand_segments = 5;
 }
 
 message CIRSwitchOp {
-  string condition = 1;
+  CIROpID condition = 1;
+
 }
 
 message CIRTernaryOp {
-  string cond = 1;
+  CIROpID cond = 1;
+
 }
 
 message CIRThrowOp {
-  string exception_ptr = 1;
+  optional CIROpID exception_ptr = 1;
+
+  optional string type_info = 2;
+  optional string dtor = 3;
 }
 
 message CIRTrapOp {
+
 }
 
 message CIRTruncOp {
-  string src = 1;
+  CIROpID src = 1;
+
 }
 
 message CIRTryCallOp {
-  string contOperands = 1;
-  string landingPadOperands = 2;
-  string arg_ops = 3;
+  repeated CIROpID contOperands = 1;
+  repeated CIROpID landingPadOperands = 2;
+  repeated CIROpID arg_ops = 3;
+
+  optional string callee = 4;
+  string calling_conv = 5;
+  string extra_attrs = 6;
+  optional string ast = 7;
 }
 
 message CIRTryOp {
+
+  optional string synthetic = 1;
+  optional string cleanup = 2;
+  optional string catch_types = 3;
 }
 
 message CIRUnaryOp {
-  string input = 1;
+  CIROpID input = 1;
+
+  string kind = 2;
 }
 
 message CIRUnreachableOp {
+
 }
 
 message CIRVAArgOp {
-  string arg_list = 1;
+  CIROpID arg_list = 1;
+
 }
 
 message CIRVACopyOp {
-  string dst_list = 1;
-  string src_list = 2;
+  CIROpID dst_list = 1;
+  CIROpID src_list = 2;
+
 }
 
 message CIRVAEndOp {
-  string arg_list = 1;
+  CIROpID arg_list = 1;
+
 }
 
 message CIRVAStartOp {
-  string arg_list = 1;
+  CIROpID arg_list = 1;
+
 }
 
 message CIRVTTAddrPointOp {
-  string sym_addr = 1;
+  optional CIROpID sym_addr = 1;
+
+  optional string name = 2;
+  string offset = 3;
 }
 
 message CIRVTableAddrPointOp {
-  string sym_addr = 1;
+  optional CIROpID sym_addr = 1;
+
+  optional string name = 2;
+  string vtable_index = 3;
+  string address_point_index = 4;
 }
 
 message CIRVecCmpOp {
-  string lhs = 1;
-  string rhs = 2;
+  CIROpID lhs = 1;
+  CIROpID rhs = 2;
+
+  string kind = 3;
 }
 
 message CIRVecCreateOp {
-  string elements = 1;
+  repeated CIROpID elements = 1;
+
 }
 
 message CIRVecExtractOp {
-  string vec = 1;
-  string index = 2;
+  CIROpID vec = 1;
+  CIROpID index = 2;
+
 }
 
 message CIRVecInsertOp {
-  string vec = 1;
-  string value = 2;
-  string index = 3;
+  CIROpID vec = 1;
+  CIROpID value = 2;
+  CIROpID index = 3;
+
 }
 
 message CIRVecShuffleDynamicOp {
-  string vec = 1;
-  string indices = 2;
+  CIROpID vec = 1;
+  CIROpID indices = 2;
+
 }
 
 message CIRVecShuffleOp {
-  string vec1 = 1;
-  string vec2 = 2;
+  CIROpID vec1 = 1;
+  CIROpID vec2 = 2;
+
+  string indices = 3;
 }
 
 message CIRVecSplatOp {
-  string value = 1;
+  CIROpID value = 1;
+
 }
 
 message CIRVecTernaryOp {
-  string cond = 1;
-  string vec1 = 2;
-  string vec2 = 3;
+  CIROpID cond = 1;
+  CIROpID vec1 = 2;
+  CIROpID vec2 = 3;
+
 }
 
 message CIRWhileOp {
+
 }
 
 message CIRYieldOp {
-  string args = 1;
+  repeated CIROpID args = 1;
+
 }
