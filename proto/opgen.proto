@@ -5,17 +5,20 @@ syntax = "proto3";
 package protocir;
 option java_package = "org.jacodb.impl.grpc";
 
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 import "setup.proto";
+import "enumgen.proto";
 
 message CIRAbsOp {
   CIROpID src = 1;
 
-  optional string poison = 2;
+  optional google.protobuf.Empty poison = 2;
 }
 
 message CIRAllocExceptionOp {
 
-  string size = 1;
+  uint64 size = 1;
 }
 
 message CIRAllocaOp {
@@ -23,11 +26,9 @@ message CIRAllocaOp {
 
   CIRTypeID allocaType = 2;
   string name = 3;
-  optional string init = 4;
-  optional string constant = 5;
-  optional string alignment = 6;
-  optional string annotations = 7;
-  optional string ast = 8;
+  optional google.protobuf.Empty init = 4;
+  optional google.protobuf.Empty constant = 5;
+  optional uint64 alignment = 6;
 }
 
 message CIRArrayCtor {
@@ -44,7 +45,7 @@ message CIRAssumeAlignedOp {
   CIROpID pointer = 1;
   optional CIROpID offset = 2;
 
-  string alignment = 3;
+  uint64 alignment = 3;
 }
 
 message CIRAssumeOp {
@@ -63,56 +64,56 @@ message CIRAtomicCmpXchg {
   CIROpID expected = 2;
   CIROpID desired = 3;
 
-  string succ_order = 4;
-  string fail_order = 5;
-  optional string weak = 6;
-  optional string is_volatile = 7;
+  CIRMemOrder succ_order = 4;
+  CIRMemOrder fail_order = 5;
+  optional google.protobuf.Empty weak = 6;
+  optional google.protobuf.Empty is_volatile = 7;
 }
 
 message CIRAtomicFetch {
   CIROpID ptr = 1;
   CIROpID val = 2;
 
-  string binop = 3;
-  string mem_order = 4;
-  optional string is_volatile = 5;
-  optional string fetch_first = 6;
+  CIRAtomicFetchKind binop = 3;
+  CIRMemOrder mem_order = 4;
+  optional google.protobuf.Empty is_volatile = 5;
+  optional google.protobuf.Empty fetch_first = 6;
 }
 
 message CIRAtomicXchg {
   CIROpID ptr = 1;
   CIROpID val = 2;
 
-  string mem_order = 3;
-  optional string is_volatile = 4;
+  CIRMemOrder mem_order = 3;
+  optional google.protobuf.Empty is_volatile = 4;
 }
 
 message CIRAwaitOp {
 
-  string kind = 1;
+  CIRAwaitKind kind = 1;
 }
 
 message CIRBaseClassAddrOp {
   CIROpID derived_addr = 1;
 
-  string offset = 2;
-  optional string assume_not_null = 3;
+  uint64 offset = 2;
+  optional google.protobuf.Empty assume_not_null = 3;
 }
 
 message CIRBinOp {
   CIROpID lhs = 1;
   CIROpID rhs = 2;
 
-  string kind = 3;
-  optional string no_unsigned_wrap = 4;
-  optional string no_signed_wrap = 5;
+  CIRBinOpKind kind = 3;
+  optional google.protobuf.Empty no_unsigned_wrap = 4;
+  optional google.protobuf.Empty no_signed_wrap = 5;
 }
 
 message CIRBinOpOverflowOp {
   CIROpID lhs = 1;
   CIROpID rhs = 2;
 
-  string kind = 3;
+  CIRBinOpOverflowKind kind = 3;
 }
 
 message CIRBitClrsbOp {
@@ -171,38 +172,34 @@ message CIRInlineAsmOp {
 
   string asm_string = 2;
   string constraints = 3;
-  optional string side_effects = 4;
-  string asm_flavor = 5;
-  string operand_attrs = 6;
-  string operands_segments = 7;
+  optional google.protobuf.Empty side_effects = 4;
+  CIRAsmFlavor asm_flavor = 5;
+  repeated uint32 operands_segments = 6;
 }
 
 message CIRCallOp {
   repeated CIROpID arg_ops = 1;
 
-  optional string exception = 2;
+  optional google.protobuf.Empty exception = 2;
   optional string callee = 3;
-  string calling_conv = 4;
-  string extra_attrs = 5;
-  optional string ast = 6;
+  CIRCallingConv calling_conv = 4;
 }
 
 message CIRCaseOp {
 
-  string value = 1;
-  string kind = 2;
+  CIRCaseOpKind kind = 1;
 }
 
 message CIRCastOp {
   CIROpID src = 1;
 
-  string kind = 2;
+  CIRCastKind kind = 2;
 }
 
 message CIRCatchParamOp {
   optional CIROpID exception_ptr = 1;
 
-  optional string kind = 2;
+  optional CIRCatchParamKind kind = 2;
 }
 
 message CIRCeilOp {
@@ -220,23 +217,22 @@ message CIRCmpOp {
   CIROpID lhs = 1;
   CIROpID rhs = 2;
 
-  string kind = 3;
+  CIRCmpOpKind kind = 3;
 }
 
 message CIRCmpThreeWayOp {
   CIROpID lhs = 1;
   CIROpID rhs = 2;
 
-  string info = 3;
 }
 
 message CIRComplexBinOp {
   CIROpID lhs = 1;
   CIROpID rhs = 2;
 
-  string kind = 3;
-  string range = 4;
-  optional string promoted = 5;
+  CIRComplexBinOpKind kind = 3;
+  CIRComplexRangeKind range = 4;
+  optional google.protobuf.Empty promoted = 5;
 }
 
 message CIRComplexCreateOp {
@@ -272,7 +268,7 @@ message CIRConditionOp {
 
 message CIRConstantOp {
 
-  string value = 1;
+  google.protobuf.Any value = 1;
 }
 
 message CIRContinueOp {
@@ -283,8 +279,7 @@ message CIRCopyOp {
   CIROpID dst = 1;
   CIROpID src = 2;
 
-  optional string is_volatile = 3;
-  optional string tbaa = 4;
+  optional google.protobuf.Empty is_volatile = 3;
 }
 
 message CIRCopysignOp {
@@ -301,8 +296,8 @@ message CIRCosOp {
 message CIRDerivedClassAddrOp {
   CIROpID base_addr = 1;
 
-  string offset = 2;
-  optional string assume_not_null = 3;
+  uint64 offset = 2;
+  optional google.protobuf.Empty assume_not_null = 3;
 }
 
 message CIRDoWhileOp {
@@ -312,15 +307,13 @@ message CIRDoWhileOp {
 message CIRDynamicCastOp {
   CIROpID src = 1;
 
-  string kind = 2;
-  optional string info = 3;
-  optional string relative_layout = 4;
+  CIRDynamicCastKind kind = 2;
+  optional google.protobuf.Empty relative_layout = 3;
 }
 
 message CIREhInflightOp {
 
-  optional string cleanup = 1;
-  optional string sym_type_list = 2;
+  optional google.protobuf.Empty cleanup = 1;
 }
 
 message CIREhTypeIdOp {
@@ -342,7 +335,7 @@ message CIRExpectOp {
   CIROpID val = 1;
   CIROpID expected = 2;
 
-  optional string prob = 3;
+  optional double prob = 3;
 }
 
 message CIRFAbsOp {
@@ -390,45 +383,39 @@ message CIRFreeExceptionOp {
 message CIRFuncOp {
 
   string sym_name = 1;
-  string global_visibility = 2;
+  CIRVisibilityKind global_visibility = 2;
   CIRTypeID function_type = 3;
-  optional string builtin = 4;
-  optional string coroutine = 5;
-  optional string lambda = 6;
-  optional string no_proto = 7;
-  optional string dsolocal = 8;
-  string linkage = 9;
-  string calling_conv = 10;
-  string extra_attrs = 11;
-  optional string sym_visibility = 12;
-  optional string comdat = 13;
-  optional string arg_attrs = 14;
-  optional string res_attrs = 15;
-  optional string aliasee = 16;
-  optional string global_ctor = 17;
-  optional string global_dtor = 18;
-  optional string annotations = 19;
-  optional string ast = 20;
+  optional google.protobuf.Empty builtin = 4;
+  optional google.protobuf.Empty coroutine = 5;
+  optional google.protobuf.Empty lambda = 6;
+  optional google.protobuf.Empty no_proto = 7;
+  optional google.protobuf.Empty dsolocal = 8;
+  CIRGlobalLinkageKind linkage = 9;
+  CIRCallingConv calling_conv = 10;
+  optional string sym_visibility = 11;
+  optional google.protobuf.Empty comdat = 12;
+  optional string aliasee = 13;
+  optional google.protobuf.Empty global_ctor = 14;
+  optional google.protobuf.Empty global_dtor = 15;
 }
 
 message CIRGetBitfieldOp {
   CIROpID addr = 1;
 
-  string bitfield_info = 2;
-  optional string is_volatile = 3;
+  optional google.protobuf.Empty is_volatile = 2;
 }
 
 message CIRGetGlobalOp {
 
   string name = 1;
-  optional string tls = 2;
+  optional google.protobuf.Empty tls = 2;
 }
 
 message CIRGetMemberOp {
   CIROpID addr = 1;
 
   string name = 2;
-  string index_attr = 3;
+  uint64 index_attr = 3;
 }
 
 message CIRGetMethodOp {
@@ -446,20 +433,16 @@ message CIRGetRuntimeMemberOp {
 message CIRGlobalOp {
 
   string sym_name = 1;
-  string global_visibility = 2;
+  CIRVisibilityKind global_visibility = 2;
   optional string sym_visibility = 3;
   CIRTypeID sym_type = 4;
-  string linkage = 5;
-  optional string addr_space = 6;
-  optional string tls_model = 7;
-  optional string initial_value = 8;
-  optional string comdat = 9;
-  optional string constant = 10;
-  optional string dsolocal = 11;
-  optional string alignment = 12;
-  optional string ast = 13;
-  optional string section = 14;
-  optional string annotations = 15;
+  CIRGlobalLinkageKind linkage = 5;
+  optional CIRTLS_Model tls_model = 6;
+  optional google.protobuf.Empty comdat = 7;
+  optional google.protobuf.Empty constant = 8;
+  optional google.protobuf.Empty dsolocal = 9;
+  optional uint64 alignment = 10;
+  optional string section = 11;
 }
 
 message CIRGotoOp {
@@ -480,7 +463,7 @@ message CIRIsConstantOp {
 message CIRIsFPClassOp {
   CIROpID src = 1;
 
-  string flags = 2;
+  uint64 flags = 2;
 }
 
 message CIRIterBeginOp {
@@ -519,11 +502,10 @@ message CIRLabelOp {
 message CIRLoadOp {
   CIROpID addr = 1;
 
-  optional string isDeref = 2;
-  optional string is_volatile = 3;
-  optional string alignment = 4;
-  optional string mem_order = 5;
-  optional string tbaa = 6;
+  optional google.protobuf.Empty isDeref = 2;
+  optional google.protobuf.Empty is_volatile = 3;
+  optional uint64 alignment = 4;
+  optional CIRMemOrder mem_order = 5;
 }
 
 message CIRLog10Op {
@@ -562,7 +544,7 @@ message CIRMemCpyInlineOp {
   CIROpID dst = 1;
   CIROpID src = 2;
 
-  string len = 3;
+  uint64 len = 3;
 }
 
 message CIRMemCpyOp {
@@ -583,7 +565,7 @@ message CIRMemSetInlineOp {
   CIROpID dst = 1;
   CIROpID val = 2;
 
-  string len = 3;
+  uint64 len = 3;
 }
 
 message CIRMemSetOp {
@@ -601,8 +583,8 @@ message CIRNearbyintOp {
 message CIRObjSizeOp {
   CIROpID ptr = 1;
 
-  string kind = 2;
-  optional string dynamic = 3;
+  CIRSizeInfoType kind = 2;
+  optional google.protobuf.Empty dynamic = 3;
 }
 
 message CIRPowOp {
@@ -614,8 +596,8 @@ message CIRPowOp {
 message CIRPrefetchOp {
   CIROpID addr = 1;
 
-  string locality = 2;
-  optional string isWrite = 3;
+  uint64 locality = 2;
+  optional google.protobuf.Empty isWrite = 3;
 }
 
 message CIRPtrDiffOp {
@@ -640,7 +622,7 @@ message CIRResumeOp {
   optional CIROpID exception_ptr = 1;
   optional CIROpID type_id = 2;
 
-  optional string rethrow = 3;
+  optional google.protobuf.Empty rethrow = 3;
 }
 
 message CIRReturnAddrOp {
@@ -662,7 +644,7 @@ message CIRRotateOp {
   CIROpID src = 1;
   CIROpID amt = 2;
 
-  optional string left = 3;
+  optional google.protobuf.Empty left = 3;
 }
 
 message CIRRoundOp {
@@ -685,15 +667,14 @@ message CIRSetBitfieldOp {
   CIROpID addr = 1;
   CIROpID src = 2;
 
-  string bitfield_info = 3;
-  optional string is_volatile = 4;
+  optional google.protobuf.Empty is_volatile = 3;
 }
 
 message CIRShiftOp {
   CIROpID value = 1;
   CIROpID amount = 2;
 
-  optional string isShiftleft = 3;
+  optional google.protobuf.Empty isShiftleft = 3;
 }
 
 message CIRSignBitOp {
@@ -732,10 +713,9 @@ message CIRStoreOp {
   CIROpID value = 1;
   CIROpID addr = 2;
 
-  optional string is_volatile = 3;
-  optional string alignment = 4;
-  optional string mem_order = 5;
-  optional string tbaa = 6;
+  optional google.protobuf.Empty is_volatile = 3;
+  optional uint64 alignment = 4;
+  optional CIRMemOrder mem_order = 5;
 }
 
 message CIRSwitchFlatOp {
@@ -743,8 +723,7 @@ message CIRSwitchFlatOp {
   repeated CIROpID defaultOperands = 2;
   repeated CIROpID caseOperands = 3;
 
-  string case_values = 4;
-  string case_operand_segments = 5;
+  repeated uint32 case_operand_segments = 4;
 }
 
 message CIRSwitchOp {
@@ -779,22 +758,19 @@ message CIRTryCallOp {
   repeated CIROpID arg_ops = 3;
 
   optional string callee = 4;
-  string calling_conv = 5;
-  string extra_attrs = 6;
-  optional string ast = 7;
+  CIRCallingConv calling_conv = 5;
 }
 
 message CIRTryOp {
 
-  optional string synthetic = 1;
-  optional string cleanup = 2;
-  optional string catch_types = 3;
+  optional google.protobuf.Empty synthetic = 1;
+  optional google.protobuf.Empty cleanup = 2;
 }
 
 message CIRUnaryOp {
   CIROpID input = 1;
 
-  string kind = 2;
+  CIRUnaryOpKind kind = 2;
 }
 
 message CIRUnreachableOp {
@@ -826,22 +802,22 @@ message CIRVTTAddrPointOp {
   optional CIROpID sym_addr = 1;
 
   optional string name = 2;
-  string offset = 3;
+  uint64 offset = 3;
 }
 
 message CIRVTableAddrPointOp {
   optional CIROpID sym_addr = 1;
 
   optional string name = 2;
-  string vtable_index = 3;
-  string address_point_index = 4;
+  uint64 vtable_index = 3;
+  uint64 address_point_index = 4;
 }
 
 message CIRVecCmpOp {
   CIROpID lhs = 1;
   CIROpID rhs = 2;
 
-  string kind = 3;
+  CIRCmpOpKind kind = 3;
 }
 
 message CIRVecCreateOp {
@@ -872,7 +848,6 @@ message CIRVecShuffleOp {
   CIROpID vec1 = 1;
   CIROpID vec2 = 2;
 
-  string indices = 3;
 }
 
 message CIRVecSplatOp {
