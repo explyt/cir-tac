@@ -1,7 +1,5 @@
 set(LIBS
-    MLIRCIR
-    MLIRParser
-    proto
+    protoSerializer
 )
 
 add_executable(cir-ser-proto cir-ser-proto.cpp)
