@@ -5,7 +5,7 @@ set(LIBS
 )
 
 add_library(protoSerializer
-  Serializer.cpp
+  SerializerGen.cpp
 )
 
 target_link_libraries(protoSerializer ${LIBS})

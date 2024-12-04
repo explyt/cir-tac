@@ -4,7 +4,7 @@ package protocir;
 option java_package = "org.jacodb.impl.grpc";
 
 import "setup.proto";
-import "op.proto";
+import "opgen.proto";
 
 message CIRFunction {
   CIRFunctionID id = 1;

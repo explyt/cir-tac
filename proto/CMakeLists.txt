@@ -5,7 +5,6 @@ include_directories(${PROTOBUF_INCLUDE_DIR})
 set(PROTOS
     enumgen.proto
     model.proto
-    op.proto
     opgen.proto
     setup.proto
 )
