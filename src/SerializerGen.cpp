@@ -34,7 +34,7 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           })
 
       .Case<cir::AllocaOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::AllocaOp op) {
+          [instID, pInst, pModuleID, &typeCache, &opCache](cir::AllocaOp op) {
             protocir::CIRAllocaOp pAllocaOp;
             pInst->mutable_base()->set_id(instID);
 
@@ -43,6 +43,16 @@ void Serializer::serializeOperation(mlir::Operation &inst,
             *pAllocaTypeID.mutable_module_id() = pModuleID;
             pAllocaTypeID.set_id(internType(typeCache, allocaType));
             *pAllocaOp.mutable_allocatype() = pAllocaTypeID;
+
+            auto dynAllocSize = op.getDynAllocSize().getDefiningOp();
+
+            if (dynAllocSize) {
+              auto dynAllocSizeID = internOperation(opCache, dynAllocSize);
+              protocir::CIROpID pDynAllocSizeID;
+              pDynAllocSizeID.set_id(dynAllocSizeID);
+
+              *pAllocaOp.mutable_dyn_alloc_size() = pDynAllocSizeID;
+            }
 
             auto name = op.getName();
             *pAllocaOp.mutable_name() = name.str();
