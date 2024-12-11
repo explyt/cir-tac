@@ -164,13 +164,10 @@ message CIRAbsOp {
   bool poison = 2;
 }
 
-message CIRAllocExceptionOp {
-
-  uint64 size = 1;
-}
+message CIRAllocExceptionOp { uint64 size = 1; }
 
 message CIRAllocaOp {
-  optional CIROpID dynAllocSize = 1;
+  optional CIROpID dyn_alloc_size = 1;
 
   CIRTypeID allocaType = 2;
   string name = 3;
@@ -179,15 +176,9 @@ message CIRAllocaOp {
   optional uint64 alignment = 6;
 }
 
-message CIRArrayCtor {
-  CIRTypeID addr = 1;
+message CIRArrayCtor { CIRTypeID addr = 1; }
 
-}
-
-message CIRArrayDtor {
-  CIRTypeID addr = 1;
-
-}
+message CIRArrayDtor { CIRTypeID addr = 1; }
 
 message CIRAssumeAlignedOp {
   CIROpID pointer = 1;
@@ -196,15 +187,11 @@ message CIRAssumeAlignedOp {
   uint64 alignment = 3;
 }
 
-message CIRAssumeOp {
-  CIROpID predicate = 1;
-
-}
+message CIRAssumeOp { CIROpID predicate = 1; }
 
 message CIRAssumeSepStorageOp {
   CIRTypeID ptr1 = 1;
   CIRTypeID ptr2 = 2;
-
 }
 
 message CIRAtomicCmpXchg {
@@ -236,10 +223,7 @@ message CIRAtomicXchg {
   bool is_volatile = 4;
 }
 
-message CIRAwaitOp {
-
-  CIRAwaitKind kind = 1;
-}
+message CIRAwaitOp { CIRAwaitKind kind = 1; }
 
 message CIRBaseClassAddrOp {
   CIROpID derived_addr = 1;
@@ -264,56 +248,36 @@ message CIRBinOpOverflowOp {
   CIRBinOpOverflowKind kind = 3;
 }
 
-message CIRBitClrsbOp {
-  CIRTypeID input = 1;
+message CIRBitClrsbOp { CIRTypeID input = 1; }
 
-}
+message CIRBitClzOp { CIRTypeID input = 1; }
 
-message CIRBitClzOp {
-  CIRTypeID input = 1;
+message CIRBitCtzOp { CIRTypeID input = 1; }
 
-}
+message CIRBitFfsOp { CIRTypeID input = 1; }
 
-message CIRBitCtzOp {
-  CIRTypeID input = 1;
+message CIRBitParityOp { CIRTypeID input = 1; }
 
-}
-
-message CIRBitFfsOp {
-  CIRTypeID input = 1;
-
-}
-
-message CIRBitParityOp {
-  CIRTypeID input = 1;
-
-}
-
-message CIRBitPopcountOp {
-  CIRTypeID input = 1;
-
-}
+message CIRBitPopcountOp { CIRTypeID input = 1; }
 
 message CIRBrCondOp {
   CIROpID cond = 1;
-  repeated CIRTypeID destOperandsTrue = 2;
-  repeated CIRTypeID destOperandsFalse = 3;
+  repeated CIRTypeID dest_operands_true = 2;
+  repeated CIRTypeID dest_operands_false = 3;
 
+  CIRBlockID dest_true = 4;
+  CIRBlockID dest_false = 5;
 }
 
 message CIRBrOp {
-  repeated CIRTypeID destOperands = 1;
+  repeated CIRTypeID dest_operands = 1;
 
+  CIRBlockID dest = 2;
 }
 
-message CIRBreakOp {
+message CIRBreakOp {}
 
-}
-
-message CIRByteswapOp {
-  CIRTypeID input = 1;
-
-}
+message CIRByteswapOp { CIRTypeID input = 1; }
 
 message CIRInlineAsmOp {
   repeated CIRTypeID operands = 1;
@@ -333,10 +297,7 @@ message CIRCallOp {
   CIRCallingConv calling_conv = 4;
 }
 
-message CIRCaseOp {
-
-  CIRCaseOpKind kind = 1;
-}
+message CIRCaseOp { CIRCaseOpKind kind = 1; }
 
 message CIRCastOp {
   CIRTypeID src = 1;
@@ -350,15 +311,11 @@ message CIRCatchParamOp {
   optional CIRCatchParamKind kind = 2;
 }
 
-message CIRCeilOp {
-  CIRTypeID src = 1;
-
-}
+message CIRCeilOp { CIRTypeID src = 1; }
 
 message CIRClearCacheOp {
   CIRTypeID begin = 1;
   CIRTypeID end = 2;
-
 }
 
 message CIRCmpOp {
@@ -371,7 +328,6 @@ message CIRCmpOp {
 message CIRCmpThreeWayOp {
   CIRTypeID lhs = 1;
   CIRTypeID rhs = 2;
-
 }
 
 message CIRComplexBinOp {
@@ -386,42 +342,21 @@ message CIRComplexBinOp {
 message CIRComplexCreateOp {
   CIRTypeID real = 1;
   CIRTypeID imag = 2;
-
 }
 
-message CIRComplexImagOp {
-  CIROpID operand = 1;
+message CIRComplexImagOp { CIROpID operand = 1; }
 
-}
+message CIRComplexImagPtrOp { CIRTypeID operand = 1; }
 
-message CIRComplexImagPtrOp {
-  CIRTypeID operand = 1;
+message CIRComplexRealOp { CIROpID operand = 1; }
 
-}
+message CIRComplexRealPtrOp { CIRTypeID operand = 1; }
 
-message CIRComplexRealOp {
-  CIROpID operand = 1;
+message CIRConditionOp { CIROpID condition = 1; }
 
-}
+message CIRConstantOp { google.protobuf.Any value = 1; }
 
-message CIRComplexRealPtrOp {
-  CIRTypeID operand = 1;
-
-}
-
-message CIRConditionOp {
-  CIROpID condition = 1;
-
-}
-
-message CIRConstantOp {
-
-  google.protobuf.Any value = 1;
-}
-
-message CIRContinueOp {
-
-}
+message CIRContinueOp {}
 
 message CIRCopyOp {
   CIROpID dst = 1;
@@ -433,13 +368,9 @@ message CIRCopyOp {
 message CIRCopysignOp {
   CIRTypeID lhs = 1;
   CIRTypeID rhs = 2;
-
 }
 
-message CIRCosOp {
-  CIRTypeID src = 1;
-
-}
+message CIRCosOp { CIRTypeID src = 1; }
 
 message CIRDerivedClassAddrOp {
   CIROpID base_addr = 1;
@@ -448,9 +379,7 @@ message CIRDerivedClassAddrOp {
   bool assume_not_null = 3;
 }
 
-message CIRDoWhileOp {
-
-}
+message CIRDoWhileOp {}
 
 message CIRDynamicCastOp {
   CIRTypeID src = 1;
@@ -459,25 +388,13 @@ message CIRDynamicCastOp {
   bool relative_layout = 3;
 }
 
-message CIREhInflightOp {
+message CIREhInflightOp { bool cleanup = 1; }
 
-  bool cleanup = 1;
-}
+message CIREhTypeIdOp { string type_sym = 1; }
 
-message CIREhTypeIdOp {
+message CIRExp2Op { CIRTypeID src = 1; }
 
-  string type_sym = 1;
-}
-
-message CIRExp2Op {
-  CIRTypeID src = 1;
-
-}
-
-message CIRExpOp {
-  CIRTypeID src = 1;
-
-}
+message CIRExpOp { CIRTypeID src = 1; }
 
 message CIRExpectOp {
   CIROpID val = 1;
@@ -486,47 +403,30 @@ message CIRExpectOp {
   double prob = 3;
 }
 
-message CIRFAbsOp {
-  CIRTypeID src = 1;
-
-}
+message CIRFAbsOp { CIRTypeID src = 1; }
 
 message CIRFMaxOp {
   CIRTypeID lhs = 1;
   CIRTypeID rhs = 2;
-
 }
 
 message CIRFMinOp {
   CIRTypeID lhs = 1;
   CIRTypeID rhs = 2;
-
 }
 
 message CIRFModOp {
   CIRTypeID lhs = 1;
   CIRTypeID rhs = 2;
-
 }
 
-message CIRFloorOp {
-  CIRTypeID src = 1;
+message CIRFloorOp { CIRTypeID src = 1; }
 
-}
+message CIRForOp {}
 
-message CIRForOp {
+message CIRFrameAddrOp { CIROpID level = 1; }
 
-}
-
-message CIRFrameAddrOp {
-  CIROpID level = 1;
-
-}
-
-message CIRFreeExceptionOp {
-  CIRTypeID ptr = 1;
-
-}
+message CIRFreeExceptionOp { CIRTypeID ptr = 1; }
 
 message CIRFuncOp {
 
@@ -569,13 +469,11 @@ message CIRGetMemberOp {
 message CIRGetMethodOp {
   CIROpID method = 1;
   CIRTypeID object = 2;
-
 }
 
 message CIRGetRuntimeMemberOp {
   CIRTypeID addr = 1;
   CIROpID member = 2;
-
 }
 
 message CIRGlobalOp {
@@ -593,20 +491,11 @@ message CIRGlobalOp {
   optional string section = 11;
 }
 
-message CIRGotoOp {
+message CIRGotoOp { string label = 1; }
 
-  string label = 1;
-}
+message CIRIfOp { CIROpID condition = 1; }
 
-message CIRIfOp {
-  CIROpID condition = 1;
-
-}
-
-message CIRIsConstantOp {
-  CIRTypeID val = 1;
-
-}
+message CIRIsConstantOp { CIRTypeID val = 1; }
 
 message CIRIsFPClassOp {
   CIRTypeID src = 1;
@@ -632,20 +521,11 @@ message CIRLLVMIntrinsicCallOp {
   string intrinsic_name = 2;
 }
 
-message CIRLLrintOp {
-  CIRTypeID src = 1;
+message CIRLLrintOp { CIRTypeID src = 1; }
 
-}
+message CIRLLroundOp { CIRTypeID src = 1; }
 
-message CIRLLroundOp {
-  CIRTypeID src = 1;
-
-}
-
-message CIRLabelOp {
-
-  string label = 1;
-}
+message CIRLabelOp { string label = 1; }
 
 message CIRLoadOp {
   CIROpID addr = 1;
@@ -656,36 +536,20 @@ message CIRLoadOp {
   optional CIRMemOrder mem_order = 5;
 }
 
-message CIRLog10Op {
-  CIRTypeID src = 1;
+message CIRLog10Op { CIRTypeID src = 1; }
 
-}
+message CIRLog2Op { CIRTypeID src = 1; }
 
-message CIRLog2Op {
-  CIRTypeID src = 1;
+message CIRLogOp { CIRTypeID src = 1; }
 
-}
+message CIRLrintOp { CIRTypeID src = 1; }
 
-message CIRLogOp {
-  CIRTypeID src = 1;
-
-}
-
-message CIRLrintOp {
-  CIRTypeID src = 1;
-
-}
-
-message CIRLroundOp {
-  CIRTypeID src = 1;
-
-}
+message CIRLroundOp { CIRTypeID src = 1; }
 
 message CIRMemChrOp {
   CIRTypeID src = 1;
   CIROpID pattern = 2;
   CIROpID len = 3;
-
 }
 
 message CIRMemCpyInlineOp {
@@ -699,14 +563,12 @@ message CIRMemCpyOp {
   CIRTypeID dst = 1;
   CIRTypeID src = 2;
   CIROpID len = 3;
-
 }
 
 message CIRMemMoveOp {
   CIRTypeID dst = 1;
   CIRTypeID src = 2;
   CIROpID len = 3;
-
 }
 
 message CIRMemSetInlineOp {
@@ -720,13 +582,9 @@ message CIRMemSetOp {
   CIRTypeID dst = 1;
   CIROpID val = 2;
   CIROpID len = 3;
-
 }
 
-message CIRNearbyintOp {
-  CIRTypeID src = 1;
-
-}
+message CIRNearbyintOp { CIRTypeID src = 1; }
 
 message CIRObjSizeOp {
   CIROpID ptr = 1;
@@ -738,7 +596,6 @@ message CIRObjSizeOp {
 message CIRPowOp {
   CIRTypeID lhs = 1;
   CIRTypeID rhs = 2;
-
 }
 
 message CIRPrefetchOp {
@@ -751,19 +608,16 @@ message CIRPrefetchOp {
 message CIRPtrDiffOp {
   CIROpID lhs = 1;
   CIROpID rhs = 2;
-
 }
 
 message CIRPtrMaskOp {
   CIROpID ptr = 1;
   CIROpID mask = 2;
-
 }
 
 message CIRPtrStrideOp {
   CIROpID base = 1;
   CIROpID stride = 2;
-
 }
 
 message CIRResumeOp {
@@ -773,20 +627,11 @@ message CIRResumeOp {
   bool rethrow = 3;
 }
 
-message CIRReturnAddrOp {
-  CIROpID level = 1;
+message CIRReturnAddrOp { CIROpID level = 1; }
 
-}
+message CIRReturnOp { repeated CIRTypeID input = 1; }
 
-message CIRReturnOp {
-  repeated CIRTypeID input = 1;
-
-}
-
-message CIRRintOp {
-  CIRTypeID src = 1;
-
-}
+message CIRRintOp { CIRTypeID src = 1; }
 
 message CIRRotateOp {
   CIROpID src = 1;
@@ -795,20 +640,14 @@ message CIRRotateOp {
   bool left = 3;
 }
 
-message CIRRoundOp {
-  CIRTypeID src = 1;
+message CIRRoundOp { CIRTypeID src = 1; }
 
-}
-
-message CIRScopeOp {
-
-}
+message CIRScopeOp {}
 
 message CIRSelectOp {
   CIROpID condition = 1;
   CIRTypeID true_value = 2;
   CIRTypeID false_value = 3;
-
 }
 
 message CIRSetBitfieldOp {
@@ -825,29 +664,15 @@ message CIRShiftOp {
   bool isShiftleft = 3;
 }
 
-message CIRSignBitOp {
-  CIRTypeID input = 1;
+message CIRSignBitOp { CIRTypeID input = 1; }
 
-}
+message CIRSinOp { CIRTypeID src = 1; }
 
-message CIRSinOp {
-  CIRTypeID src = 1;
+message CIRSqrtOp { CIRTypeID src = 1; }
 
-}
+message CIRStackRestoreOp { CIROpID ptr = 1; }
 
-message CIRSqrtOp {
-  CIRTypeID src = 1;
-
-}
-
-message CIRStackRestoreOp {
-  CIROpID ptr = 1;
-
-}
-
-message CIRStackSaveOp {
-
-}
+message CIRStackSaveOp {}
 
 message CIRStdFindOp {
   CIRTypeID first = 1;
@@ -868,21 +693,18 @@ message CIRStoreOp {
 
 message CIRSwitchFlatOp {
   CIROpID condition = 1;
-  repeated CIRTypeID defaultOperands = 2;
-  repeated CIRTypeID caseOperands = 3;
+  repeated CIRTypeID default_operands = 2;
+  repeated CIRTypeID case_operands = 3;
 
   repeated uint32 case_operand_segments = 4;
+
+  CIRBlockID default_destination = 5;
+  CIRBlockID case_destinations = 6;
 }
 
-message CIRSwitchOp {
-  CIROpID condition = 1;
+message CIRSwitchOp { CIROpID condition = 1; }
 
-}
-
-message CIRTernaryOp {
-  CIROpID cond = 1;
-
-}
+message CIRTernaryOp { CIROpID cond = 1; }
 
 message CIRThrowOp {
   optional CIROpID exception_ptr = 1;
@@ -891,22 +713,20 @@ message CIRThrowOp {
   optional string dtor = 3;
 }
 
-message CIRTrapOp {
+message CIRTrapOp {}
 
-}
-
-message CIRTruncOp {
-  CIRTypeID src = 1;
-
-}
+message CIRTruncOp { CIRTypeID src = 1; }
 
 message CIRTryCallOp {
-  repeated CIRTypeID contOperands = 1;
-  repeated CIRTypeID landingPadOperands = 2;
+  repeated CIRTypeID cont_operands = 1;
+  repeated CIRTypeID landing_pad_operands = 2;
   repeated CIRTypeID arg_ops = 3;
 
   optional string callee = 4;
   CIRCallingConv calling_conv = 5;
+
+  CIRBlockID cont = 6;
+  CIRBlockID landing_pad = 7;
 }
 
 message CIRTryOp {
@@ -921,30 +741,18 @@ message CIRUnaryOp {
   CIRUnaryOpKind kind = 2;
 }
 
-message CIRUnreachableOp {
+message CIRUnreachableOp {}
 
-}
-
-message CIRVAArgOp {
-  CIROpID arg_list = 1;
-
-}
+message CIRVAArgOp { CIROpID arg_list = 1; }
 
 message CIRVACopyOp {
   CIROpID dst_list = 1;
   CIROpID src_list = 2;
-
 }
 
-message CIRVAEndOp {
-  CIROpID arg_list = 1;
+message CIRVAEndOp { CIROpID arg_list = 1; }
 
-}
-
-message CIRVAStartOp {
-  CIROpID arg_list = 1;
-
-}
+message CIRVAStartOp { CIROpID arg_list = 1; }
 
 message CIRVTTAddrPointOp {
   optional CIRTypeID sym_addr = 1;
@@ -968,53 +776,37 @@ message CIRVecCmpOp {
   CIRCmpOpKind kind = 3;
 }
 
-message CIRVecCreateOp {
-  repeated CIRTypeID elements = 1;
-
-}
+message CIRVecCreateOp { repeated CIRTypeID elements = 1; }
 
 message CIRVecExtractOp {
   CIROpID vec = 1;
   CIROpID index = 2;
-
 }
 
 message CIRVecInsertOp {
   CIROpID vec = 1;
   CIRTypeID value = 2;
   CIROpID index = 3;
-
 }
 
 message CIRVecShuffleDynamicOp {
   CIROpID vec = 1;
   CIRTypeID indices = 2;
-
 }
 
 message CIRVecShuffleOp {
   CIROpID vec1 = 1;
   CIROpID vec2 = 2;
-
 }
 
-message CIRVecSplatOp {
-  CIRTypeID value = 1;
-
-}
+message CIRVecSplatOp { CIRTypeID value = 1; }
 
 message CIRVecTernaryOp {
   CIRTypeID cond = 1;
   CIROpID vec1 = 2;
   CIROpID vec2 = 3;
-
 }
 
-message CIRWhileOp {
+message CIRWhileOp {}
 
-}
-
-message CIRYieldOp {
-  repeated CIRTypeID args = 1;
-
-}
+message CIRYieldOp { repeated CIRTypeID args = 1; }

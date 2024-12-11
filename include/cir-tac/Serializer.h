@@ -8,6 +8,8 @@ using TypeCache = llvm::DenseMap<mlir::Type, uint64_t>;
 
 using OperationCache = llvm::DenseMap<mlir::Operation *, uint64_t>;
 
+using BlockCache = llvm::DenseMap<mlir::Block *, uint64_t>;
+
 using FunctionCache = llvm::DenseMap<cir::FuncOp, uint64_t>;
 
 namespace protocir {
@@ -28,6 +30,13 @@ public:
     return cache.at(operation);
   }
 
+  static uint64_t internBlock(BlockCache &cache, mlir::Block *block) {
+    if (!cache.contains(block)) {
+      cache[block] = cache.size();
+    }
+    return cache.at(block);
+  }
+
   static uint64_t internFunction(FunctionCache &cache, cir::FuncOp operation) {
     if (!cache.contains(operation)) {
       cache[operation] = cache.size();
@@ -38,6 +47,7 @@ public:
   static void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
                                  protocir::CIRModuleID pModuleID,
                                  TypeCache &typeCache, OperationCache &opCache,
+                                 BlockCache &blockCache,
                                  FunctionCache &functionCache);
 };
 

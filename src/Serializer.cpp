@@ -9,6 +9,7 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                                     protocir::CIRModuleID pModuleID,
                                     TypeCache &typeCache,
                                     OperationCache &opCache,
+                                    BlockCache &blockCache,
                                     FunctionCache &functionCache
 
 ) {

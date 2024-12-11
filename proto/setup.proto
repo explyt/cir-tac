@@ -10,6 +10,8 @@ message CIRFunctionID {
   uint64 id = 2;
 }
 
+message CIRBlockID { uint64 id = 1; }
+
 message CIRTypeID {
   CIRModuleID module_id = 1;
   uint64 id = 2;
