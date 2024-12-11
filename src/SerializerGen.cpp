@@ -35,6 +35,26 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAllocaOp pAllocaOp;
         pInst->mutable_base()->set_id(instID);
 
+        auto allocaType = op.getAllocaType();
+        protocir::CIRTypeID pAllocaTypeID;
+        *pAllocaTypeID.mutable_module_id() = pModuleID;
+        pAllocaTypeID.set_id(internType(typeCache, allocaType));
+        *pAllocaOp.mutable_allocatype() = pAllocaTypeID;
+
+        auto name = op.getName();
+        *pAllocaOp.mutable_name() = name.str();
+
+        auto init = op.getInit();
+        pAllocaOp.set_init(init);
+
+        auto constant = op.getConstant();
+        pAllocaOp.set_constant(constant);
+
+        auto alignment = op.getAlignment();
+        if (alignment) {
+          pAllocaOp.set_alignment(alignment.value());
+        }
+
         pInst->mutable_alloca_op()->CopyFrom(pAllocaOp);
       })
 
