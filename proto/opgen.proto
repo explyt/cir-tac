@@ -400,7 +400,7 @@ message CIRExpectOp {
   CIROpID val = 1;
   CIROpID expected = 2;
 
-  double prob = 3;
+  optional double prob = 3;
 }
 
 message CIRFAbsOp { CIRTypeID src = 1; }

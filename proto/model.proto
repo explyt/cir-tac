@@ -7,7 +7,7 @@ import "setup.proto";
 import "opgen.proto";
 
 message CIRBlock {
-  CIRModuleID id = 1;
+  CIRBlockID id = 1;
   repeated CIROp operations = 2;
 }
 
