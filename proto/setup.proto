@@ -18,3 +18,5 @@ message CIRTypeID {
 }
 
 message CIROpID { uint64 id = 1; }
+
+message CIROpIDs { repeated CIROpID range = 1; }

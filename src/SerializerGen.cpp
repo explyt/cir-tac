@@ -18,1157 +18,1658 @@ void Serializer::serializeOperation(mlir::Operation &inst,
   auto instID = internOperation(opCache, &inst);
   llvm::TypeSwitch<mlir::Operation *>(&inst)
 
-      .Case<cir::AbsOp>([instID, pInst, pModuleID, &typeCache](cir::AbsOp op) {
+      .Case<cir::AbsOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::AbsOp op) {
         protocir::CIRAbsOp pAbsOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
 
         pInst->mutable_abs_op()->CopyFrom(pAbsOp);
       })
 
-      .Case<cir::AllocExceptionOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::AllocExceptionOp op) {
-            protocir::CIRAllocExceptionOp pAllocExceptionOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::AllocExceptionOp>([instID, pInst, pModuleID, &typeCache,
+                                    &blockCache,
+                                    &opCache](cir::AllocExceptionOp op) {
+        protocir::CIRAllocExceptionOp pAllocExceptionOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_alloc_exception_op()->CopyFrom(pAllocExceptionOp);
-          })
+        pInst->mutable_alloc_exception_op()->CopyFrom(pAllocExceptionOp);
+      })
 
-      .Case<cir::AllocaOp>(
-          [instID, pInst, pModuleID, &typeCache, &opCache](cir::AllocaOp op) {
-            protocir::CIRAllocaOp pAllocaOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::AllocaOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::AllocaOp op) {
+        protocir::CIRAllocaOp pAllocaOp;
+        pInst->mutable_base()->set_id(instID);
 
-            auto allocaType = op.getAllocaType();
-            protocir::CIRTypeID pAllocaTypeID;
-            *pAllocaTypeID.mutable_module_id() = pModuleID;
-            pAllocaTypeID.set_id(internType(typeCache, allocaType));
-            *pAllocaOp.mutable_allocatype() = pAllocaTypeID;
+        auto dynAllocSize = op.getDynAllocSize().getDefiningOp();
+        if (dynAllocSize) {
+          auto dynAllocSizeID = internOperation(opCache, dynAllocSize);
 
-            auto dynAllocSize = op.getDynAllocSize().getDefiningOp();
+          protocir::CIROpID pdynAllocSizeID;
+          pdynAllocSizeID.set_id(dynAllocSizeID);
 
-            if (dynAllocSize) {
-              auto dynAllocSizeID = internOperation(opCache, dynAllocSize);
-              protocir::CIROpID pDynAllocSizeID;
-              pDynAllocSizeID.set_id(dynAllocSizeID);
+          *pAllocaOp.mutable_dyn_alloc_size() = pdynAllocSizeID;
+        }
 
-              *pAllocaOp.mutable_dyn_alloc_size() = pDynAllocSizeID;
-            }
+        pInst->mutable_alloca_op()->CopyFrom(pAllocaOp);
+      })
 
-            auto name = op.getName();
-            *pAllocaOp.mutable_name() = name.str();
+      .Case<cir::ArrayCtor>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::ArrayCtor op) {
+        protocir::CIRArrayCtor pArrayCtor;
+        pInst->mutable_base()->set_id(instID);
 
-            auto init = op.getInit();
-            pAllocaOp.set_init(init);
+        auto addr = op.getAddr().getDefiningOp();
 
-            auto constant = op.getConstant();
-            pAllocaOp.set_constant(constant);
+        pInst->mutable_array_ctor()->CopyFrom(pArrayCtor);
+      })
 
-            auto alignment = op.getAlignment();
-            if (alignment) {
-              pAllocaOp.set_alignment(alignment.value());
-            }
+      .Case<cir::ArrayDtor>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::ArrayDtor op) {
+        protocir::CIRArrayDtor pArrayDtor;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_alloca_op()->CopyFrom(pAllocaOp);
-          })
+        auto addr = op.getAddr().getDefiningOp();
 
-      .Case<cir::ArrayCtor>(
-          [instID, pInst, pModuleID, &typeCache](cir::ArrayCtor op) {
-            protocir::CIRArrayCtor pArrayCtor;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_array_dtor()->CopyFrom(pArrayDtor);
+      })
 
-            pInst->mutable_array_ctor()->CopyFrom(pArrayCtor);
-          })
+      .Case<cir::AssumeAlignedOp>([instID, pInst, pModuleID, &typeCache,
+                                   &blockCache,
+                                   &opCache](cir::AssumeAlignedOp op) {
+        protocir::CIRAssumeAlignedOp pAssumeAlignedOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::ArrayDtor>(
-          [instID, pInst, pModuleID, &typeCache](cir::ArrayDtor op) {
-            protocir::CIRArrayDtor pArrayDtor;
-            pInst->mutable_base()->set_id(instID);
+        auto pointer = op.getPointer().getDefiningOp();
 
-            pInst->mutable_array_dtor()->CopyFrom(pArrayDtor);
-          })
+        auto offset = op.getOffset().getDefiningOp();
+        if (offset) {
+          auto offsetID = internOperation(opCache, offset);
 
-      .Case<cir::AssumeAlignedOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::AssumeAlignedOp op) {
-            protocir::CIRAssumeAlignedOp pAssumeAlignedOp;
-            pInst->mutable_base()->set_id(instID);
+          protocir::CIROpID poffsetID;
+          poffsetID.set_id(offsetID);
 
-            pInst->mutable_assume_aligned_op()->CopyFrom(pAssumeAlignedOp);
-          })
+          *pAssumeAlignedOp.mutable_offset() = poffsetID;
+        }
 
-      .Case<cir::AssumeOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::AssumeOp op) {
-            protocir::CIRAssumeOp pAssumeOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_assume_aligned_op()->CopyFrom(pAssumeAlignedOp);
+      })
 
-            pInst->mutable_assume_op()->CopyFrom(pAssumeOp);
-          })
+      .Case<cir::AssumeOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::AssumeOp op) {
+        protocir::CIRAssumeOp pAssumeOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::AssumeSepStorageOp>([instID, pInst, pModuleID,
-                                      &typeCache](cir::AssumeSepStorageOp op) {
+        auto predicate = op.getPredicate().getDefiningOp();
+
+        pInst->mutable_assume_op()->CopyFrom(pAssumeOp);
+      })
+
+      .Case<cir::AssumeSepStorageOp>([instID, pInst, pModuleID, &typeCache,
+                                      &blockCache,
+                                      &opCache](cir::AssumeSepStorageOp op) {
         protocir::CIRAssumeSepStorageOp pAssumeSepStorageOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto ptr1 = op.getPtr1().getDefiningOp();
+
+        auto ptr2 = op.getPtr2().getDefiningOp();
 
         pInst->mutable_assume_sep_storage_op()->CopyFrom(pAssumeSepStorageOp);
       })
 
-      .Case<cir::AtomicCmpXchg>(
-          [instID, pInst, pModuleID, &typeCache](cir::AtomicCmpXchg op) {
-            protocir::CIRAtomicCmpXchg pAtomicCmpXchg;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::AtomicCmpXchg>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::AtomicCmpXchg op) {
+        protocir::CIRAtomicCmpXchg pAtomicCmpXchg;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_atomic_cmp_xchg()->CopyFrom(pAtomicCmpXchg);
-          })
+        auto ptr = op.getPtr().getDefiningOp();
 
-      .Case<cir::AtomicFetch>(
-          [instID, pInst, pModuleID, &typeCache](cir::AtomicFetch op) {
-            protocir::CIRAtomicFetch pAtomicFetch;
-            pInst->mutable_base()->set_id(instID);
+        auto expected = op.getExpected().getDefiningOp();
 
-            pInst->mutable_atomic_fetch()->CopyFrom(pAtomicFetch);
-          })
+        auto desired = op.getDesired().getDefiningOp();
 
-      .Case<cir::AtomicXchg>(
-          [instID, pInst, pModuleID, &typeCache](cir::AtomicXchg op) {
-            protocir::CIRAtomicXchg pAtomicXchg;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_atomic_cmp_xchg()->CopyFrom(pAtomicCmpXchg);
+      })
 
-            pInst->mutable_atomic_xchg()->CopyFrom(pAtomicXchg);
-          })
+      .Case<cir::AtomicFetch>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::AtomicFetch op) {
+        protocir::CIRAtomicFetch pAtomicFetch;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::AwaitOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::AwaitOp op) {
-            protocir::CIRAwaitOp pAwaitOp;
-            pInst->mutable_base()->set_id(instID);
+        auto ptr = op.getPtr().getDefiningOp();
 
-            pInst->mutable_await_op()->CopyFrom(pAwaitOp);
-          })
+        auto val = op.getVal().getDefiningOp();
 
-      .Case<cir::BaseClassAddrOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BaseClassAddrOp op) {
-            protocir::CIRBaseClassAddrOp pBaseClassAddrOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_atomic_fetch()->CopyFrom(pAtomicFetch);
+      })
 
-            pInst->mutable_base_class_addr_op()->CopyFrom(pBaseClassAddrOp);
-          })
+      .Case<cir::AtomicXchg>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::AtomicXchg op) {
+        protocir::CIRAtomicXchg pAtomicXchg;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::BinOp>([instID, pInst, pModuleID, &typeCache](cir::BinOp op) {
+        auto ptr = op.getPtr().getDefiningOp();
+
+        auto val = op.getVal().getDefiningOp();
+
+        pInst->mutable_atomic_xchg()->CopyFrom(pAtomicXchg);
+      })
+
+      .Case<cir::AwaitOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::AwaitOp op) {
+        protocir::CIRAwaitOp pAwaitOp;
+        pInst->mutable_base()->set_id(instID);
+
+        pInst->mutable_await_op()->CopyFrom(pAwaitOp);
+      })
+
+      .Case<cir::BaseClassAddrOp>([instID, pInst, pModuleID, &typeCache,
+                                   &blockCache,
+                                   &opCache](cir::BaseClassAddrOp op) {
+        protocir::CIRBaseClassAddrOp pBaseClassAddrOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto derivedAddr = op.getDerivedAddr().getDefiningOp();
+
+        pInst->mutable_base_class_addr_op()->CopyFrom(pBaseClassAddrOp);
+      })
+
+      .Case<cir::BinOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::BinOp op) {
         protocir::CIRBinOp pBinOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto lhs = op.getLhs().getDefiningOp();
+
+        auto rhs = op.getRhs().getDefiningOp();
 
         pInst->mutable_bin_op()->CopyFrom(pBinOp);
       })
 
-      .Case<cir::BinOpOverflowOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BinOpOverflowOp op) {
-            protocir::CIRBinOpOverflowOp pBinOpOverflowOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::BinOpOverflowOp>([instID, pInst, pModuleID, &typeCache,
+                                   &blockCache,
+                                   &opCache](cir::BinOpOverflowOp op) {
+        protocir::CIRBinOpOverflowOp pBinOpOverflowOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_bin_op_overflow_op()->CopyFrom(pBinOpOverflowOp);
-          })
+        auto lhs = op.getLhs().getDefiningOp();
 
-      .Case<cir::BitClrsbOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BitClrsbOp op) {
-            protocir::CIRBitClrsbOp pBitClrsbOp;
-            pInst->mutable_base()->set_id(instID);
+        auto rhs = op.getRhs().getDefiningOp();
 
-            pInst->mutable_bit_clrsb_op()->CopyFrom(pBitClrsbOp);
-          })
+        pInst->mutable_bin_op_overflow_op()->CopyFrom(pBinOpOverflowOp);
+      })
 
-      .Case<cir::BitClzOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BitClzOp op) {
-            protocir::CIRBitClzOp pBitClzOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::BitClrsbOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::BitClrsbOp op) {
+        protocir::CIRBitClrsbOp pBitClrsbOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_bit_clz_op()->CopyFrom(pBitClzOp);
-          })
+        auto input = op.getInput().getDefiningOp();
 
-      .Case<cir::BitCtzOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BitCtzOp op) {
-            protocir::CIRBitCtzOp pBitCtzOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_bit_clrsb_op()->CopyFrom(pBitClrsbOp);
+      })
 
-            pInst->mutable_bit_ctz_op()->CopyFrom(pBitCtzOp);
-          })
+      .Case<cir::BitClzOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::BitClzOp op) {
+        protocir::CIRBitClzOp pBitClzOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::BitFfsOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BitFfsOp op) {
-            protocir::CIRBitFfsOp pBitFfsOp;
-            pInst->mutable_base()->set_id(instID);
+        auto input = op.getInput().getDefiningOp();
 
-            pInst->mutable_bit_ffs_op()->CopyFrom(pBitFfsOp);
-          })
+        pInst->mutable_bit_clz_op()->CopyFrom(pBitClzOp);
+      })
 
-      .Case<cir::BitParityOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BitParityOp op) {
-            protocir::CIRBitParityOp pBitParityOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::BitCtzOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::BitCtzOp op) {
+        protocir::CIRBitCtzOp pBitCtzOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_bit_parity_op()->CopyFrom(pBitParityOp);
-          })
+        auto input = op.getInput().getDefiningOp();
 
-      .Case<cir::BitPopcountOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BitPopcountOp op) {
-            protocir::CIRBitPopcountOp pBitPopcountOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_bit_ctz_op()->CopyFrom(pBitCtzOp);
+      })
 
-            pInst->mutable_bit_popcount_op()->CopyFrom(pBitPopcountOp);
-          })
+      .Case<cir::BitFfsOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::BitFfsOp op) {
+        protocir::CIRBitFfsOp pBitFfsOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::BrCondOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BrCondOp op) {
-            protocir::CIRBrCondOp pBrCondOp;
-            pInst->mutable_base()->set_id(instID);
+        auto input = op.getInput().getDefiningOp();
 
-            pInst->mutable_br_cond_op()->CopyFrom(pBrCondOp);
-          })
+        pInst->mutable_bit_ffs_op()->CopyFrom(pBitFfsOp);
+      })
 
-      .Case<cir::BrOp>(
-          [instID, pInst, pModuleID, &typeCache, &blockCache](cir::BrOp op) {
-            protocir::CIRBrOp pBrOp;
-            pInst->mutable_base()->set_id(instID);
-            auto dest = op.getDest();
-            auto destID = internBlock(blockCache, dest);
-            protocir::CIRBlockID pBlockID;
-            pBlockID.set_id(destID);
-            *pBrOp.mutable_dest() = pBlockID;
+      .Case<cir::BitParityOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::BitParityOp op) {
+        protocir::CIRBitParityOp pBitParityOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_br_op()->CopyFrom(pBrOp);
-          })
+        auto input = op.getInput().getDefiningOp();
 
-      .Case<cir::BreakOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::BreakOp op) {
-            protocir::CIRBreakOp pBreakOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_bit_parity_op()->CopyFrom(pBitParityOp);
+      })
 
-            pInst->mutable_break_op()->CopyFrom(pBreakOp);
-          })
+      .Case<cir::BitPopcountOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::BitPopcountOp op) {
+        protocir::CIRBitPopcountOp pBitPopcountOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::ByteswapOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ByteswapOp op) {
-            protocir::CIRByteswapOp pByteswapOp;
-            pInst->mutable_base()->set_id(instID);
+        auto input = op.getInput().getDefiningOp();
 
-            pInst->mutable_byteswap_op()->CopyFrom(pByteswapOp);
-          })
+        pInst->mutable_bit_popcount_op()->CopyFrom(pBitPopcountOp);
+      })
 
-      .Case<cir::InlineAsmOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::InlineAsmOp op) {
-            protocir::CIRInlineAsmOp pInlineAsmOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::BrCondOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::BrCondOp op) {
+        protocir::CIRBrCondOp pBrCondOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_inline_asm_op()->CopyFrom(pInlineAsmOp);
-          })
+        auto cond = op.getCond().getDefiningOp();
 
-      .Case<cir::CallOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CallOp op) {
-            protocir::CIRCallOp pCallOp;
-            pInst->mutable_base()->set_id(instID);
+        auto destOperandsTrue = op.getDestOperandsTrue();
+        for (auto edestOperandsTrue : destOperandsTrue) {
+          auto edestOperandsTrueProto = pBrCondOp.add_dest_operands_true();
+          auto edestOperandsTrueID =
+              internOperation(opCache, edestOperandsTrue.getDefiningOp());
+          edestOperandsTrueProto->set_id(edestOperandsTrueID);
+        }
 
-            pInst->mutable_call_op()->CopyFrom(pCallOp);
-          })
+        auto destOperandsFalse = op.getDestOperandsFalse();
+        for (auto edestOperandsFalse : destOperandsFalse) {
+          auto edestOperandsFalseProto = pBrCondOp.add_dest_operands_false();
+          auto edestOperandsFalseID =
+              internOperation(opCache, edestOperandsFalse.getDefiningOp());
+          edestOperandsFalseProto->set_id(edestOperandsFalseID);
+        }
 
-      .Case<cir::CaseOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CaseOp op) {
-            protocir::CIRCaseOp pCaseOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_br_cond_op()->CopyFrom(pBrCondOp);
+      })
 
-            pInst->mutable_case_op()->CopyFrom(pCaseOp);
-          })
+      .Case<cir::BrOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                        &opCache](cir::BrOp op) {
+        protocir::CIRBrOp pBrOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::CastOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CastOp op) {
-            protocir::CIRCastOp pCastOp;
-            pInst->mutable_base()->set_id(instID);
+        auto destOperands = op.getDestOperands();
+        for (auto edestOperands : destOperands) {
+          auto edestOperandsProto = pBrOp.add_dest_operands();
+          auto edestOperandsID =
+              internOperation(opCache, edestOperands.getDefiningOp());
+          edestOperandsProto->set_id(edestOperandsID);
+        }
 
-            pInst->mutable_cast_op()->CopyFrom(pCastOp);
-          })
+        pInst->mutable_br_op()->CopyFrom(pBrOp);
+      })
 
-      .Case<cir::CatchParamOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CatchParamOp op) {
-            protocir::CIRCatchParamOp pCatchParamOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::BreakOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::BreakOp op) {
+        protocir::CIRBreakOp pBreakOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_catch_param_op()->CopyFrom(pCatchParamOp);
-          })
+        pInst->mutable_break_op()->CopyFrom(pBreakOp);
+      })
 
-      .Case<cir::CeilOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CeilOp op) {
-            protocir::CIRCeilOp pCeilOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::ByteswapOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::ByteswapOp op) {
+        protocir::CIRByteswapOp pByteswapOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_ceil_op()->CopyFrom(pCeilOp);
-          })
+        auto input = op.getInput().getDefiningOp();
 
-      .Case<cir::ClearCacheOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ClearCacheOp op) {
-            protocir::CIRClearCacheOp pClearCacheOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_byteswap_op()->CopyFrom(pByteswapOp);
+      })
 
-            pInst->mutable_clear_cache_op()->CopyFrom(pClearCacheOp);
-          })
+      .Case<cir::InlineAsmOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::InlineAsmOp op) {
+        protocir::CIRInlineAsmOp pInlineAsmOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::CmpOp>([instID, pInst, pModuleID, &typeCache](cir::CmpOp op) {
+        auto operands = op.getOperands();
+        for (auto eoperands : operands) {
+          auto eoperandsProto = pInlineAsmOp.add_operands();
+          for (auto eeoperands : eoperands) {
+            auto eeoperandsProto = eoperandsProto->add_range();
+            auto eeoperandsID =
+                internOperation(opCache, eeoperands.getDefiningOp());
+            eeoperandsProto->set_id(eeoperandsID);
+          }
+        }
+
+        pInst->mutable_inline_asm_op()->CopyFrom(pInlineAsmOp);
+      })
+
+      .Case<cir::CallOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::CallOp op) {
+        protocir::CIRCallOp pCallOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto argOps = op.getArgOps();
+        for (auto eargOps : argOps) {
+          auto eargOpsProto = pCallOp.add_arg_ops();
+          auto eargOpsID = internOperation(opCache, eargOps.getDefiningOp());
+          eargOpsProto->set_id(eargOpsID);
+        }
+
+        pInst->mutable_call_op()->CopyFrom(pCallOp);
+      })
+
+      .Case<cir::CaseOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::CaseOp op) {
+        protocir::CIRCaseOp pCaseOp;
+        pInst->mutable_base()->set_id(instID);
+
+        pInst->mutable_case_op()->CopyFrom(pCaseOp);
+      })
+
+      .Case<cir::CastOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::CastOp op) {
+        protocir::CIRCastOp pCastOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_cast_op()->CopyFrom(pCastOp);
+      })
+
+      .Case<cir::CatchParamOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::CatchParamOp op) {
+        protocir::CIRCatchParamOp pCatchParamOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto exceptionPtr = op.getExceptionPtr().getDefiningOp();
+        if (exceptionPtr) {
+          auto exceptionPtrID = internOperation(opCache, exceptionPtr);
+
+          protocir::CIROpID pexceptionPtrID;
+          pexceptionPtrID.set_id(exceptionPtrID);
+
+          *pCatchParamOp.mutable_exception_ptr() = pexceptionPtrID;
+        }
+
+        pInst->mutable_catch_param_op()->CopyFrom(pCatchParamOp);
+      })
+
+      .Case<cir::CeilOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::CeilOp op) {
+        protocir::CIRCeilOp pCeilOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_ceil_op()->CopyFrom(pCeilOp);
+      })
+
+      .Case<cir::ClearCacheOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::ClearCacheOp op) {
+        protocir::CIRClearCacheOp pClearCacheOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto begin = op.getBegin().getDefiningOp();
+
+        auto end = op.getEnd().getDefiningOp();
+
+        pInst->mutable_clear_cache_op()->CopyFrom(pClearCacheOp);
+      })
+
+      .Case<cir::CmpOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::CmpOp op) {
         protocir::CIRCmpOp pCmpOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto lhs = op.getLhs().getDefiningOp();
+
+        auto rhs = op.getRhs().getDefiningOp();
 
         pInst->mutable_cmp_op()->CopyFrom(pCmpOp);
       })
 
-      .Case<cir::CmpThreeWayOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CmpThreeWayOp op) {
-            protocir::CIRCmpThreeWayOp pCmpThreeWayOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::CmpThreeWayOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::CmpThreeWayOp op) {
+        protocir::CIRCmpThreeWayOp pCmpThreeWayOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_cmp_three_way_op()->CopyFrom(pCmpThreeWayOp);
-          })
+        auto lhs = op.getLhs().getDefiningOp();
 
-      .Case<cir::ComplexBinOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ComplexBinOp op) {
-            protocir::CIRComplexBinOp pComplexBinOp;
-            pInst->mutable_base()->set_id(instID);
+        auto rhs = op.getRhs().getDefiningOp();
 
-            pInst->mutable_complex_bin_op()->CopyFrom(pComplexBinOp);
-          })
+        pInst->mutable_cmp_three_way_op()->CopyFrom(pCmpThreeWayOp);
+      })
 
-      .Case<cir::ComplexCreateOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ComplexCreateOp op) {
-            protocir::CIRComplexCreateOp pComplexCreateOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::ComplexBinOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::ComplexBinOp op) {
+        protocir::CIRComplexBinOp pComplexBinOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_complex_create_op()->CopyFrom(pComplexCreateOp);
-          })
+        auto lhs = op.getLhs().getDefiningOp();
 
-      .Case<cir::ComplexImagOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ComplexImagOp op) {
-            protocir::CIRComplexImagOp pComplexImagOp;
-            pInst->mutable_base()->set_id(instID);
+        auto rhs = op.getRhs().getDefiningOp();
 
-            pInst->mutable_complex_imag_op()->CopyFrom(pComplexImagOp);
-          })
+        pInst->mutable_complex_bin_op()->CopyFrom(pComplexBinOp);
+      })
 
-      .Case<cir::ComplexImagPtrOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ComplexImagPtrOp op) {
-            protocir::CIRComplexImagPtrOp pComplexImagPtrOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::ComplexCreateOp>([instID, pInst, pModuleID, &typeCache,
+                                   &blockCache,
+                                   &opCache](cir::ComplexCreateOp op) {
+        protocir::CIRComplexCreateOp pComplexCreateOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_complex_imag_ptr_op()->CopyFrom(pComplexImagPtrOp);
-          })
+        auto real = op.getReal().getDefiningOp();
 
-      .Case<cir::ComplexRealOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ComplexRealOp op) {
-            protocir::CIRComplexRealOp pComplexRealOp;
-            pInst->mutable_base()->set_id(instID);
+        auto imag = op.getImag().getDefiningOp();
 
-            pInst->mutable_complex_real_op()->CopyFrom(pComplexRealOp);
-          })
+        pInst->mutable_complex_create_op()->CopyFrom(pComplexCreateOp);
+      })
 
-      .Case<cir::ComplexRealPtrOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ComplexRealPtrOp op) {
-            protocir::CIRComplexRealPtrOp pComplexRealPtrOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::ComplexImagOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::ComplexImagOp op) {
+        protocir::CIRComplexImagOp pComplexImagOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_complex_real_ptr_op()->CopyFrom(pComplexRealPtrOp);
-          })
+        auto operand = op.getOperand().getDefiningOp();
 
-      .Case<cir::ConditionOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ConditionOp op) {
-            protocir::CIRConditionOp pConditionOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_complex_imag_op()->CopyFrom(pComplexImagOp);
+      })
 
-            pInst->mutable_condition_op()->CopyFrom(pConditionOp);
-          })
+      .Case<cir::ComplexImagPtrOp>([instID, pInst, pModuleID, &typeCache,
+                                    &blockCache,
+                                    &opCache](cir::ComplexImagPtrOp op) {
+        protocir::CIRComplexImagPtrOp pComplexImagPtrOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::ConstantOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ConstantOp op) {
-            protocir::CIRConstantOp pConstantOp;
-            pInst->mutable_base()->set_id(instID);
+        auto operand = op.getOperand().getDefiningOp();
 
-            pInst->mutable_constant_op()->CopyFrom(pConstantOp);
-          })
+        pInst->mutable_complex_imag_ptr_op()->CopyFrom(pComplexImagPtrOp);
+      })
 
-      .Case<cir::ContinueOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ContinueOp op) {
-            protocir::CIRContinueOp pContinueOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::ComplexRealOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::ComplexRealOp op) {
+        protocir::CIRComplexRealOp pComplexRealOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_continue_op()->CopyFrom(pContinueOp);
-          })
+        auto operand = op.getOperand().getDefiningOp();
 
-      .Case<cir::CopyOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CopyOp op) {
-            protocir::CIRCopyOp pCopyOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_complex_real_op()->CopyFrom(pComplexRealOp);
+      })
 
-            pInst->mutable_copy_op()->CopyFrom(pCopyOp);
-          })
+      .Case<cir::ComplexRealPtrOp>([instID, pInst, pModuleID, &typeCache,
+                                    &blockCache,
+                                    &opCache](cir::ComplexRealPtrOp op) {
+        protocir::CIRComplexRealPtrOp pComplexRealPtrOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::CopysignOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::CopysignOp op) {
-            protocir::CIRCopysignOp pCopysignOp;
-            pInst->mutable_base()->set_id(instID);
+        auto operand = op.getOperand().getDefiningOp();
 
-            pInst->mutable_copysign_op()->CopyFrom(pCopysignOp);
-          })
+        pInst->mutable_complex_real_ptr_op()->CopyFrom(pComplexRealPtrOp);
+      })
 
-      .Case<cir::CosOp>([instID, pInst, pModuleID, &typeCache](cir::CosOp op) {
+      .Case<cir::ConditionOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::ConditionOp op) {
+        protocir::CIRConditionOp pConditionOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto condition = op.getCondition().getDefiningOp();
+
+        pInst->mutable_condition_op()->CopyFrom(pConditionOp);
+      })
+
+      .Case<cir::ConstantOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::ConstantOp op) {
+        protocir::CIRConstantOp pConstantOp;
+        pInst->mutable_base()->set_id(instID);
+
+        pInst->mutable_constant_op()->CopyFrom(pConstantOp);
+      })
+
+      .Case<cir::ContinueOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::ContinueOp op) {
+        protocir::CIRContinueOp pContinueOp;
+        pInst->mutable_base()->set_id(instID);
+
+        pInst->mutable_continue_op()->CopyFrom(pContinueOp);
+      })
+
+      .Case<cir::CopyOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::CopyOp op) {
+        protocir::CIRCopyOp pCopyOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto dst = op.getDst().getDefiningOp();
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_copy_op()->CopyFrom(pCopyOp);
+      })
+
+      .Case<cir::CopysignOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::CopysignOp op) {
+        protocir::CIRCopysignOp pCopysignOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto lhs = op.getLhs().getDefiningOp();
+
+        auto rhs = op.getRhs().getDefiningOp();
+
+        pInst->mutable_copysign_op()->CopyFrom(pCopysignOp);
+      })
+
+      .Case<cir::CosOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::CosOp op) {
         protocir::CIRCosOp pCosOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
 
         pInst->mutable_cos_op()->CopyFrom(pCosOp);
       })
 
-      .Case<cir::DerivedClassAddrOp>([instID, pInst, pModuleID,
-                                      &typeCache](cir::DerivedClassAddrOp op) {
+      .Case<cir::DerivedClassAddrOp>([instID, pInst, pModuleID, &typeCache,
+                                      &blockCache,
+                                      &opCache](cir::DerivedClassAddrOp op) {
         protocir::CIRDerivedClassAddrOp pDerivedClassAddrOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto baseAddr = op.getBaseAddr().getDefiningOp();
 
         pInst->mutable_derived_class_addr_op()->CopyFrom(pDerivedClassAddrOp);
       })
 
-      .Case<cir::DoWhileOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::DoWhileOp op) {
-            protocir::CIRDoWhileOp pDoWhileOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::DoWhileOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::DoWhileOp op) {
+        protocir::CIRDoWhileOp pDoWhileOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_do_while_op()->CopyFrom(pDoWhileOp);
-          })
+        pInst->mutable_do_while_op()->CopyFrom(pDoWhileOp);
+      })
 
-      .Case<cir::DynamicCastOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::DynamicCastOp op) {
-            protocir::CIRDynamicCastOp pDynamicCastOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::DynamicCastOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::DynamicCastOp op) {
+        protocir::CIRDynamicCastOp pDynamicCastOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_dynamic_cast_op()->CopyFrom(pDynamicCastOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::EhInflightOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::EhInflightOp op) {
-            protocir::CIREhInflightOp pEhInflightOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_dynamic_cast_op()->CopyFrom(pDynamicCastOp);
+      })
 
-            pInst->mutable_eh_inflight_op()->CopyFrom(pEhInflightOp);
-          })
+      .Case<cir::EhInflightOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::EhInflightOp op) {
+        protocir::CIREhInflightOp pEhInflightOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::EhTypeIdOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::EhTypeIdOp op) {
-            protocir::CIREhTypeIdOp pEhTypeIdOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_eh_inflight_op()->CopyFrom(pEhInflightOp);
+      })
 
-            pInst->mutable_eh_type_id_op()->CopyFrom(pEhTypeIdOp);
-          })
+      .Case<cir::EhTypeIdOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::EhTypeIdOp op) {
+        protocir::CIREhTypeIdOp pEhTypeIdOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::Exp2Op>(
-          [instID, pInst, pModuleID, &typeCache](cir::Exp2Op op) {
-            protocir::CIRExp2Op pExp2Op;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_eh_type_id_op()->CopyFrom(pEhTypeIdOp);
+      })
 
-            pInst->mutable_exp2_op()->CopyFrom(pExp2Op);
-          })
+      .Case<cir::Exp2Op>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::Exp2Op op) {
+        protocir::CIRExp2Op pExp2Op;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::ExpOp>([instID, pInst, pModuleID, &typeCache](cir::ExpOp op) {
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_exp2_op()->CopyFrom(pExp2Op);
+      })
+
+      .Case<cir::ExpOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::ExpOp op) {
         protocir::CIRExpOp pExpOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
 
         pInst->mutable_exp_op()->CopyFrom(pExpOp);
       })
 
-      .Case<cir::ExpectOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ExpectOp op) {
-            protocir::CIRExpectOp pExpectOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::ExpectOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::ExpectOp op) {
+        protocir::CIRExpectOp pExpectOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_expect_op()->CopyFrom(pExpectOp);
-          })
+        auto val = op.getVal().getDefiningOp();
 
-      .Case<cir::FAbsOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FAbsOp op) {
-            protocir::CIRFAbsOp pFAbsOp;
-            pInst->mutable_base()->set_id(instID);
+        auto expected = op.getExpected().getDefiningOp();
 
-            pInst->mutable_f_abs_op()->CopyFrom(pFAbsOp);
-          })
+        pInst->mutable_expect_op()->CopyFrom(pExpectOp);
+      })
 
-      .Case<cir::FMaxOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FMaxOp op) {
-            protocir::CIRFMaxOp pFMaxOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::FAbsOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::FAbsOp op) {
+        protocir::CIRFAbsOp pFAbsOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_f_max_op()->CopyFrom(pFMaxOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::FMinOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FMinOp op) {
-            protocir::CIRFMinOp pFMinOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_f_abs_op()->CopyFrom(pFAbsOp);
+      })
 
-            pInst->mutable_f_min_op()->CopyFrom(pFMinOp);
-          })
+      .Case<cir::FMaxOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::FMaxOp op) {
+        protocir::CIRFMaxOp pFMaxOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::FModOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FModOp op) {
-            protocir::CIRFModOp pFModOp;
-            pInst->mutable_base()->set_id(instID);
+        auto lhs = op.getLhs().getDefiningOp();
 
-            pInst->mutable_f_mod_op()->CopyFrom(pFModOp);
-          })
+        auto rhs = op.getRhs().getDefiningOp();
 
-      .Case<cir::FloorOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FloorOp op) {
-            protocir::CIRFloorOp pFloorOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_f_max_op()->CopyFrom(pFMaxOp);
+      })
 
-            pInst->mutable_floor_op()->CopyFrom(pFloorOp);
-          })
+      .Case<cir::FMinOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::FMinOp op) {
+        protocir::CIRFMinOp pFMinOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::ForOp>([instID, pInst, pModuleID, &typeCache](cir::ForOp op) {
+        auto lhs = op.getLhs().getDefiningOp();
+
+        auto rhs = op.getRhs().getDefiningOp();
+
+        pInst->mutable_f_min_op()->CopyFrom(pFMinOp);
+      })
+
+      .Case<cir::FModOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::FModOp op) {
+        protocir::CIRFModOp pFModOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto lhs = op.getLhs().getDefiningOp();
+
+        auto rhs = op.getRhs().getDefiningOp();
+
+        pInst->mutable_f_mod_op()->CopyFrom(pFModOp);
+      })
+
+      .Case<cir::FloorOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::FloorOp op) {
+        protocir::CIRFloorOp pFloorOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_floor_op()->CopyFrom(pFloorOp);
+      })
+
+      .Case<cir::ForOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::ForOp op) {
         protocir::CIRForOp pForOp;
         pInst->mutable_base()->set_id(instID);
 
         pInst->mutable_for_op()->CopyFrom(pForOp);
       })
 
-      .Case<cir::FrameAddrOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FrameAddrOp op) {
-            protocir::CIRFrameAddrOp pFrameAddrOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::FrameAddrOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::FrameAddrOp op) {
+        protocir::CIRFrameAddrOp pFrameAddrOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_frame_addr_op()->CopyFrom(pFrameAddrOp);
-          })
+        auto level = op.getLevel().getDefiningOp();
 
-      .Case<cir::FreeExceptionOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FreeExceptionOp op) {
-            protocir::CIRFreeExceptionOp pFreeExceptionOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_frame_addr_op()->CopyFrom(pFrameAddrOp);
+      })
 
-            pInst->mutable_free_exception_op()->CopyFrom(pFreeExceptionOp);
-          })
+      .Case<cir::FreeExceptionOp>([instID, pInst, pModuleID, &typeCache,
+                                   &blockCache,
+                                   &opCache](cir::FreeExceptionOp op) {
+        protocir::CIRFreeExceptionOp pFreeExceptionOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::FuncOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::FuncOp op) {
-            protocir::CIRFuncOp pFuncOp;
-            pInst->mutable_base()->set_id(instID);
+        auto ptr = op.getPtr().getDefiningOp();
 
-            pInst->mutable_func_op()->CopyFrom(pFuncOp);
-          })
+        pInst->mutable_free_exception_op()->CopyFrom(pFreeExceptionOp);
+      })
 
-      .Case<cir::GetBitfieldOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::GetBitfieldOp op) {
-            protocir::CIRGetBitfieldOp pGetBitfieldOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::FuncOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::FuncOp op) {
+        protocir::CIRFuncOp pFuncOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_get_bitfield_op()->CopyFrom(pGetBitfieldOp);
-          })
+        pInst->mutable_func_op()->CopyFrom(pFuncOp);
+      })
 
-      .Case<cir::GetGlobalOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::GetGlobalOp op) {
-            protocir::CIRGetGlobalOp pGetGlobalOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::GetBitfieldOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::GetBitfieldOp op) {
+        protocir::CIRGetBitfieldOp pGetBitfieldOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_get_global_op()->CopyFrom(pGetGlobalOp);
-          })
+        auto addr = op.getAddr().getDefiningOp();
 
-      .Case<cir::GetMemberOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::GetMemberOp op) {
-            protocir::CIRGetMemberOp pGetMemberOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_get_bitfield_op()->CopyFrom(pGetBitfieldOp);
+      })
 
-            pInst->mutable_get_member_op()->CopyFrom(pGetMemberOp);
-          })
+      .Case<cir::GetGlobalOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::GetGlobalOp op) {
+        protocir::CIRGetGlobalOp pGetGlobalOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::GetMethodOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::GetMethodOp op) {
-            protocir::CIRGetMethodOp pGetMethodOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_get_global_op()->CopyFrom(pGetGlobalOp);
+      })
 
-            pInst->mutable_get_method_op()->CopyFrom(pGetMethodOp);
-          })
+      .Case<cir::GetMemberOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::GetMemberOp op) {
+        protocir::CIRGetMemberOp pGetMemberOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::GetRuntimeMemberOp>([instID, pInst, pModuleID,
-                                      &typeCache](cir::GetRuntimeMemberOp op) {
+        auto addr = op.getAddr().getDefiningOp();
+
+        pInst->mutable_get_member_op()->CopyFrom(pGetMemberOp);
+      })
+
+      .Case<cir::GetMethodOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::GetMethodOp op) {
+        protocir::CIRGetMethodOp pGetMethodOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto method = op.getMethod().getDefiningOp();
+
+        auto object = op.getObject().getDefiningOp();
+
+        pInst->mutable_get_method_op()->CopyFrom(pGetMethodOp);
+      })
+
+      .Case<cir::GetRuntimeMemberOp>([instID, pInst, pModuleID, &typeCache,
+                                      &blockCache,
+                                      &opCache](cir::GetRuntimeMemberOp op) {
         protocir::CIRGetRuntimeMemberOp pGetRuntimeMemberOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto addr = op.getAddr().getDefiningOp();
+
+        auto member = op.getMember().getDefiningOp();
 
         pInst->mutable_get_runtime_member_op()->CopyFrom(pGetRuntimeMemberOp);
       })
 
-      .Case<cir::GlobalOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::GlobalOp op) {
-            protocir::CIRGlobalOp pGlobalOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::GlobalOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::GlobalOp op) {
+        protocir::CIRGlobalOp pGlobalOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_global_op()->CopyFrom(pGlobalOp);
-          })
+        pInst->mutable_global_op()->CopyFrom(pGlobalOp);
+      })
 
-      .Case<cir::GotoOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::GotoOp op) {
-            protocir::CIRGotoOp pGotoOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::GotoOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::GotoOp op) {
+        protocir::CIRGotoOp pGotoOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_goto_op()->CopyFrom(pGotoOp);
-          })
+        pInst->mutable_goto_op()->CopyFrom(pGotoOp);
+      })
 
-      .Case<cir::IfOp>([instID, pInst, pModuleID, &typeCache](cir::IfOp op) {
+      .Case<cir::IfOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                        &opCache](cir::IfOp op) {
         protocir::CIRIfOp pIfOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto condition = op.getCondition().getDefiningOp();
 
         pInst->mutable_if_op()->CopyFrom(pIfOp);
       })
 
-      .Case<cir::IsConstantOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::IsConstantOp op) {
-            protocir::CIRIsConstantOp pIsConstantOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::IsConstantOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::IsConstantOp op) {
+        protocir::CIRIsConstantOp pIsConstantOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_is_constant_op()->CopyFrom(pIsConstantOp);
-          })
+        auto val = op.getVal().getDefiningOp();
 
-      .Case<cir::IsFPClassOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::IsFPClassOp op) {
-            protocir::CIRIsFPClassOp pIsFPClassOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_is_constant_op()->CopyFrom(pIsConstantOp);
+      })
 
-            pInst->mutable_is_fp_class_op()->CopyFrom(pIsFPClassOp);
-          })
+      .Case<cir::IsFPClassOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::IsFPClassOp op) {
+        protocir::CIRIsFPClassOp pIsFPClassOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::IterBeginOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::IterBeginOp op) {
-            protocir::CIRIterBeginOp pIterBeginOp;
-            pInst->mutable_base()->set_id(instID);
+        auto src = op.getSrc().getDefiningOp();
 
-            pInst->mutable_iter_begin_op()->CopyFrom(pIterBeginOp);
-          })
+        pInst->mutable_is_fp_class_op()->CopyFrom(pIsFPClassOp);
+      })
 
-      .Case<cir::IterEndOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::IterEndOp op) {
-            protocir::CIRIterEndOp pIterEndOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::IterBeginOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::IterBeginOp op) {
+        protocir::CIRIterBeginOp pIterBeginOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_iter_end_op()->CopyFrom(pIterEndOp);
-          })
+        auto container = op.getContainer().getDefiningOp();
 
-      .Case<cir::LLVMIntrinsicCallOp>([instID, pInst, pModuleID, &typeCache](
-                                          cir::LLVMIntrinsicCallOp op) {
+        pInst->mutable_iter_begin_op()->CopyFrom(pIterBeginOp);
+      })
+
+      .Case<cir::IterEndOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::IterEndOp op) {
+        protocir::CIRIterEndOp pIterEndOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto container = op.getContainer().getDefiningOp();
+
+        pInst->mutable_iter_end_op()->CopyFrom(pIterEndOp);
+      })
+
+      .Case<cir::LLVMIntrinsicCallOp>([instID, pInst, pModuleID, &typeCache,
+                                       &blockCache,
+                                       &opCache](cir::LLVMIntrinsicCallOp op) {
         protocir::CIRLLVMIntrinsicCallOp pLLVMIntrinsicCallOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto argOps = op.getArgOps();
+        for (auto eargOps : argOps) {
+          auto eargOpsProto = pLLVMIntrinsicCallOp.add_arg_ops();
+          auto eargOpsID = internOperation(opCache, eargOps.getDefiningOp());
+          eargOpsProto->set_id(eargOpsID);
+        }
 
         pInst->mutable_llvm_intrinsic_call_op()->CopyFrom(pLLVMIntrinsicCallOp);
       })
 
-      .Case<cir::LLrintOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::LLrintOp op) {
-            protocir::CIRLLrintOp pLLrintOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::LLrintOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::LLrintOp op) {
+        protocir::CIRLLrintOp pLLrintOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_l_lrint_op()->CopyFrom(pLLrintOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::LLroundOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::LLroundOp op) {
-            protocir::CIRLLroundOp pLLroundOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_l_lrint_op()->CopyFrom(pLLrintOp);
+      })
 
-            pInst->mutable_l_lround_op()->CopyFrom(pLLroundOp);
-          })
+      .Case<cir::LLroundOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::LLroundOp op) {
+        protocir::CIRLLroundOp pLLroundOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::LabelOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::LabelOp op) {
-            protocir::CIRLabelOp pLabelOp;
-            pInst->mutable_base()->set_id(instID);
+        auto src = op.getSrc().getDefiningOp();
 
-            pInst->mutable_label_op()->CopyFrom(pLabelOp);
-          })
+        pInst->mutable_l_lround_op()->CopyFrom(pLLroundOp);
+      })
 
-      .Case<cir::LoadOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::LoadOp op) {
-            protocir::CIRLoadOp pLoadOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::LabelOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::LabelOp op) {
+        protocir::CIRLabelOp pLabelOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_load_op()->CopyFrom(pLoadOp);
-          })
+        pInst->mutable_label_op()->CopyFrom(pLabelOp);
+      })
 
-      .Case<cir::Log10Op>(
-          [instID, pInst, pModuleID, &typeCache](cir::Log10Op op) {
-            protocir::CIRLog10Op pLog10Op;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::LoadOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::LoadOp op) {
+        protocir::CIRLoadOp pLoadOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_log10_op()->CopyFrom(pLog10Op);
-          })
+        auto addr = op.getAddr().getDefiningOp();
 
-      .Case<cir::Log2Op>(
-          [instID, pInst, pModuleID, &typeCache](cir::Log2Op op) {
-            protocir::CIRLog2Op pLog2Op;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_load_op()->CopyFrom(pLoadOp);
+      })
 
-            pInst->mutable_log2_op()->CopyFrom(pLog2Op);
-          })
+      .Case<cir::Log10Op>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::Log10Op op) {
+        protocir::CIRLog10Op pLog10Op;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::LogOp>([instID, pInst, pModuleID, &typeCache](cir::LogOp op) {
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_log10_op()->CopyFrom(pLog10Op);
+      })
+
+      .Case<cir::Log2Op>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::Log2Op op) {
+        protocir::CIRLog2Op pLog2Op;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_log2_op()->CopyFrom(pLog2Op);
+      })
+
+      .Case<cir::LogOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::LogOp op) {
         protocir::CIRLogOp pLogOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
 
         pInst->mutable_log_op()->CopyFrom(pLogOp);
       })
 
-      .Case<cir::LrintOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::LrintOp op) {
-            protocir::CIRLrintOp pLrintOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::LrintOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::LrintOp op) {
+        protocir::CIRLrintOp pLrintOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_lrint_op()->CopyFrom(pLrintOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::LroundOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::LroundOp op) {
-            protocir::CIRLroundOp pLroundOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_lrint_op()->CopyFrom(pLrintOp);
+      })
 
-            pInst->mutable_lround_op()->CopyFrom(pLroundOp);
-          })
+      .Case<cir::LroundOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::LroundOp op) {
+        protocir::CIRLroundOp pLroundOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::MemChrOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::MemChrOp op) {
-            protocir::CIRMemChrOp pMemChrOp;
-            pInst->mutable_base()->set_id(instID);
+        auto src = op.getSrc().getDefiningOp();
 
-            pInst->mutable_mem_chr_op()->CopyFrom(pMemChrOp);
-          })
+        pInst->mutable_lround_op()->CopyFrom(pLroundOp);
+      })
 
-      .Case<cir::MemCpyInlineOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::MemCpyInlineOp op) {
-            protocir::CIRMemCpyInlineOp pMemCpyInlineOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::MemChrOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::MemChrOp op) {
+        protocir::CIRMemChrOp pMemChrOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_mem_cpy_inline_op()->CopyFrom(pMemCpyInlineOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::MemCpyOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::MemCpyOp op) {
-            protocir::CIRMemCpyOp pMemCpyOp;
-            pInst->mutable_base()->set_id(instID);
+        auto pattern = op.getPattern().getDefiningOp();
 
-            pInst->mutable_mem_cpy_op()->CopyFrom(pMemCpyOp);
-          })
+        auto len = op.getLen().getDefiningOp();
 
-      .Case<cir::MemMoveOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::MemMoveOp op) {
-            protocir::CIRMemMoveOp pMemMoveOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_mem_chr_op()->CopyFrom(pMemChrOp);
+      })
 
-            pInst->mutable_mem_move_op()->CopyFrom(pMemMoveOp);
-          })
+      .Case<cir::MemCpyInlineOp>([instID, pInst, pModuleID, &typeCache,
+                                  &blockCache,
+                                  &opCache](cir::MemCpyInlineOp op) {
+        protocir::CIRMemCpyInlineOp pMemCpyInlineOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::MemSetInlineOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::MemSetInlineOp op) {
-            protocir::CIRMemSetInlineOp pMemSetInlineOp;
-            pInst->mutable_base()->set_id(instID);
+        auto dst = op.getDst().getDefiningOp();
 
-            pInst->mutable_mem_set_inline_op()->CopyFrom(pMemSetInlineOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::MemSetOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::MemSetOp op) {
-            protocir::CIRMemSetOp pMemSetOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_mem_cpy_inline_op()->CopyFrom(pMemCpyInlineOp);
+      })
 
-            pInst->mutable_mem_set_op()->CopyFrom(pMemSetOp);
-          })
+      .Case<cir::MemCpyOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::MemCpyOp op) {
+        protocir::CIRMemCpyOp pMemCpyOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::NearbyintOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::NearbyintOp op) {
-            protocir::CIRNearbyintOp pNearbyintOp;
-            pInst->mutable_base()->set_id(instID);
+        auto dst = op.getDst().getDefiningOp();
 
-            pInst->mutable_nearbyint_op()->CopyFrom(pNearbyintOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::ObjSizeOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ObjSizeOp op) {
-            protocir::CIRObjSizeOp pObjSizeOp;
-            pInst->mutable_base()->set_id(instID);
+        auto len = op.getLen().getDefiningOp();
 
-            pInst->mutable_obj_size_op()->CopyFrom(pObjSizeOp);
-          })
+        pInst->mutable_mem_cpy_op()->CopyFrom(pMemCpyOp);
+      })
 
-      .Case<cir::PowOp>([instID, pInst, pModuleID, &typeCache](cir::PowOp op) {
+      .Case<cir::MemMoveOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::MemMoveOp op) {
+        protocir::CIRMemMoveOp pMemMoveOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto dst = op.getDst().getDefiningOp();
+
+        auto src = op.getSrc().getDefiningOp();
+
+        auto len = op.getLen().getDefiningOp();
+
+        pInst->mutable_mem_move_op()->CopyFrom(pMemMoveOp);
+      })
+
+      .Case<cir::MemSetInlineOp>([instID, pInst, pModuleID, &typeCache,
+                                  &blockCache,
+                                  &opCache](cir::MemSetInlineOp op) {
+        protocir::CIRMemSetInlineOp pMemSetInlineOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto dst = op.getDst().getDefiningOp();
+
+        auto val = op.getVal().getDefiningOp();
+
+        pInst->mutable_mem_set_inline_op()->CopyFrom(pMemSetInlineOp);
+      })
+
+      .Case<cir::MemSetOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::MemSetOp op) {
+        protocir::CIRMemSetOp pMemSetOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto dst = op.getDst().getDefiningOp();
+
+        auto val = op.getVal().getDefiningOp();
+
+        auto len = op.getLen().getDefiningOp();
+
+        pInst->mutable_mem_set_op()->CopyFrom(pMemSetOp);
+      })
+
+      .Case<cir::NearbyintOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::NearbyintOp op) {
+        protocir::CIRNearbyintOp pNearbyintOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_nearbyint_op()->CopyFrom(pNearbyintOp);
+      })
+
+      .Case<cir::ObjSizeOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::ObjSizeOp op) {
+        protocir::CIRObjSizeOp pObjSizeOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto ptr = op.getPtr().getDefiningOp();
+
+        pInst->mutable_obj_size_op()->CopyFrom(pObjSizeOp);
+      })
+
+      .Case<cir::PowOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::PowOp op) {
         protocir::CIRPowOp pPowOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto lhs = op.getLhs().getDefiningOp();
+
+        auto rhs = op.getRhs().getDefiningOp();
 
         pInst->mutable_pow_op()->CopyFrom(pPowOp);
       })
 
-      .Case<cir::PrefetchOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::PrefetchOp op) {
-            protocir::CIRPrefetchOp pPrefetchOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::PrefetchOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::PrefetchOp op) {
+        protocir::CIRPrefetchOp pPrefetchOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_prefetch_op()->CopyFrom(pPrefetchOp);
-          })
+        auto addr = op.getAddr().getDefiningOp();
 
-      .Case<cir::PtrDiffOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::PtrDiffOp op) {
-            protocir::CIRPtrDiffOp pPtrDiffOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_prefetch_op()->CopyFrom(pPrefetchOp);
+      })
 
-            pInst->mutable_ptr_diff_op()->CopyFrom(pPtrDiffOp);
-          })
+      .Case<cir::PtrDiffOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::PtrDiffOp op) {
+        protocir::CIRPtrDiffOp pPtrDiffOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::PtrMaskOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::PtrMaskOp op) {
-            protocir::CIRPtrMaskOp pPtrMaskOp;
-            pInst->mutable_base()->set_id(instID);
+        auto lhs = op.getLhs().getDefiningOp();
 
-            pInst->mutable_ptr_mask_op()->CopyFrom(pPtrMaskOp);
-          })
+        auto rhs = op.getRhs().getDefiningOp();
 
-      .Case<cir::PtrStrideOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::PtrStrideOp op) {
-            protocir::CIRPtrStrideOp pPtrStrideOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_ptr_diff_op()->CopyFrom(pPtrDiffOp);
+      })
 
-            pInst->mutable_ptr_stride_op()->CopyFrom(pPtrStrideOp);
-          })
+      .Case<cir::PtrMaskOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::PtrMaskOp op) {
+        protocir::CIRPtrMaskOp pPtrMaskOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::ResumeOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ResumeOp op) {
-            protocir::CIRResumeOp pResumeOp;
-            pInst->mutable_base()->set_id(instID);
+        auto ptr = op.getPtr().getDefiningOp();
 
-            pInst->mutable_resume_op()->CopyFrom(pResumeOp);
-          })
+        auto mask = op.getMask().getDefiningOp();
 
-      .Case<cir::ReturnAddrOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ReturnAddrOp op) {
-            protocir::CIRReturnAddrOp pReturnAddrOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_ptr_mask_op()->CopyFrom(pPtrMaskOp);
+      })
 
-            pInst->mutable_return_addr_op()->CopyFrom(pReturnAddrOp);
-          })
+      .Case<cir::PtrStrideOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::PtrStrideOp op) {
+        protocir::CIRPtrStrideOp pPtrStrideOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::ReturnOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ReturnOp op) {
-            protocir::CIRReturnOp pReturnOp;
-            pInst->mutable_base()->set_id(instID);
+        auto base = op.getBase().getDefiningOp();
 
-            pInst->mutable_return_op()->CopyFrom(pReturnOp);
-          })
+        auto stride = op.getStride().getDefiningOp();
 
-      .Case<cir::RintOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::RintOp op) {
-            protocir::CIRRintOp pRintOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_ptr_stride_op()->CopyFrom(pPtrStrideOp);
+      })
 
-            pInst->mutable_rint_op()->CopyFrom(pRintOp);
-          })
+      .Case<cir::ResumeOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::ResumeOp op) {
+        protocir::CIRResumeOp pResumeOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::RotateOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::RotateOp op) {
-            protocir::CIRRotateOp pRotateOp;
-            pInst->mutable_base()->set_id(instID);
+        auto exceptionPtr = op.getExceptionPtr().getDefiningOp();
+        if (exceptionPtr) {
+          auto exceptionPtrID = internOperation(opCache, exceptionPtr);
 
-            pInst->mutable_rotate_op()->CopyFrom(pRotateOp);
-          })
+          protocir::CIROpID pexceptionPtrID;
+          pexceptionPtrID.set_id(exceptionPtrID);
 
-      .Case<cir::RoundOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::RoundOp op) {
-            protocir::CIRRoundOp pRoundOp;
-            pInst->mutable_base()->set_id(instID);
+          *pResumeOp.mutable_exception_ptr() = pexceptionPtrID;
+        }
 
-            pInst->mutable_round_op()->CopyFrom(pRoundOp);
-          })
+        auto typeId = op.getTypeId().getDefiningOp();
+        if (typeId) {
+          auto typeIdID = internOperation(opCache, typeId);
 
-      .Case<cir::ScopeOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ScopeOp op) {
-            protocir::CIRScopeOp pScopeOp;
-            pInst->mutable_base()->set_id(instID);
+          protocir::CIROpID ptypeIdID;
+          ptypeIdID.set_id(typeIdID);
 
-            pInst->mutable_scope_op()->CopyFrom(pScopeOp);
-          })
+          *pResumeOp.mutable_type_id() = ptypeIdID;
+        }
 
-      .Case<cir::SelectOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::SelectOp op) {
-            protocir::CIRSelectOp pSelectOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_resume_op()->CopyFrom(pResumeOp);
+      })
 
-            pInst->mutable_select_op()->CopyFrom(pSelectOp);
-          })
+      .Case<cir::ReturnAddrOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::ReturnAddrOp op) {
+        protocir::CIRReturnAddrOp pReturnAddrOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::SetBitfieldOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::SetBitfieldOp op) {
-            protocir::CIRSetBitfieldOp pSetBitfieldOp;
-            pInst->mutable_base()->set_id(instID);
+        auto level = op.getLevel().getDefiningOp();
 
-            pInst->mutable_set_bitfield_op()->CopyFrom(pSetBitfieldOp);
-          })
+        pInst->mutable_return_addr_op()->CopyFrom(pReturnAddrOp);
+      })
 
-      .Case<cir::ShiftOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ShiftOp op) {
-            protocir::CIRShiftOp pShiftOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::ReturnOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::ReturnOp op) {
+        protocir::CIRReturnOp pReturnOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_shift_op()->CopyFrom(pShiftOp);
-          })
+        auto input = op.getInput();
+        for (auto einput : input) {
+          auto einputProto = pReturnOp.add_input();
+          auto einputID = internOperation(opCache, einput.getDefiningOp());
+          einputProto->set_id(einputID);
+        }
 
-      .Case<cir::SignBitOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::SignBitOp op) {
-            protocir::CIRSignBitOp pSignBitOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_return_op()->CopyFrom(pReturnOp);
+      })
 
-            pInst->mutable_sign_bit_op()->CopyFrom(pSignBitOp);
-          })
+      .Case<cir::RintOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::RintOp op) {
+        protocir::CIRRintOp pRintOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::SinOp>([instID, pInst, pModuleID, &typeCache](cir::SinOp op) {
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_rint_op()->CopyFrom(pRintOp);
+      })
+
+      .Case<cir::RotateOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::RotateOp op) {
+        protocir::CIRRotateOp pRotateOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        auto amt = op.getAmt().getDefiningOp();
+
+        pInst->mutable_rotate_op()->CopyFrom(pRotateOp);
+      })
+
+      .Case<cir::RoundOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::RoundOp op) {
+        protocir::CIRRoundOp pRoundOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_round_op()->CopyFrom(pRoundOp);
+      })
+
+      .Case<cir::ScopeOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::ScopeOp op) {
+        protocir::CIRScopeOp pScopeOp;
+        pInst->mutable_base()->set_id(instID);
+
+        pInst->mutable_scope_op()->CopyFrom(pScopeOp);
+      })
+
+      .Case<cir::SelectOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::SelectOp op) {
+        protocir::CIRSelectOp pSelectOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto condition = op.getCondition().getDefiningOp();
+
+        auto trueValue = op.getTrueValue().getDefiningOp();
+
+        auto falseValue = op.getFalseValue().getDefiningOp();
+
+        pInst->mutable_select_op()->CopyFrom(pSelectOp);
+      })
+
+      .Case<cir::SetBitfieldOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::SetBitfieldOp op) {
+        protocir::CIRSetBitfieldOp pSetBitfieldOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto addr = op.getAddr().getDefiningOp();
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_set_bitfield_op()->CopyFrom(pSetBitfieldOp);
+      })
+
+      .Case<cir::ShiftOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::ShiftOp op) {
+        protocir::CIRShiftOp pShiftOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto value = op.getValue().getDefiningOp();
+
+        auto amount = op.getAmount().getDefiningOp();
+
+        pInst->mutable_shift_op()->CopyFrom(pShiftOp);
+      })
+
+      .Case<cir::SignBitOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::SignBitOp op) {
+        protocir::CIRSignBitOp pSignBitOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto input = op.getInput().getDefiningOp();
+
+        pInst->mutable_sign_bit_op()->CopyFrom(pSignBitOp);
+      })
+
+      .Case<cir::SinOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::SinOp op) {
         protocir::CIRSinOp pSinOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
 
         pInst->mutable_sin_op()->CopyFrom(pSinOp);
       })
 
-      .Case<cir::SqrtOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::SqrtOp op) {
-            protocir::CIRSqrtOp pSqrtOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::SqrtOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::SqrtOp op) {
+        protocir::CIRSqrtOp pSqrtOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_sqrt_op()->CopyFrom(pSqrtOp);
-          })
+        auto src = op.getSrc().getDefiningOp();
 
-      .Case<cir::StackRestoreOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::StackRestoreOp op) {
-            protocir::CIRStackRestoreOp pStackRestoreOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_sqrt_op()->CopyFrom(pSqrtOp);
+      })
 
-            pInst->mutable_stack_restore_op()->CopyFrom(pStackRestoreOp);
-          })
+      .Case<cir::StackRestoreOp>([instID, pInst, pModuleID, &typeCache,
+                                  &blockCache,
+                                  &opCache](cir::StackRestoreOp op) {
+        protocir::CIRStackRestoreOp pStackRestoreOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::StackSaveOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::StackSaveOp op) {
-            protocir::CIRStackSaveOp pStackSaveOp;
-            pInst->mutable_base()->set_id(instID);
+        auto ptr = op.getPtr().getDefiningOp();
 
-            pInst->mutable_stack_save_op()->CopyFrom(pStackSaveOp);
-          })
+        pInst->mutable_stack_restore_op()->CopyFrom(pStackRestoreOp);
+      })
 
-      .Case<cir::StdFindOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::StdFindOp op) {
-            protocir::CIRStdFindOp pStdFindOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::StackSaveOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::StackSaveOp op) {
+        protocir::CIRStackSaveOp pStackSaveOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_std_find_op()->CopyFrom(pStdFindOp);
-          })
+        pInst->mutable_stack_save_op()->CopyFrom(pStackSaveOp);
+      })
 
-      .Case<cir::StoreOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::StoreOp op) {
-            protocir::CIRStoreOp pStoreOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::StdFindOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::StdFindOp op) {
+        protocir::CIRStdFindOp pStdFindOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_store_op()->CopyFrom(pStoreOp);
-          })
+        auto first = op.getFirst().getDefiningOp();
 
-      .Case<cir::SwitchFlatOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::SwitchFlatOp op) {
-            protocir::CIRSwitchFlatOp pSwitchFlatOp;
-            pInst->mutable_base()->set_id(instID);
+        auto last = op.getLast().getDefiningOp();
 
-            pInst->mutable_switch_flat_op()->CopyFrom(pSwitchFlatOp);
-          })
+        auto pattern = op.getPattern().getDefiningOp();
 
-      .Case<cir::SwitchOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::SwitchOp op) {
-            protocir::CIRSwitchOp pSwitchOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_std_find_op()->CopyFrom(pStdFindOp);
+      })
 
-            pInst->mutable_switch_op()->CopyFrom(pSwitchOp);
-          })
+      .Case<cir::StoreOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::StoreOp op) {
+        protocir::CIRStoreOp pStoreOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::TernaryOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::TernaryOp op) {
-            protocir::CIRTernaryOp pTernaryOp;
-            pInst->mutable_base()->set_id(instID);
+        auto value = op.getValue().getDefiningOp();
 
-            pInst->mutable_ternary_op()->CopyFrom(pTernaryOp);
-          })
+        auto addr = op.getAddr().getDefiningOp();
 
-      .Case<cir::ThrowOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::ThrowOp op) {
-            protocir::CIRThrowOp pThrowOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_store_op()->CopyFrom(pStoreOp);
+      })
 
-            pInst->mutable_throw_op()->CopyFrom(pThrowOp);
-          })
+      .Case<cir::SwitchFlatOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::SwitchFlatOp op) {
+        protocir::CIRSwitchFlatOp pSwitchFlatOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::TrapOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::TrapOp op) {
-            protocir::CIRTrapOp pTrapOp;
-            pInst->mutable_base()->set_id(instID);
+        auto condition = op.getCondition().getDefiningOp();
 
-            pInst->mutable_trap_op()->CopyFrom(pTrapOp);
-          })
+        auto defaultOperands = op.getDefaultOperands();
+        for (auto edefaultOperands : defaultOperands) {
+          auto edefaultOperandsProto = pSwitchFlatOp.add_default_operands();
+          auto edefaultOperandsID =
+              internOperation(opCache, edefaultOperands.getDefiningOp());
+          edefaultOperandsProto->set_id(edefaultOperandsID);
+        }
 
-      .Case<cir::TruncOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::TruncOp op) {
-            protocir::CIRTruncOp pTruncOp;
-            pInst->mutable_base()->set_id(instID);
+        auto caseOperands = op.getCaseOperands();
+        for (auto ecaseOperands : caseOperands) {
+          auto ecaseOperandsProto = pSwitchFlatOp.add_case_operands();
+          for (auto eecaseOperands : ecaseOperands) {
+            auto eecaseOperandsProto = ecaseOperandsProto->add_range();
+            auto eecaseOperandsID =
+                internOperation(opCache, eecaseOperands.getDefiningOp());
+            eecaseOperandsProto->set_id(eecaseOperandsID);
+          }
+        }
 
-            pInst->mutable_trunc_op()->CopyFrom(pTruncOp);
-          })
+        pInst->mutable_switch_flat_op()->CopyFrom(pSwitchFlatOp);
+      })
 
-      .Case<cir::TryCallOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::TryCallOp op) {
-            protocir::CIRTryCallOp pTryCallOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::SwitchOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::SwitchOp op) {
+        protocir::CIRSwitchOp pSwitchOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_try_call_op()->CopyFrom(pTryCallOp);
-          })
+        auto condition = op.getCondition().getDefiningOp();
 
-      .Case<cir::TryOp>([instID, pInst, pModuleID, &typeCache](cir::TryOp op) {
+        pInst->mutable_switch_op()->CopyFrom(pSwitchOp);
+      })
+
+      .Case<cir::TernaryOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::TernaryOp op) {
+        protocir::CIRTernaryOp pTernaryOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto cond = op.getCond().getDefiningOp();
+
+        pInst->mutable_ternary_op()->CopyFrom(pTernaryOp);
+      })
+
+      .Case<cir::ThrowOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::ThrowOp op) {
+        protocir::CIRThrowOp pThrowOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto exceptionPtr = op.getExceptionPtr().getDefiningOp();
+        if (exceptionPtr) {
+          auto exceptionPtrID = internOperation(opCache, exceptionPtr);
+
+          protocir::CIROpID pexceptionPtrID;
+          pexceptionPtrID.set_id(exceptionPtrID);
+
+          *pThrowOp.mutable_exception_ptr() = pexceptionPtrID;
+        }
+
+        pInst->mutable_throw_op()->CopyFrom(pThrowOp);
+      })
+
+      .Case<cir::TrapOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                          &opCache](cir::TrapOp op) {
+        protocir::CIRTrapOp pTrapOp;
+        pInst->mutable_base()->set_id(instID);
+
+        pInst->mutable_trap_op()->CopyFrom(pTrapOp);
+      })
+
+      .Case<cir::TruncOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::TruncOp op) {
+        protocir::CIRTruncOp pTruncOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto src = op.getSrc().getDefiningOp();
+
+        pInst->mutable_trunc_op()->CopyFrom(pTruncOp);
+      })
+
+      .Case<cir::TryCallOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::TryCallOp op) {
+        protocir::CIRTryCallOp pTryCallOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto contOperands = op.getContOperands();
+        for (auto econtOperands : contOperands) {
+          auto econtOperandsProto = pTryCallOp.add_cont_operands();
+          auto econtOperandsID =
+              internOperation(opCache, econtOperands.getDefiningOp());
+          econtOperandsProto->set_id(econtOperandsID);
+        }
+
+        auto landingPadOperands = op.getLandingPadOperands();
+        for (auto elandingPadOperands : landingPadOperands) {
+          auto elandingPadOperandsProto = pTryCallOp.add_landing_pad_operands();
+          auto elandingPadOperandsID =
+              internOperation(opCache, elandingPadOperands.getDefiningOp());
+          elandingPadOperandsProto->set_id(elandingPadOperandsID);
+        }
+
+        auto argOps = op.getArgOps();
+        for (auto eargOps : argOps) {
+          auto eargOpsProto = pTryCallOp.add_arg_ops();
+          auto eargOpsID = internOperation(opCache, eargOps.getDefiningOp());
+          eargOpsProto->set_id(eargOpsID);
+        }
+
+        pInst->mutable_try_call_op()->CopyFrom(pTryCallOp);
+      })
+
+      .Case<cir::TryOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                         &opCache](cir::TryOp op) {
         protocir::CIRTryOp pTryOp;
         pInst->mutable_base()->set_id(instID);
 
         pInst->mutable_try_op()->CopyFrom(pTryOp);
       })
 
-      .Case<cir::UnaryOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::UnaryOp op) {
-            protocir::CIRUnaryOp pUnaryOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::UnaryOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::UnaryOp op) {
+        protocir::CIRUnaryOp pUnaryOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_unary_op()->CopyFrom(pUnaryOp);
-          })
+        auto input = op.getInput().getDefiningOp();
 
-      .Case<cir::UnreachableOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::UnreachableOp op) {
-            protocir::CIRUnreachableOp pUnreachableOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_unary_op()->CopyFrom(pUnaryOp);
+      })
 
-            pInst->mutable_unreachable_op()->CopyFrom(pUnreachableOp);
-          })
+      .Case<cir::UnreachableOp>([instID, pInst, pModuleID, &typeCache,
+                                 &blockCache, &opCache](cir::UnreachableOp op) {
+        protocir::CIRUnreachableOp pUnreachableOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::VAArgOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VAArgOp op) {
-            protocir::CIRVAArgOp pVAArgOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_unreachable_op()->CopyFrom(pUnreachableOp);
+      })
 
-            pInst->mutable_va_arg_op()->CopyFrom(pVAArgOp);
-          })
+      .Case<cir::VAArgOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::VAArgOp op) {
+        protocir::CIRVAArgOp pVAArgOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::VACopyOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VACopyOp op) {
-            protocir::CIRVACopyOp pVACopyOp;
-            pInst->mutable_base()->set_id(instID);
+        auto argList = op.getArgList().getDefiningOp();
 
-            pInst->mutable_va_copy_op()->CopyFrom(pVACopyOp);
-          })
+        pInst->mutable_va_arg_op()->CopyFrom(pVAArgOp);
+      })
 
-      .Case<cir::VAEndOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VAEndOp op) {
-            protocir::CIRVAEndOp pVAEndOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::VACopyOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::VACopyOp op) {
+        protocir::CIRVACopyOp pVACopyOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_va_end_op()->CopyFrom(pVAEndOp);
-          })
+        auto dstList = op.getDstList().getDefiningOp();
 
-      .Case<cir::VAStartOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VAStartOp op) {
-            protocir::CIRVAStartOp pVAStartOp;
-            pInst->mutable_base()->set_id(instID);
+        auto srcList = op.getSrcList().getDefiningOp();
 
-            pInst->mutable_va_start_op()->CopyFrom(pVAStartOp);
-          })
+        pInst->mutable_va_copy_op()->CopyFrom(pVACopyOp);
+      })
 
-      .Case<cir::VTTAddrPointOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VTTAddrPointOp op) {
-            protocir::CIRVTTAddrPointOp pVTTAddrPointOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::VAEndOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::VAEndOp op) {
+        protocir::CIRVAEndOp pVAEndOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_vtt_addr_point_op()->CopyFrom(pVTTAddrPointOp);
-          })
+        auto argList = op.getArgList().getDefiningOp();
 
-      .Case<cir::VTableAddrPointOp>([instID, pInst, pModuleID,
-                                     &typeCache](cir::VTableAddrPointOp op) {
+        pInst->mutable_va_end_op()->CopyFrom(pVAEndOp);
+      })
+
+      .Case<cir::VAStartOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                             &opCache](cir::VAStartOp op) {
+        protocir::CIRVAStartOp pVAStartOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto argList = op.getArgList().getDefiningOp();
+
+        pInst->mutable_va_start_op()->CopyFrom(pVAStartOp);
+      })
+
+      .Case<cir::VTTAddrPointOp>([instID, pInst, pModuleID, &typeCache,
+                                  &blockCache,
+                                  &opCache](cir::VTTAddrPointOp op) {
+        protocir::CIRVTTAddrPointOp pVTTAddrPointOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto symAddr = op.getSymAddr().getDefiningOp();
+        if (symAddr) {
+          auto symAddrID = internOperation(opCache, symAddr);
+
+          protocir::CIROpID psymAddrID;
+          psymAddrID.set_id(symAddrID);
+
+          *pVTTAddrPointOp.mutable_sym_addr() = psymAddrID;
+        }
+
+        pInst->mutable_vtt_addr_point_op()->CopyFrom(pVTTAddrPointOp);
+      })
+
+      .Case<cir::VTableAddrPointOp>([instID, pInst, pModuleID, &typeCache,
+                                     &blockCache,
+                                     &opCache](cir::VTableAddrPointOp op) {
         protocir::CIRVTableAddrPointOp pVTableAddrPointOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto symAddr = op.getSymAddr().getDefiningOp();
+        if (symAddr) {
+          auto symAddrID = internOperation(opCache, symAddr);
+
+          protocir::CIROpID psymAddrID;
+          psymAddrID.set_id(symAddrID);
+
+          *pVTableAddrPointOp.mutable_sym_addr() = psymAddrID;
+        }
 
         pInst->mutable_v_table_addr_point_op()->CopyFrom(pVTableAddrPointOp);
       })
 
-      .Case<cir::VecCmpOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VecCmpOp op) {
-            protocir::CIRVecCmpOp pVecCmpOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::VecCmpOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                            &opCache](cir::VecCmpOp op) {
+        protocir::CIRVecCmpOp pVecCmpOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_vec_cmp_op()->CopyFrom(pVecCmpOp);
-          })
+        auto lhs = op.getLhs().getDefiningOp();
 
-      .Case<cir::VecCreateOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VecCreateOp op) {
-            protocir::CIRVecCreateOp pVecCreateOp;
-            pInst->mutable_base()->set_id(instID);
+        auto rhs = op.getRhs().getDefiningOp();
 
-            pInst->mutable_vec_create_op()->CopyFrom(pVecCreateOp);
-          })
+        pInst->mutable_vec_cmp_op()->CopyFrom(pVecCmpOp);
+      })
 
-      .Case<cir::VecExtractOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VecExtractOp op) {
-            protocir::CIRVecExtractOp pVecExtractOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::VecCreateOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::VecCreateOp op) {
+        protocir::CIRVecCreateOp pVecCreateOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_vec_extract_op()->CopyFrom(pVecExtractOp);
-          })
+        auto elements = op.getElements();
+        for (auto eelements : elements) {
+          auto eelementsProto = pVecCreateOp.add_elements();
+          auto eelementsID =
+              internOperation(opCache, eelements.getDefiningOp());
+          eelementsProto->set_id(eelementsID);
+        }
 
-      .Case<cir::VecInsertOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VecInsertOp op) {
-            protocir::CIRVecInsertOp pVecInsertOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_vec_create_op()->CopyFrom(pVecCreateOp);
+      })
 
-            pInst->mutable_vec_insert_op()->CopyFrom(pVecInsertOp);
-          })
+      .Case<cir::VecExtractOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::VecExtractOp op) {
+        protocir::CIRVecExtractOp pVecExtractOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::VecShuffleDynamicOp>([instID, pInst, pModuleID, &typeCache](
-                                          cir::VecShuffleDynamicOp op) {
+        auto vec = op.getVec().getDefiningOp();
+
+        auto index = op.getIndex().getDefiningOp();
+
+        pInst->mutable_vec_extract_op()->CopyFrom(pVecExtractOp);
+      })
+
+      .Case<cir::VecInsertOp>([instID, pInst, pModuleID, &typeCache,
+                               &blockCache, &opCache](cir::VecInsertOp op) {
+        protocir::CIRVecInsertOp pVecInsertOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto vec = op.getVec().getDefiningOp();
+
+        auto value = op.getValue().getDefiningOp();
+
+        auto index = op.getIndex().getDefiningOp();
+
+        pInst->mutable_vec_insert_op()->CopyFrom(pVecInsertOp);
+      })
+
+      .Case<cir::VecShuffleDynamicOp>([instID, pInst, pModuleID, &typeCache,
+                                       &blockCache,
+                                       &opCache](cir::VecShuffleDynamicOp op) {
         protocir::CIRVecShuffleDynamicOp pVecShuffleDynamicOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto vec = op.getVec().getDefiningOp();
+
+        auto indices = op.getIndices().getDefiningOp();
 
         pInst->mutable_vec_shuffle_dynamic_op()->CopyFrom(pVecShuffleDynamicOp);
       })
 
-      .Case<cir::VecShuffleOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VecShuffleOp op) {
-            protocir::CIRVecShuffleOp pVecShuffleOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::VecShuffleOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::VecShuffleOp op) {
+        protocir::CIRVecShuffleOp pVecShuffleOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_vec_shuffle_op()->CopyFrom(pVecShuffleOp);
-          })
+        auto vec1 = op.getVec1().getDefiningOp();
 
-      .Case<cir::VecSplatOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VecSplatOp op) {
-            protocir::CIRVecSplatOp pVecSplatOp;
-            pInst->mutable_base()->set_id(instID);
+        auto vec2 = op.getVec2().getDefiningOp();
 
-            pInst->mutable_vec_splat_op()->CopyFrom(pVecSplatOp);
-          })
+        pInst->mutable_vec_shuffle_op()->CopyFrom(pVecShuffleOp);
+      })
 
-      .Case<cir::VecTernaryOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::VecTernaryOp op) {
-            protocir::CIRVecTernaryOp pVecTernaryOp;
-            pInst->mutable_base()->set_id(instID);
+      .Case<cir::VecSplatOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                              &opCache](cir::VecSplatOp op) {
+        protocir::CIRVecSplatOp pVecSplatOp;
+        pInst->mutable_base()->set_id(instID);
 
-            pInst->mutable_vec_ternary_op()->CopyFrom(pVecTernaryOp);
-          })
+        auto value = op.getValue().getDefiningOp();
 
-      .Case<cir::WhileOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::WhileOp op) {
-            protocir::CIRWhileOp pWhileOp;
-            pInst->mutable_base()->set_id(instID);
+        pInst->mutable_vec_splat_op()->CopyFrom(pVecSplatOp);
+      })
 
-            pInst->mutable_while_op()->CopyFrom(pWhileOp);
-          })
+      .Case<cir::VecTernaryOp>([instID, pInst, pModuleID, &typeCache,
+                                &blockCache, &opCache](cir::VecTernaryOp op) {
+        protocir::CIRVecTernaryOp pVecTernaryOp;
+        pInst->mutable_base()->set_id(instID);
 
-      .Case<cir::YieldOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::YieldOp op) {
-            protocir::CIRYieldOp pYieldOp;
-            pInst->mutable_base()->set_id(instID);
+        auto cond = op.getCond().getDefiningOp();
 
-            pInst->mutable_yield_op()->CopyFrom(pYieldOp);
-          })
+        auto vec1 = op.getVec1().getDefiningOp();
+
+        auto vec2 = op.getVec2().getDefiningOp();
+
+        pInst->mutable_vec_ternary_op()->CopyFrom(pVecTernaryOp);
+      })
+
+      .Case<cir::WhileOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::WhileOp op) {
+        protocir::CIRWhileOp pWhileOp;
+        pInst->mutable_base()->set_id(instID);
+
+        pInst->mutable_while_op()->CopyFrom(pWhileOp);
+      })
+
+      .Case<cir::YieldOp>([instID, pInst, pModuleID, &typeCache, &blockCache,
+                           &opCache](cir::YieldOp op) {
+        protocir::CIRYieldOp pYieldOp;
+        pInst->mutable_base()->set_id(instID);
+
+        auto args = op.getArgs();
+        for (auto eargs : args) {
+          auto eargsProto = pYieldOp.add_args();
+          auto eargsID = internOperation(opCache, eargs.getDefiningOp());
+          eargsProto->set_id(eargsID);
+        }
+
+        pInst->mutable_yield_op()->CopyFrom(pYieldOp);
+      })
 
       .Default([](mlir::Operation *op) {
         op->dump();
