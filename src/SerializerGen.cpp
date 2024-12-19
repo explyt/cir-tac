@@ -24,6 +24,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pAbsOp.mutable_src() = psrcID;
+
+        auto poison = op.getPoison();
+        pAbsOp.set_poison(poison);
 
         pInst->mutable_abs_op()->CopyFrom(pAbsOp);
       })
@@ -33,6 +42,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                                     &opCache](cir::AllocExceptionOp op) {
         protocir::CIRAllocExceptionOp pAllocExceptionOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto size = op.getSize();
+        pAllocExceptionOp.set_size(size);
 
         pInst->mutable_alloc_exception_op()->CopyFrom(pAllocExceptionOp);
       })
@@ -52,6 +64,29 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pAllocaOp.mutable_dyn_alloc_size() = pdynAllocSizeID;
         }
 
+        auto allocaType = op.getAllocaType();
+        auto allocaTypeID = internType(typeCache, allocaType);
+
+        protocir::CIRTypeID pallocaTypeID;
+        pallocaTypeID.set_id(allocaTypeID);
+
+        *pAllocaOp.mutable_alloca_type() = pallocaTypeID;
+
+        auto name = op.getName();
+        *pAllocaOp.mutable_name() = name;
+
+        auto init = op.getInit();
+        pAllocaOp.set_init(init);
+
+        auto constant = op.getConstant();
+        pAllocaOp.set_constant(constant);
+
+        auto alignmentOptional = op.getAlignment();
+        if (alignmentOptional) {
+          auto alignment = alignmentOptional.value();
+          pAllocaOp.set_alignment(alignment);
+        }
+
         pInst->mutable_alloca_op()->CopyFrom(pAllocaOp);
       })
 
@@ -61,6 +96,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pArrayCtor.mutable_addr() = paddrID;
 
         pInst->mutable_array_ctor()->CopyFrom(pArrayCtor);
       })
@@ -71,6 +112,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pArrayDtor.mutable_addr() = paddrID;
 
         pInst->mutable_array_dtor()->CopyFrom(pArrayDtor);
       })
@@ -82,6 +129,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto pointer = op.getPointer().getDefiningOp();
+        auto pointerID = internOperation(opCache, pointer);
+
+        protocir::CIROpID ppointerID;
+        ppointerID.set_id(pointerID);
+
+        *pAssumeAlignedOp.mutable_pointer() = ppointerID;
 
         auto offset = op.getOffset().getDefiningOp();
         if (offset) {
@@ -93,6 +146,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pAssumeAlignedOp.mutable_offset() = poffsetID;
         }
 
+        auto alignment = op.getAlignment();
+        pAssumeAlignedOp.set_alignment(alignment);
+
         pInst->mutable_assume_aligned_op()->CopyFrom(pAssumeAlignedOp);
       })
 
@@ -102,6 +158,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto predicate = op.getPredicate().getDefiningOp();
+        auto predicateID = internOperation(opCache, predicate);
+
+        protocir::CIROpID ppredicateID;
+        ppredicateID.set_id(predicateID);
+
+        *pAssumeOp.mutable_predicate() = ppredicateID;
 
         pInst->mutable_assume_op()->CopyFrom(pAssumeOp);
       })
@@ -113,8 +175,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr1 = op.getPtr1().getDefiningOp();
+        auto ptr1ID = internOperation(opCache, ptr1);
+
+        protocir::CIROpID pptr1ID;
+        pptr1ID.set_id(ptr1ID);
+
+        *pAssumeSepStorageOp.mutable_ptr1() = pptr1ID;
 
         auto ptr2 = op.getPtr2().getDefiningOp();
+        auto ptr2ID = internOperation(opCache, ptr2);
+
+        protocir::CIROpID pptr2ID;
+        pptr2ID.set_id(ptr2ID);
+
+        *pAssumeSepStorageOp.mutable_ptr2() = pptr2ID;
 
         pInst->mutable_assume_sep_storage_op()->CopyFrom(pAssumeSepStorageOp);
       })
@@ -125,10 +199,34 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr = op.getPtr().getDefiningOp();
+        auto ptrID = internOperation(opCache, ptr);
+
+        protocir::CIROpID pptrID;
+        pptrID.set_id(ptrID);
+
+        *pAtomicCmpXchg.mutable_ptr() = pptrID;
 
         auto expected = op.getExpected().getDefiningOp();
+        auto expectedID = internOperation(opCache, expected);
+
+        protocir::CIROpID pexpectedID;
+        pexpectedID.set_id(expectedID);
+
+        *pAtomicCmpXchg.mutable_expected() = pexpectedID;
 
         auto desired = op.getDesired().getDefiningOp();
+        auto desiredID = internOperation(opCache, desired);
+
+        protocir::CIROpID pdesiredID;
+        pdesiredID.set_id(desiredID);
+
+        *pAtomicCmpXchg.mutable_desired() = pdesiredID;
+
+        auto weak = op.getWeak();
+        pAtomicCmpXchg.set_weak(weak);
+
+        auto isVolatile = op.getIsVolatile();
+        pAtomicCmpXchg.set_is_volatile(isVolatile);
 
         pInst->mutable_atomic_cmp_xchg()->CopyFrom(pAtomicCmpXchg);
       })
@@ -139,8 +237,26 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr = op.getPtr().getDefiningOp();
+        auto ptrID = internOperation(opCache, ptr);
+
+        protocir::CIROpID pptrID;
+        pptrID.set_id(ptrID);
+
+        *pAtomicFetch.mutable_ptr() = pptrID;
 
         auto val = op.getVal().getDefiningOp();
+        auto valID = internOperation(opCache, val);
+
+        protocir::CIROpID pvalID;
+        pvalID.set_id(valID);
+
+        *pAtomicFetch.mutable_val() = pvalID;
+
+        auto isVolatile = op.getIsVolatile();
+        pAtomicFetch.set_is_volatile(isVolatile);
+
+        auto fetchFirst = op.getFetchFirst();
+        pAtomicFetch.set_fetch_first(fetchFirst);
 
         pInst->mutable_atomic_fetch()->CopyFrom(pAtomicFetch);
       })
@@ -151,8 +267,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr = op.getPtr().getDefiningOp();
+        auto ptrID = internOperation(opCache, ptr);
+
+        protocir::CIROpID pptrID;
+        pptrID.set_id(ptrID);
+
+        *pAtomicXchg.mutable_ptr() = pptrID;
 
         auto val = op.getVal().getDefiningOp();
+        auto valID = internOperation(opCache, val);
+
+        protocir::CIROpID pvalID;
+        pvalID.set_id(valID);
+
+        *pAtomicXchg.mutable_val() = pvalID;
+
+        auto isVolatile = op.getIsVolatile();
+        pAtomicXchg.set_is_volatile(isVolatile);
 
         pInst->mutable_atomic_xchg()->CopyFrom(pAtomicXchg);
       })
@@ -172,6 +303,21 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto derivedAddr = op.getDerivedAddr().getDefiningOp();
+        auto derivedAddrID = internOperation(opCache, derivedAddr);
+
+        protocir::CIROpID pderivedAddrID;
+        pderivedAddrID.set_id(derivedAddrID);
+
+        *pBaseClassAddrOp.mutable_derived_addr() = pderivedAddrID;
+
+        llvm::SmallVector<char> offsetStr;
+        auto offset = op.getOffset();
+        offset.toString(offsetStr, 10, false);
+        llvm::StringRef offsetStrRef(offsetStr.data(), offsetStr.size());
+        *pBaseClassAddrOp.mutable_offset() = offsetStrRef;
+
+        auto assumeNotNull = op.getAssumeNotNull();
+        pBaseClassAddrOp.set_assume_not_null(assumeNotNull);
 
         pInst->mutable_base_class_addr_op()->CopyFrom(pBaseClassAddrOp);
       })
@@ -182,8 +328,26 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pBinOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pBinOp.mutable_rhs() = prhsID;
+
+        auto noUnsignedWrap = op.getNoUnsignedWrap();
+        pBinOp.set_no_unsigned_wrap(noUnsignedWrap);
+
+        auto noSignedWrap = op.getNoSignedWrap();
+        pBinOp.set_no_signed_wrap(noSignedWrap);
 
         pInst->mutable_bin_op()->CopyFrom(pBinOp);
       })
@@ -195,8 +359,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pBinOpOverflowOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pBinOpOverflowOp.mutable_rhs() = prhsID;
 
         pInst->mutable_bin_op_overflow_op()->CopyFrom(pBinOpOverflowOp);
       })
@@ -207,6 +383,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pBitClrsbOp.mutable_input() = pinputID;
 
         pInst->mutable_bit_clrsb_op()->CopyFrom(pBitClrsbOp);
       })
@@ -217,6 +399,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pBitClzOp.mutable_input() = pinputID;
 
         pInst->mutable_bit_clz_op()->CopyFrom(pBitClzOp);
       })
@@ -227,6 +415,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pBitCtzOp.mutable_input() = pinputID;
 
         pInst->mutable_bit_ctz_op()->CopyFrom(pBitCtzOp);
       })
@@ -237,6 +431,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pBitFfsOp.mutable_input() = pinputID;
 
         pInst->mutable_bit_ffs_op()->CopyFrom(pBitFfsOp);
       })
@@ -247,6 +447,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pBitParityOp.mutable_input() = pinputID;
 
         pInst->mutable_bit_parity_op()->CopyFrom(pBitParityOp);
       })
@@ -257,6 +463,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pBitPopcountOp.mutable_input() = pinputID;
 
         pInst->mutable_bit_popcount_op()->CopyFrom(pBitPopcountOp);
       })
@@ -267,6 +479,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto cond = op.getCond().getDefiningOp();
+        auto condID = internOperation(opCache, cond);
+
+        protocir::CIROpID pcondID;
+        pcondID.set_id(condID);
+
+        *pBrCondOp.mutable_cond() = pcondID;
 
         auto destOperandsTrue = op.getDestOperandsTrue();
         for (auto edestOperandsTrue : destOperandsTrue) {
@@ -317,6 +535,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pByteswapOp.mutable_input() = pinputID;
 
         pInst->mutable_byteswap_op()->CopyFrom(pByteswapOp);
       })
@@ -337,6 +561,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           }
         }
 
+        auto asmString = op.getAsmString();
+        *pInlineAsmOp.mutable_asm_string() = asmString;
+
+        auto constraints = op.getConstraints();
+        *pInlineAsmOp.mutable_constraints() = constraints;
+
+        auto sideEffects = op.getSideEffects();
+        pInlineAsmOp.set_side_effects(sideEffects);
+
+        auto operandsSegments = op.getOperandsSegments();
+        for (auto eoperandsSegments : operandsSegments) {
+          pInlineAsmOp.add_operands_segments(eoperandsSegments);
+        }
+
         pInst->mutable_inline_asm_op()->CopyFrom(pInlineAsmOp);
       })
 
@@ -350,6 +588,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           auto eargOpsProto = pCallOp.add_arg_ops();
           auto eargOpsID = internOperation(opCache, eargOps.getDefiningOp());
           eargOpsProto->set_id(eargOpsID);
+        }
+
+        auto exception = op.getException();
+        pCallOp.set_exception(exception);
+
+        auto calleeOptional = op.getCallee();
+        if (calleeOptional) {
+          auto callee = calleeOptional.value();
+          *pCallOp.mutable_callee() = callee;
         }
 
         pInst->mutable_call_op()->CopyFrom(pCallOp);
@@ -369,6 +616,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pCastOp.mutable_src() = psrcID;
 
         pInst->mutable_cast_op()->CopyFrom(pCastOp);
       })
@@ -397,6 +650,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pCeilOp.mutable_src() = psrcID;
 
         pInst->mutable_ceil_op()->CopyFrom(pCeilOp);
       })
@@ -407,8 +666,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto begin = op.getBegin().getDefiningOp();
+        auto beginID = internOperation(opCache, begin);
+
+        protocir::CIROpID pbeginID;
+        pbeginID.set_id(beginID);
+
+        *pClearCacheOp.mutable_begin() = pbeginID;
 
         auto end = op.getEnd().getDefiningOp();
+        auto endID = internOperation(opCache, end);
+
+        protocir::CIROpID pendID;
+        pendID.set_id(endID);
+
+        *pClearCacheOp.mutable_end() = pendID;
 
         pInst->mutable_clear_cache_op()->CopyFrom(pClearCacheOp);
       })
@@ -419,8 +690,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pCmpOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pCmpOp.mutable_rhs() = prhsID;
 
         pInst->mutable_cmp_op()->CopyFrom(pCmpOp);
       })
@@ -431,8 +714,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pCmpThreeWayOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pCmpThreeWayOp.mutable_rhs() = prhsID;
 
         pInst->mutable_cmp_three_way_op()->CopyFrom(pCmpThreeWayOp);
       })
@@ -443,8 +738,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pComplexBinOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pComplexBinOp.mutable_rhs() = prhsID;
+
+        auto promoted = op.getPromoted();
+        pComplexBinOp.set_promoted(promoted);
 
         pInst->mutable_complex_bin_op()->CopyFrom(pComplexBinOp);
       })
@@ -456,8 +766,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto real = op.getReal().getDefiningOp();
+        auto realID = internOperation(opCache, real);
+
+        protocir::CIROpID prealID;
+        prealID.set_id(realID);
+
+        *pComplexCreateOp.mutable_real() = prealID;
 
         auto imag = op.getImag().getDefiningOp();
+        auto imagID = internOperation(opCache, imag);
+
+        protocir::CIROpID pimagID;
+        pimagID.set_id(imagID);
+
+        *pComplexCreateOp.mutable_imag() = pimagID;
 
         pInst->mutable_complex_create_op()->CopyFrom(pComplexCreateOp);
       })
@@ -468,6 +790,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto operand = op.getOperand().getDefiningOp();
+        auto operandID = internOperation(opCache, operand);
+
+        protocir::CIROpID poperandID;
+        poperandID.set_id(operandID);
+
+        *pComplexImagOp.mutable_operand() = poperandID;
 
         pInst->mutable_complex_imag_op()->CopyFrom(pComplexImagOp);
       })
@@ -479,6 +807,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto operand = op.getOperand().getDefiningOp();
+        auto operandID = internOperation(opCache, operand);
+
+        protocir::CIROpID poperandID;
+        poperandID.set_id(operandID);
+
+        *pComplexImagPtrOp.mutable_operand() = poperandID;
 
         pInst->mutable_complex_imag_ptr_op()->CopyFrom(pComplexImagPtrOp);
       })
@@ -489,6 +823,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto operand = op.getOperand().getDefiningOp();
+        auto operandID = internOperation(opCache, operand);
+
+        protocir::CIROpID poperandID;
+        poperandID.set_id(operandID);
+
+        *pComplexRealOp.mutable_operand() = poperandID;
 
         pInst->mutable_complex_real_op()->CopyFrom(pComplexRealOp);
       })
@@ -500,6 +840,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto operand = op.getOperand().getDefiningOp();
+        auto operandID = internOperation(opCache, operand);
+
+        protocir::CIROpID poperandID;
+        poperandID.set_id(operandID);
+
+        *pComplexRealPtrOp.mutable_operand() = poperandID;
 
         pInst->mutable_complex_real_ptr_op()->CopyFrom(pComplexRealPtrOp);
       })
@@ -510,6 +856,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto condition = op.getCondition().getDefiningOp();
+        auto conditionID = internOperation(opCache, condition);
+
+        protocir::CIROpID pconditionID;
+        pconditionID.set_id(conditionID);
+
+        *pConditionOp.mutable_condition() = pconditionID;
 
         pInst->mutable_condition_op()->CopyFrom(pConditionOp);
       })
@@ -518,6 +870,11 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                               &opCache](cir::ConstantOp op) {
         protocir::CIRConstantOp pConstantOp;
         pInst->mutable_base()->set_id(instID);
+
+        std::string valueStr;
+        llvm::raw_string_ostream valueRawStream(valueStr);
+        op.getValue().print(valueRawStream);
+        *pConstantOp.mutable_value() = valueStr;
 
         pInst->mutable_constant_op()->CopyFrom(pConstantOp);
       })
@@ -536,8 +893,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto dst = op.getDst().getDefiningOp();
+        auto dstID = internOperation(opCache, dst);
+
+        protocir::CIROpID pdstID;
+        pdstID.set_id(dstID);
+
+        *pCopyOp.mutable_dst() = pdstID;
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pCopyOp.mutable_src() = psrcID;
+
+        auto isVolatile = op.getIsVolatile();
+        pCopyOp.set_is_volatile(isVolatile);
 
         pInst->mutable_copy_op()->CopyFrom(pCopyOp);
       })
@@ -548,8 +920,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pCopysignOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pCopysignOp.mutable_rhs() = prhsID;
 
         pInst->mutable_copysign_op()->CopyFrom(pCopysignOp);
       })
@@ -560,6 +944,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pCosOp.mutable_src() = psrcID;
 
         pInst->mutable_cos_op()->CopyFrom(pCosOp);
       })
@@ -571,6 +961,21 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto baseAddr = op.getBaseAddr().getDefiningOp();
+        auto baseAddrID = internOperation(opCache, baseAddr);
+
+        protocir::CIROpID pbaseAddrID;
+        pbaseAddrID.set_id(baseAddrID);
+
+        *pDerivedClassAddrOp.mutable_base_addr() = pbaseAddrID;
+
+        llvm::SmallVector<char> offsetStr;
+        auto offset = op.getOffset();
+        offset.toString(offsetStr, 10, false);
+        llvm::StringRef offsetStrRef(offsetStr.data(), offsetStr.size());
+        *pDerivedClassAddrOp.mutable_offset() = offsetStrRef;
+
+        auto assumeNotNull = op.getAssumeNotNull();
+        pDerivedClassAddrOp.set_assume_not_null(assumeNotNull);
 
         pInst->mutable_derived_class_addr_op()->CopyFrom(pDerivedClassAddrOp);
       })
@@ -589,6 +994,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pDynamicCastOp.mutable_src() = psrcID;
+
+        auto relativeLayout = op.getRelativeLayout();
+        pDynamicCastOp.set_relative_layout(relativeLayout);
 
         pInst->mutable_dynamic_cast_op()->CopyFrom(pDynamicCastOp);
       })
@@ -598,6 +1012,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIREhInflightOp pEhInflightOp;
         pInst->mutable_base()->set_id(instID);
 
+        auto cleanup = op.getCleanup();
+        pEhInflightOp.set_cleanup(cleanup);
+
         pInst->mutable_eh_inflight_op()->CopyFrom(pEhInflightOp);
       })
 
@@ -605,6 +1022,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                               &opCache](cir::EhTypeIdOp op) {
         protocir::CIREhTypeIdOp pEhTypeIdOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto typeSym = op.getTypeSym();
+        *pEhTypeIdOp.mutable_type_sym() = typeSym;
 
         pInst->mutable_eh_type_id_op()->CopyFrom(pEhTypeIdOp);
       })
@@ -615,6 +1035,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pExp2Op.mutable_src() = psrcID;
 
         pInst->mutable_exp2_op()->CopyFrom(pExp2Op);
       })
@@ -625,6 +1051,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pExpOp.mutable_src() = psrcID;
 
         pInst->mutable_exp_op()->CopyFrom(pExpOp);
       })
@@ -635,8 +1067,29 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto val = op.getVal().getDefiningOp();
+        auto valID = internOperation(opCache, val);
+
+        protocir::CIROpID pvalID;
+        pvalID.set_id(valID);
+
+        *pExpectOp.mutable_val() = pvalID;
 
         auto expected = op.getExpected().getDefiningOp();
+        auto expectedID = internOperation(opCache, expected);
+
+        protocir::CIROpID pexpectedID;
+        pexpectedID.set_id(expectedID);
+
+        *pExpectOp.mutable_expected() = pexpectedID;
+
+        auto probOptional = op.getProb();
+        if (probOptional) {
+          auto prob = probOptional.value();
+          llvm::SmallVector<char> probStr;
+          prob.toString(probStr);
+          llvm::StringRef probStrRef(probStr.data(), probStr.size());
+          *pExpectOp.mutable_prob() = probStrRef;
+        }
 
         pInst->mutable_expect_op()->CopyFrom(pExpectOp);
       })
@@ -647,6 +1100,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pFAbsOp.mutable_src() = psrcID;
 
         pInst->mutable_f_abs_op()->CopyFrom(pFAbsOp);
       })
@@ -657,8 +1116,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pFMaxOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pFMaxOp.mutable_rhs() = prhsID;
 
         pInst->mutable_f_max_op()->CopyFrom(pFMaxOp);
       })
@@ -669,8 +1140,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pFMinOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pFMinOp.mutable_rhs() = prhsID;
 
         pInst->mutable_f_min_op()->CopyFrom(pFMinOp);
       })
@@ -681,8 +1164,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pFModOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pFModOp.mutable_rhs() = prhsID;
 
         pInst->mutable_f_mod_op()->CopyFrom(pFModOp);
       })
@@ -693,6 +1188,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pFloorOp.mutable_src() = psrcID;
 
         pInst->mutable_floor_op()->CopyFrom(pFloorOp);
       })
@@ -711,6 +1212,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto level = op.getLevel().getDefiningOp();
+        auto levelID = internOperation(opCache, level);
+
+        protocir::CIROpID plevelID;
+        plevelID.set_id(levelID);
+
+        *pFrameAddrOp.mutable_level() = plevelID;
 
         pInst->mutable_frame_addr_op()->CopyFrom(pFrameAddrOp);
       })
@@ -722,6 +1229,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr = op.getPtr().getDefiningOp();
+        auto ptrID = internOperation(opCache, ptr);
+
+        protocir::CIROpID pptrID;
+        pptrID.set_id(ptrID);
+
+        *pFreeExceptionOp.mutable_ptr() = pptrID;
 
         pInst->mutable_free_exception_op()->CopyFrom(pFreeExceptionOp);
       })
@@ -730,6 +1243,56 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::FuncOp op) {
         protocir::CIRFuncOp pFuncOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto symName = op.getSymName();
+        *pFuncOp.mutable_sym_name() = symName;
+
+        auto globalVisibility = op.getGlobalVisibility();
+        *pFuncOp.mutable_global_visibility() = globalVisibility;
+
+        auto functionType = op.getFunctionType();
+        auto functionTypeID = internType(typeCache, functionType);
+
+        protocir::CIRTypeID pfunctionTypeID;
+        pfunctionTypeID.set_id(functionTypeID);
+
+        *pFuncOp.mutable_function_type() = pfunctionTypeID;
+
+        auto builtin = op.getBuiltin();
+        pFuncOp.set_builtin(builtin);
+
+        auto coroutine = op.getCoroutine();
+        pFuncOp.set_coroutine(coroutine);
+
+        auto lambda = op.getLambda();
+        pFuncOp.set_lambda(lambda);
+
+        auto noProto = op.getNoProto();
+        pFuncOp.set_no_proto(noProto);
+
+        auto dsolocal = op.getDsolocal();
+        pFuncOp.set_dsolocal(dsolocal);
+
+        auto symVisibilityOptional = op.getSymVisibility();
+        if (symVisibilityOptional) {
+          auto symVisibility = symVisibilityOptional.value();
+          *pFuncOp.mutable_sym_visibility() = symVisibility;
+        }
+
+        auto comdat = op.getComdat();
+        pFuncOp.set_comdat(comdat);
+
+        auto aliaseeOptional = op.getAliasee();
+        if (aliaseeOptional) {
+          auto aliasee = aliaseeOptional.value();
+          *pFuncOp.mutable_aliasee() = aliasee;
+        }
+
+        auto globalCtorOptional = op.getGlobalCtor();
+        pFuncOp.set_global_ctor(globalCtorOptional.has_value());
+
+        auto globalDtorOptional = op.getGlobalDtor();
+        pFuncOp.set_global_dtor(globalDtorOptional.has_value());
 
         pInst->mutable_func_op()->CopyFrom(pFuncOp);
       })
@@ -740,6 +1303,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pGetBitfieldOp.mutable_addr() = paddrID;
+
+        auto isVolatile = op.getIsVolatile();
+        pGetBitfieldOp.set_is_volatile(isVolatile);
 
         pInst->mutable_get_bitfield_op()->CopyFrom(pGetBitfieldOp);
       })
@@ -748,6 +1320,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                                &blockCache, &opCache](cir::GetGlobalOp op) {
         protocir::CIRGetGlobalOp pGetGlobalOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto name = op.getName();
+        *pGetGlobalOp.mutable_name() = name;
+
+        auto tls = op.getTls();
+        pGetGlobalOp.set_tls(tls);
 
         pInst->mutable_get_global_op()->CopyFrom(pGetGlobalOp);
       })
@@ -758,6 +1336,22 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pGetMemberOp.mutable_addr() = paddrID;
+
+        auto name = op.getName();
+        *pGetMemberOp.mutable_name() = name;
+
+        llvm::SmallVector<char> indexAttrStr;
+        auto indexAttr = op.getIndexAttr();
+        indexAttr.toString(indexAttrStr, 10, false);
+        llvm::StringRef indexAttrStrRef(indexAttrStr.data(),
+                                        indexAttrStr.size());
+        *pGetMemberOp.mutable_index_attr() = indexAttrStrRef;
 
         pInst->mutable_get_member_op()->CopyFrom(pGetMemberOp);
       })
@@ -768,8 +1362,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto method = op.getMethod().getDefiningOp();
+        auto methodID = internOperation(opCache, method);
+
+        protocir::CIROpID pmethodID;
+        pmethodID.set_id(methodID);
+
+        *pGetMethodOp.mutable_method() = pmethodID;
 
         auto object = op.getObject().getDefiningOp();
+        auto objectID = internOperation(opCache, object);
+
+        protocir::CIROpID pobjectID;
+        pobjectID.set_id(objectID);
+
+        *pGetMethodOp.mutable_object() = pobjectID;
 
         pInst->mutable_get_method_op()->CopyFrom(pGetMethodOp);
       })
@@ -781,8 +1387,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pGetRuntimeMemberOp.mutable_addr() = paddrID;
 
         auto member = op.getMember().getDefiningOp();
+        auto memberID = internOperation(opCache, member);
+
+        protocir::CIROpID pmemberID;
+        pmemberID.set_id(memberID);
+
+        *pGetRuntimeMemberOp.mutable_member() = pmemberID;
 
         pInst->mutable_get_runtime_member_op()->CopyFrom(pGetRuntimeMemberOp);
       })
@@ -792,6 +1410,47 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRGlobalOp pGlobalOp;
         pInst->mutable_base()->set_id(instID);
 
+        auto symName = op.getSymName();
+        *pGlobalOp.mutable_sym_name() = symName;
+
+        auto globalVisibility = op.getGlobalVisibility();
+        *pGlobalOp.mutable_global_visibility() = globalVisibility;
+
+        auto symVisibilityOptional = op.getSymVisibility();
+        if (symVisibilityOptional) {
+          auto symVisibility = symVisibilityOptional.value();
+          *pGlobalOp.mutable_sym_visibility() = symVisibility;
+        }
+
+        auto symType = op.getSymType();
+        auto symTypeID = internType(typeCache, symType);
+
+        protocir::CIRTypeID psymTypeID;
+        psymTypeID.set_id(symTypeID);
+
+        *pGlobalOp.mutable_sym_type() = psymTypeID;
+
+        auto comdat = op.getComdat();
+        pGlobalOp.set_comdat(comdat);
+
+        auto constant = op.getConstant();
+        pGlobalOp.set_constant(constant);
+
+        auto dsolocal = op.getDsolocal();
+        pGlobalOp.set_dsolocal(dsolocal);
+
+        auto alignmentOptional = op.getAlignment();
+        if (alignmentOptional) {
+          auto alignment = alignmentOptional.value();
+          pGlobalOp.set_alignment(alignment);
+        }
+
+        auto sectionOptional = op.getSection();
+        if (sectionOptional) {
+          auto section = sectionOptional.value();
+          *pGlobalOp.mutable_section() = section;
+        }
+
         pInst->mutable_global_op()->CopyFrom(pGlobalOp);
       })
 
@@ -799,6 +1458,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::GotoOp op) {
         protocir::CIRGotoOp pGotoOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto label = op.getLabel();
+        *pGotoOp.mutable_label() = label;
 
         pInst->mutable_goto_op()->CopyFrom(pGotoOp);
       })
@@ -809,6 +1471,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto condition = op.getCondition().getDefiningOp();
+        auto conditionID = internOperation(opCache, condition);
+
+        protocir::CIROpID pconditionID;
+        pconditionID.set_id(conditionID);
+
+        *pIfOp.mutable_condition() = pconditionID;
 
         pInst->mutable_if_op()->CopyFrom(pIfOp);
       })
@@ -819,6 +1487,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto val = op.getVal().getDefiningOp();
+        auto valID = internOperation(opCache, val);
+
+        protocir::CIROpID pvalID;
+        pvalID.set_id(valID);
+
+        *pIsConstantOp.mutable_val() = pvalID;
 
         pInst->mutable_is_constant_op()->CopyFrom(pIsConstantOp);
       })
@@ -829,6 +1503,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pIsFPClassOp.mutable_src() = psrcID;
+
+        auto flags = op.getFlags();
+        pIsFPClassOp.set_flags(flags);
 
         pInst->mutable_is_fp_class_op()->CopyFrom(pIsFPClassOp);
       })
@@ -839,6 +1522,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto container = op.getContainer().getDefiningOp();
+        auto containerID = internOperation(opCache, container);
+
+        protocir::CIROpID pcontainerID;
+        pcontainerID.set_id(containerID);
+
+        *pIterBeginOp.mutable_container() = pcontainerID;
+
+        auto originalFn = op.getOriginalFn();
+        *pIterBeginOp.mutable_original_fn() = originalFn;
 
         pInst->mutable_iter_begin_op()->CopyFrom(pIterBeginOp);
       })
@@ -849,6 +1541,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto container = op.getContainer().getDefiningOp();
+        auto containerID = internOperation(opCache, container);
+
+        protocir::CIROpID pcontainerID;
+        pcontainerID.set_id(containerID);
+
+        *pIterEndOp.mutable_container() = pcontainerID;
+
+        auto originalFn = op.getOriginalFn();
+        *pIterEndOp.mutable_original_fn() = originalFn;
 
         pInst->mutable_iter_end_op()->CopyFrom(pIterEndOp);
       })
@@ -866,6 +1567,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           eargOpsProto->set_id(eargOpsID);
         }
 
+        auto intrinsicName = op.getIntrinsicName();
+        *pLLVMIntrinsicCallOp.mutable_intrinsic_name() = intrinsicName;
+
         pInst->mutable_llvm_intrinsic_call_op()->CopyFrom(pLLVMIntrinsicCallOp);
       })
 
@@ -875,6 +1579,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pLLrintOp.mutable_src() = psrcID;
 
         pInst->mutable_l_lrint_op()->CopyFrom(pLLrintOp);
       })
@@ -885,6 +1595,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pLLroundOp.mutable_src() = psrcID;
 
         pInst->mutable_l_lround_op()->CopyFrom(pLLroundOp);
       })
@@ -893,6 +1609,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::LabelOp op) {
         protocir::CIRLabelOp pLabelOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto label = op.getLabel();
+        *pLabelOp.mutable_label() = label;
 
         pInst->mutable_label_op()->CopyFrom(pLabelOp);
       })
@@ -903,6 +1622,24 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pLoadOp.mutable_addr() = paddrID;
+
+        auto isDeref = op.getIsDeref();
+        pLoadOp.set_is_deref(isDeref);
+
+        auto isVolatile = op.getIsVolatile();
+        pLoadOp.set_is_volatile(isVolatile);
+
+        auto alignmentOptional = op.getAlignment();
+        if (alignmentOptional) {
+          auto alignment = alignmentOptional.value();
+          pLoadOp.set_alignment(alignment);
+        }
 
         pInst->mutable_load_op()->CopyFrom(pLoadOp);
       })
@@ -913,6 +1650,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pLog10Op.mutable_src() = psrcID;
 
         pInst->mutable_log10_op()->CopyFrom(pLog10Op);
       })
@@ -923,6 +1666,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pLog2Op.mutable_src() = psrcID;
 
         pInst->mutable_log2_op()->CopyFrom(pLog2Op);
       })
@@ -933,6 +1682,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pLogOp.mutable_src() = psrcID;
 
         pInst->mutable_log_op()->CopyFrom(pLogOp);
       })
@@ -943,6 +1698,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pLrintOp.mutable_src() = psrcID;
 
         pInst->mutable_lrint_op()->CopyFrom(pLrintOp);
       })
@@ -953,6 +1714,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pLroundOp.mutable_src() = psrcID;
 
         pInst->mutable_lround_op()->CopyFrom(pLroundOp);
       })
@@ -963,10 +1730,28 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pMemChrOp.mutable_src() = psrcID;
 
         auto pattern = op.getPattern().getDefiningOp();
+        auto patternID = internOperation(opCache, pattern);
+
+        protocir::CIROpID ppatternID;
+        ppatternID.set_id(patternID);
+
+        *pMemChrOp.mutable_pattern() = ppatternID;
 
         auto len = op.getLen().getDefiningOp();
+        auto lenID = internOperation(opCache, len);
+
+        protocir::CIROpID plenID;
+        plenID.set_id(lenID);
+
+        *pMemChrOp.mutable_len() = plenID;
 
         pInst->mutable_mem_chr_op()->CopyFrom(pMemChrOp);
       })
@@ -978,8 +1763,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto dst = op.getDst().getDefiningOp();
+        auto dstID = internOperation(opCache, dst);
+
+        protocir::CIROpID pdstID;
+        pdstID.set_id(dstID);
+
+        *pMemCpyInlineOp.mutable_dst() = pdstID;
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pMemCpyInlineOp.mutable_src() = psrcID;
+
+        auto len = op.getLen();
+        pMemCpyInlineOp.set_len(len);
 
         pInst->mutable_mem_cpy_inline_op()->CopyFrom(pMemCpyInlineOp);
       })
@@ -990,10 +1790,28 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto dst = op.getDst().getDefiningOp();
+        auto dstID = internOperation(opCache, dst);
+
+        protocir::CIROpID pdstID;
+        pdstID.set_id(dstID);
+
+        *pMemCpyOp.mutable_dst() = pdstID;
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pMemCpyOp.mutable_src() = psrcID;
 
         auto len = op.getLen().getDefiningOp();
+        auto lenID = internOperation(opCache, len);
+
+        protocir::CIROpID plenID;
+        plenID.set_id(lenID);
+
+        *pMemCpyOp.mutable_len() = plenID;
 
         pInst->mutable_mem_cpy_op()->CopyFrom(pMemCpyOp);
       })
@@ -1004,10 +1822,28 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto dst = op.getDst().getDefiningOp();
+        auto dstID = internOperation(opCache, dst);
+
+        protocir::CIROpID pdstID;
+        pdstID.set_id(dstID);
+
+        *pMemMoveOp.mutable_dst() = pdstID;
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pMemMoveOp.mutable_src() = psrcID;
 
         auto len = op.getLen().getDefiningOp();
+        auto lenID = internOperation(opCache, len);
+
+        protocir::CIROpID plenID;
+        plenID.set_id(lenID);
+
+        *pMemMoveOp.mutable_len() = plenID;
 
         pInst->mutable_mem_move_op()->CopyFrom(pMemMoveOp);
       })
@@ -1019,8 +1855,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto dst = op.getDst().getDefiningOp();
+        auto dstID = internOperation(opCache, dst);
+
+        protocir::CIROpID pdstID;
+        pdstID.set_id(dstID);
+
+        *pMemSetInlineOp.mutable_dst() = pdstID;
 
         auto val = op.getVal().getDefiningOp();
+        auto valID = internOperation(opCache, val);
+
+        protocir::CIROpID pvalID;
+        pvalID.set_id(valID);
+
+        *pMemSetInlineOp.mutable_val() = pvalID;
+
+        auto len = op.getLen();
+        pMemSetInlineOp.set_len(len);
 
         pInst->mutable_mem_set_inline_op()->CopyFrom(pMemSetInlineOp);
       })
@@ -1031,10 +1882,28 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto dst = op.getDst().getDefiningOp();
+        auto dstID = internOperation(opCache, dst);
+
+        protocir::CIROpID pdstID;
+        pdstID.set_id(dstID);
+
+        *pMemSetOp.mutable_dst() = pdstID;
 
         auto val = op.getVal().getDefiningOp();
+        auto valID = internOperation(opCache, val);
+
+        protocir::CIROpID pvalID;
+        pvalID.set_id(valID);
+
+        *pMemSetOp.mutable_val() = pvalID;
 
         auto len = op.getLen().getDefiningOp();
+        auto lenID = internOperation(opCache, len);
+
+        protocir::CIROpID plenID;
+        plenID.set_id(lenID);
+
+        *pMemSetOp.mutable_len() = plenID;
 
         pInst->mutable_mem_set_op()->CopyFrom(pMemSetOp);
       })
@@ -1045,6 +1914,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pNearbyintOp.mutable_src() = psrcID;
 
         pInst->mutable_nearbyint_op()->CopyFrom(pNearbyintOp);
       })
@@ -1055,6 +1930,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr = op.getPtr().getDefiningOp();
+        auto ptrID = internOperation(opCache, ptr);
+
+        protocir::CIROpID pptrID;
+        pptrID.set_id(ptrID);
+
+        *pObjSizeOp.mutable_ptr() = pptrID;
+
+        auto dynamic = op.getDynamic();
+        pObjSizeOp.set_dynamic(dynamic);
 
         pInst->mutable_obj_size_op()->CopyFrom(pObjSizeOp);
       })
@@ -1065,8 +1949,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pPowOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pPowOp.mutable_rhs() = prhsID;
 
         pInst->mutable_pow_op()->CopyFrom(pPowOp);
       })
@@ -1077,6 +1973,18 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pPrefetchOp.mutable_addr() = paddrID;
+
+        auto locality = op.getLocality();
+        pPrefetchOp.set_locality(locality);
+
+        auto isWrite = op.getIsWrite();
+        pPrefetchOp.set_is_write(isWrite);
 
         pInst->mutable_prefetch_op()->CopyFrom(pPrefetchOp);
       })
@@ -1087,8 +1995,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pPtrDiffOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pPtrDiffOp.mutable_rhs() = prhsID;
 
         pInst->mutable_ptr_diff_op()->CopyFrom(pPtrDiffOp);
       })
@@ -1099,8 +2019,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr = op.getPtr().getDefiningOp();
+        auto ptrID = internOperation(opCache, ptr);
+
+        protocir::CIROpID pptrID;
+        pptrID.set_id(ptrID);
+
+        *pPtrMaskOp.mutable_ptr() = pptrID;
 
         auto mask = op.getMask().getDefiningOp();
+        auto maskID = internOperation(opCache, mask);
+
+        protocir::CIROpID pmaskID;
+        pmaskID.set_id(maskID);
+
+        *pPtrMaskOp.mutable_mask() = pmaskID;
 
         pInst->mutable_ptr_mask_op()->CopyFrom(pPtrMaskOp);
       })
@@ -1111,8 +2043,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto base = op.getBase().getDefiningOp();
+        auto baseID = internOperation(opCache, base);
+
+        protocir::CIROpID pbaseID;
+        pbaseID.set_id(baseID);
+
+        *pPtrStrideOp.mutable_base() = pbaseID;
 
         auto stride = op.getStride().getDefiningOp();
+        auto strideID = internOperation(opCache, stride);
+
+        protocir::CIROpID pstrideID;
+        pstrideID.set_id(strideID);
+
+        *pPtrStrideOp.mutable_stride() = pstrideID;
 
         pInst->mutable_ptr_stride_op()->CopyFrom(pPtrStrideOp);
       })
@@ -1142,6 +2086,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pResumeOp.mutable_type_id() = ptypeIdID;
         }
 
+        auto rethrow = op.getRethrow();
+        pResumeOp.set_rethrow(rethrow);
+
         pInst->mutable_resume_op()->CopyFrom(pResumeOp);
       })
 
@@ -1151,6 +2098,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto level = op.getLevel().getDefiningOp();
+        auto levelID = internOperation(opCache, level);
+
+        protocir::CIROpID plevelID;
+        plevelID.set_id(levelID);
+
+        *pReturnAddrOp.mutable_level() = plevelID;
 
         pInst->mutable_return_addr_op()->CopyFrom(pReturnAddrOp);
       })
@@ -1176,6 +2129,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pRintOp.mutable_src() = psrcID;
 
         pInst->mutable_rint_op()->CopyFrom(pRintOp);
       })
@@ -1186,8 +2145,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pRotateOp.mutable_src() = psrcID;
 
         auto amt = op.getAmt().getDefiningOp();
+        auto amtID = internOperation(opCache, amt);
+
+        protocir::CIROpID pamtID;
+        pamtID.set_id(amtID);
+
+        *pRotateOp.mutable_amt() = pamtID;
+
+        auto left = op.getLeft();
+        pRotateOp.set_left(left);
 
         pInst->mutable_rotate_op()->CopyFrom(pRotateOp);
       })
@@ -1198,6 +2172,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pRoundOp.mutable_src() = psrcID;
 
         pInst->mutable_round_op()->CopyFrom(pRoundOp);
       })
@@ -1216,10 +2196,28 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto condition = op.getCondition().getDefiningOp();
+        auto conditionID = internOperation(opCache, condition);
+
+        protocir::CIROpID pconditionID;
+        pconditionID.set_id(conditionID);
+
+        *pSelectOp.mutable_condition() = pconditionID;
 
         auto trueValue = op.getTrueValue().getDefiningOp();
+        auto trueValueID = internOperation(opCache, trueValue);
+
+        protocir::CIROpID ptrueValueID;
+        ptrueValueID.set_id(trueValueID);
+
+        *pSelectOp.mutable_true_value() = ptrueValueID;
 
         auto falseValue = op.getFalseValue().getDefiningOp();
+        auto falseValueID = internOperation(opCache, falseValue);
+
+        protocir::CIROpID pfalseValueID;
+        pfalseValueID.set_id(falseValueID);
+
+        *pSelectOp.mutable_false_value() = pfalseValueID;
 
         pInst->mutable_select_op()->CopyFrom(pSelectOp);
       })
@@ -1230,8 +2228,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pSetBitfieldOp.mutable_addr() = paddrID;
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pSetBitfieldOp.mutable_src() = psrcID;
+
+        auto isVolatile = op.getIsVolatile();
+        pSetBitfieldOp.set_is_volatile(isVolatile);
 
         pInst->mutable_set_bitfield_op()->CopyFrom(pSetBitfieldOp);
       })
@@ -1242,8 +2255,23 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto value = op.getValue().getDefiningOp();
+        auto valueID = internOperation(opCache, value);
+
+        protocir::CIROpID pvalueID;
+        pvalueID.set_id(valueID);
+
+        *pShiftOp.mutable_value() = pvalueID;
 
         auto amount = op.getAmount().getDefiningOp();
+        auto amountID = internOperation(opCache, amount);
+
+        protocir::CIROpID pamountID;
+        pamountID.set_id(amountID);
+
+        *pShiftOp.mutable_amount() = pamountID;
+
+        auto isShiftleft = op.getIsShiftleft();
+        pShiftOp.set_is_shiftleft(isShiftleft);
 
         pInst->mutable_shift_op()->CopyFrom(pShiftOp);
       })
@@ -1254,6 +2282,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pSignBitOp.mutable_input() = pinputID;
 
         pInst->mutable_sign_bit_op()->CopyFrom(pSignBitOp);
       })
@@ -1264,6 +2298,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pSinOp.mutable_src() = psrcID;
 
         pInst->mutable_sin_op()->CopyFrom(pSinOp);
       })
@@ -1274,6 +2314,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pSqrtOp.mutable_src() = psrcID;
 
         pInst->mutable_sqrt_op()->CopyFrom(pSqrtOp);
       })
@@ -1285,6 +2331,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto ptr = op.getPtr().getDefiningOp();
+        auto ptrID = internOperation(opCache, ptr);
+
+        protocir::CIROpID pptrID;
+        pptrID.set_id(ptrID);
+
+        *pStackRestoreOp.mutable_ptr() = pptrID;
 
         pInst->mutable_stack_restore_op()->CopyFrom(pStackRestoreOp);
       })
@@ -1303,10 +2355,31 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto first = op.getFirst().getDefiningOp();
+        auto firstID = internOperation(opCache, first);
+
+        protocir::CIROpID pfirstID;
+        pfirstID.set_id(firstID);
+
+        *pStdFindOp.mutable_first() = pfirstID;
 
         auto last = op.getLast().getDefiningOp();
+        auto lastID = internOperation(opCache, last);
+
+        protocir::CIROpID plastID;
+        plastID.set_id(lastID);
+
+        *pStdFindOp.mutable_last() = plastID;
 
         auto pattern = op.getPattern().getDefiningOp();
+        auto patternID = internOperation(opCache, pattern);
+
+        protocir::CIROpID ppatternID;
+        ppatternID.set_id(patternID);
+
+        *pStdFindOp.mutable_pattern() = ppatternID;
+
+        auto originalFn = op.getOriginalFn();
+        *pStdFindOp.mutable_original_fn() = originalFn;
 
         pInst->mutable_std_find_op()->CopyFrom(pStdFindOp);
       })
@@ -1317,8 +2390,29 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto value = op.getValue().getDefiningOp();
+        auto valueID = internOperation(opCache, value);
+
+        protocir::CIROpID pvalueID;
+        pvalueID.set_id(valueID);
+
+        *pStoreOp.mutable_value() = pvalueID;
 
         auto addr = op.getAddr().getDefiningOp();
+        auto addrID = internOperation(opCache, addr);
+
+        protocir::CIROpID paddrID;
+        paddrID.set_id(addrID);
+
+        *pStoreOp.mutable_addr() = paddrID;
+
+        auto isVolatile = op.getIsVolatile();
+        pStoreOp.set_is_volatile(isVolatile);
+
+        auto alignmentOptional = op.getAlignment();
+        if (alignmentOptional) {
+          auto alignment = alignmentOptional.value();
+          pStoreOp.set_alignment(alignment);
+        }
 
         pInst->mutable_store_op()->CopyFrom(pStoreOp);
       })
@@ -1329,6 +2423,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto condition = op.getCondition().getDefiningOp();
+        auto conditionID = internOperation(opCache, condition);
+
+        protocir::CIROpID pconditionID;
+        pconditionID.set_id(conditionID);
+
+        *pSwitchFlatOp.mutable_condition() = pconditionID;
 
         auto defaultOperands = op.getDefaultOperands();
         for (auto edefaultOperands : defaultOperands) {
@@ -1349,6 +2449,11 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           }
         }
 
+        auto caseOperandSegments = op.getCaseOperandSegments();
+        for (auto ecaseOperandSegments : caseOperandSegments) {
+          pSwitchFlatOp.add_case_operand_segments(ecaseOperandSegments);
+        }
+
         pInst->mutable_switch_flat_op()->CopyFrom(pSwitchFlatOp);
       })
 
@@ -1358,6 +2463,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto condition = op.getCondition().getDefiningOp();
+        auto conditionID = internOperation(opCache, condition);
+
+        protocir::CIROpID pconditionID;
+        pconditionID.set_id(conditionID);
+
+        *pSwitchOp.mutable_condition() = pconditionID;
 
         pInst->mutable_switch_op()->CopyFrom(pSwitchOp);
       })
@@ -1368,6 +2479,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto cond = op.getCond().getDefiningOp();
+        auto condID = internOperation(opCache, cond);
+
+        protocir::CIROpID pcondID;
+        pcondID.set_id(condID);
+
+        *pTernaryOp.mutable_cond() = pcondID;
 
         pInst->mutable_ternary_op()->CopyFrom(pTernaryOp);
       })
@@ -1387,6 +2504,18 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pThrowOp.mutable_exception_ptr() = pexceptionPtrID;
         }
 
+        auto typeInfoOptional = op.getTypeInfo();
+        if (typeInfoOptional) {
+          auto typeInfo = typeInfoOptional.value();
+          *pThrowOp.mutable_type_info() = typeInfo;
+        }
+
+        auto dtorOptional = op.getDtor();
+        if (dtorOptional) {
+          auto dtor = dtorOptional.value();
+          *pThrowOp.mutable_dtor() = dtor;
+        }
+
         pInst->mutable_throw_op()->CopyFrom(pThrowOp);
       })
 
@@ -1404,6 +2533,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto src = op.getSrc().getDefiningOp();
+        auto srcID = internOperation(opCache, src);
+
+        protocir::CIROpID psrcID;
+        psrcID.set_id(srcID);
+
+        *pTruncOp.mutable_src() = psrcID;
 
         pInst->mutable_trunc_op()->CopyFrom(pTruncOp);
       })
@@ -1436,6 +2571,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           eargOpsProto->set_id(eargOpsID);
         }
 
+        auto calleeOptional = op.getCallee();
+        if (calleeOptional) {
+          auto callee = calleeOptional.value();
+          *pTryCallOp.mutable_callee() = callee;
+        }
+
         pInst->mutable_try_call_op()->CopyFrom(pTryCallOp);
       })
 
@@ -1443,6 +2584,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                          &opCache](cir::TryOp op) {
         protocir::CIRTryOp pTryOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto synthetic = op.getSynthetic();
+        pTryOp.set_synthetic(synthetic);
+
+        auto cleanup = op.getCleanup();
+        pTryOp.set_cleanup(cleanup);
 
         pInst->mutable_try_op()->CopyFrom(pTryOp);
       })
@@ -1453,6 +2600,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto input = op.getInput().getDefiningOp();
+        auto inputID = internOperation(opCache, input);
+
+        protocir::CIROpID pinputID;
+        pinputID.set_id(inputID);
+
+        *pUnaryOp.mutable_input() = pinputID;
 
         pInst->mutable_unary_op()->CopyFrom(pUnaryOp);
       })
@@ -1471,6 +2624,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto argList = op.getArgList().getDefiningOp();
+        auto argListID = internOperation(opCache, argList);
+
+        protocir::CIROpID pargListID;
+        pargListID.set_id(argListID);
+
+        *pVAArgOp.mutable_arg_list() = pargListID;
 
         pInst->mutable_va_arg_op()->CopyFrom(pVAArgOp);
       })
@@ -1481,8 +2640,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto dstList = op.getDstList().getDefiningOp();
+        auto dstListID = internOperation(opCache, dstList);
+
+        protocir::CIROpID pdstListID;
+        pdstListID.set_id(dstListID);
+
+        *pVACopyOp.mutable_dst_list() = pdstListID;
 
         auto srcList = op.getSrcList().getDefiningOp();
+        auto srcListID = internOperation(opCache, srcList);
+
+        protocir::CIROpID psrcListID;
+        psrcListID.set_id(srcListID);
+
+        *pVACopyOp.mutable_src_list() = psrcListID;
 
         pInst->mutable_va_copy_op()->CopyFrom(pVACopyOp);
       })
@@ -1493,6 +2664,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto argList = op.getArgList().getDefiningOp();
+        auto argListID = internOperation(opCache, argList);
+
+        protocir::CIROpID pargListID;
+        pargListID.set_id(argListID);
+
+        *pVAEndOp.mutable_arg_list() = pargListID;
 
         pInst->mutable_va_end_op()->CopyFrom(pVAEndOp);
       })
@@ -1503,6 +2680,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto argList = op.getArgList().getDefiningOp();
+        auto argListID = internOperation(opCache, argList);
+
+        protocir::CIROpID pargListID;
+        pargListID.set_id(argListID);
+
+        *pVAStartOp.mutable_arg_list() = pargListID;
 
         pInst->mutable_va_start_op()->CopyFrom(pVAStartOp);
       })
@@ -1523,6 +2706,15 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pVTTAddrPointOp.mutable_sym_addr() = psymAddrID;
         }
 
+        auto nameOptional = op.getName();
+        if (nameOptional) {
+          auto name = nameOptional.value();
+          *pVTTAddrPointOp.mutable_name() = name;
+        }
+
+        auto offset = op.getOffset();
+        pVTTAddrPointOp.set_offset(offset);
+
         pInst->mutable_vtt_addr_point_op()->CopyFrom(pVTTAddrPointOp);
       })
 
@@ -1542,6 +2734,18 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pVTableAddrPointOp.mutable_sym_addr() = psymAddrID;
         }
 
+        auto nameOptional = op.getName();
+        if (nameOptional) {
+          auto name = nameOptional.value();
+          *pVTableAddrPointOp.mutable_name() = name;
+        }
+
+        auto vtableIndex = op.getVtableIndex();
+        pVTableAddrPointOp.set_vtable_index(vtableIndex);
+
+        auto addressPointIndex = op.getAddressPointIndex();
+        pVTableAddrPointOp.set_address_point_index(addressPointIndex);
+
         pInst->mutable_v_table_addr_point_op()->CopyFrom(pVTableAddrPointOp);
       })
 
@@ -1551,8 +2755,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto lhs = op.getLhs().getDefiningOp();
+        auto lhsID = internOperation(opCache, lhs);
+
+        protocir::CIROpID plhsID;
+        plhsID.set_id(lhsID);
+
+        *pVecCmpOp.mutable_lhs() = plhsID;
 
         auto rhs = op.getRhs().getDefiningOp();
+        auto rhsID = internOperation(opCache, rhs);
+
+        protocir::CIROpID prhsID;
+        prhsID.set_id(rhsID);
+
+        *pVecCmpOp.mutable_rhs() = prhsID;
 
         pInst->mutable_vec_cmp_op()->CopyFrom(pVecCmpOp);
       })
@@ -1579,8 +2795,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto vec = op.getVec().getDefiningOp();
+        auto vecID = internOperation(opCache, vec);
+
+        protocir::CIROpID pvecID;
+        pvecID.set_id(vecID);
+
+        *pVecExtractOp.mutable_vec() = pvecID;
 
         auto index = op.getIndex().getDefiningOp();
+        auto indexID = internOperation(opCache, index);
+
+        protocir::CIROpID pindexID;
+        pindexID.set_id(indexID);
+
+        *pVecExtractOp.mutable_index() = pindexID;
 
         pInst->mutable_vec_extract_op()->CopyFrom(pVecExtractOp);
       })
@@ -1591,10 +2819,28 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto vec = op.getVec().getDefiningOp();
+        auto vecID = internOperation(opCache, vec);
+
+        protocir::CIROpID pvecID;
+        pvecID.set_id(vecID);
+
+        *pVecInsertOp.mutable_vec() = pvecID;
 
         auto value = op.getValue().getDefiningOp();
+        auto valueID = internOperation(opCache, value);
+
+        protocir::CIROpID pvalueID;
+        pvalueID.set_id(valueID);
+
+        *pVecInsertOp.mutable_value() = pvalueID;
 
         auto index = op.getIndex().getDefiningOp();
+        auto indexID = internOperation(opCache, index);
+
+        protocir::CIROpID pindexID;
+        pindexID.set_id(indexID);
+
+        *pVecInsertOp.mutable_index() = pindexID;
 
         pInst->mutable_vec_insert_op()->CopyFrom(pVecInsertOp);
       })
@@ -1606,8 +2852,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto vec = op.getVec().getDefiningOp();
+        auto vecID = internOperation(opCache, vec);
+
+        protocir::CIROpID pvecID;
+        pvecID.set_id(vecID);
+
+        *pVecShuffleDynamicOp.mutable_vec() = pvecID;
 
         auto indices = op.getIndices().getDefiningOp();
+        auto indicesID = internOperation(opCache, indices);
+
+        protocir::CIROpID pindicesID;
+        pindicesID.set_id(indicesID);
+
+        *pVecShuffleDynamicOp.mutable_indices() = pindicesID;
 
         pInst->mutable_vec_shuffle_dynamic_op()->CopyFrom(pVecShuffleDynamicOp);
       })
@@ -1618,8 +2876,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto vec1 = op.getVec1().getDefiningOp();
+        auto vec1ID = internOperation(opCache, vec1);
+
+        protocir::CIROpID pvec1ID;
+        pvec1ID.set_id(vec1ID);
+
+        *pVecShuffleOp.mutable_vec1() = pvec1ID;
 
         auto vec2 = op.getVec2().getDefiningOp();
+        auto vec2ID = internOperation(opCache, vec2);
+
+        protocir::CIROpID pvec2ID;
+        pvec2ID.set_id(vec2ID);
+
+        *pVecShuffleOp.mutable_vec2() = pvec2ID;
 
         pInst->mutable_vec_shuffle_op()->CopyFrom(pVecShuffleOp);
       })
@@ -1630,6 +2900,12 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto value = op.getValue().getDefiningOp();
+        auto valueID = internOperation(opCache, value);
+
+        protocir::CIROpID pvalueID;
+        pvalueID.set_id(valueID);
+
+        *pVecSplatOp.mutable_value() = pvalueID;
 
         pInst->mutable_vec_splat_op()->CopyFrom(pVecSplatOp);
       })
@@ -1640,10 +2916,28 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pInst->mutable_base()->set_id(instID);
 
         auto cond = op.getCond().getDefiningOp();
+        auto condID = internOperation(opCache, cond);
+
+        protocir::CIROpID pcondID;
+        pcondID.set_id(condID);
+
+        *pVecTernaryOp.mutable_cond() = pcondID;
 
         auto vec1 = op.getVec1().getDefiningOp();
+        auto vec1ID = internOperation(opCache, vec1);
+
+        protocir::CIROpID pvec1ID;
+        pvec1ID.set_id(vec1ID);
+
+        *pVecTernaryOp.mutable_vec1() = pvec1ID;
 
         auto vec2 = op.getVec2().getDefiningOp();
+        auto vec2ID = internOperation(opCache, vec2);
+
+        protocir::CIROpID pvec2ID;
+        pvec2ID.set_id(vec2ID);
+
+        *pVecTernaryOp.mutable_vec2() = pvec2ID;
 
         pInst->mutable_vec_ternary_op()->CopyFrom(pVecTernaryOp);
       })

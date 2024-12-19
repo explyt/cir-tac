@@ -169,7 +169,7 @@ message CIRAllocExceptionOp { uint64 size = 1; }
 message CIRAllocaOp {
   optional CIROpID dyn_alloc_size = 1;
 
-  CIROpID allocaType = 2;
+  CIRTypeID alloca_type = 2;
   string name = 3;
   bool init = 4;
   bool constant = 5;
@@ -228,7 +228,7 @@ message CIRAwaitOp { CIRAwaitKind kind = 1; }
 message CIRBaseClassAddrOp {
   CIROpID derived_addr = 1;
 
-  uint64 offset = 2;
+  string offset = 2;
   bool assume_not_null = 3;
 }
 
@@ -354,7 +354,7 @@ message CIRComplexRealPtrOp { CIROpID operand = 1; }
 
 message CIRConditionOp { CIROpID condition = 1; }
 
-message CIRConstantOp { google.protobuf.Any value = 1; }
+message CIRConstantOp { string value = 1; }
 
 message CIRContinueOp {}
 
@@ -375,7 +375,7 @@ message CIRCosOp { CIROpID src = 1; }
 message CIRDerivedClassAddrOp {
   CIROpID base_addr = 1;
 
-  uint64 offset = 2;
+  string offset = 2;
   bool assume_not_null = 3;
 }
 
@@ -400,7 +400,7 @@ message CIRExpectOp {
   CIROpID val = 1;
   CIROpID expected = 2;
 
-  optional double prob = 3;
+  optional string prob = 3;
 }
 
 message CIRFAbsOp { CIROpID src = 1; }
@@ -432,7 +432,7 @@ message CIRFuncOp {
 
   string sym_name = 1;
   CIRVisibilityKind global_visibility = 2;
-  CIROpID function_type = 3;
+  CIRTypeID function_type = 3;
   bool builtin = 4;
   bool coroutine = 5;
   bool lambda = 6;
@@ -443,8 +443,8 @@ message CIRFuncOp {
   optional string sym_visibility = 11;
   bool comdat = 12;
   optional string aliasee = 13;
-  optional google.protobuf.Empty global_ctor = 14;
-  optional google.protobuf.Empty global_dtor = 15;
+  bool global_ctor = 14;
+  bool global_dtor = 15;
 }
 
 message CIRGetBitfieldOp {
@@ -463,7 +463,7 @@ message CIRGetMemberOp {
   CIROpID addr = 1;
 
   string name = 2;
-  uint64 index_attr = 3;
+  string index_attr = 3;
 }
 
 message CIRGetMethodOp {
@@ -481,7 +481,7 @@ message CIRGlobalOp {
   string sym_name = 1;
   CIRVisibilityKind global_visibility = 2;
   optional string sym_visibility = 3;
-  CIROpID sym_type = 4;
+  CIRTypeID sym_type = 4;
   CIRGlobalLinkageKind linkage = 5;
   optional CIRTLS_Model tls_model = 6;
   bool comdat = 7;
@@ -530,7 +530,7 @@ message CIRLabelOp { string label = 1; }
 message CIRLoadOp {
   CIROpID addr = 1;
 
-  bool isDeref = 2;
+  bool is_deref = 2;
   bool is_volatile = 3;
   optional uint64 alignment = 4;
   optional CIRMemOrder mem_order = 5;
@@ -602,7 +602,7 @@ message CIRPrefetchOp {
   CIROpID addr = 1;
 
   uint32 locality = 2;
-  bool isWrite = 3;
+  bool is_write = 3;
 }
 
 message CIRPtrDiffOp {
@@ -661,7 +661,7 @@ message CIRShiftOp {
   CIROpID value = 1;
   CIROpID amount = 2;
 
-  bool isShiftleft = 3;
+  bool is_shiftleft = 3;
 }
 
 message CIRSignBitOp { CIROpID input = 1; }
