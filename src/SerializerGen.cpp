@@ -55,8 +55,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAllocaOp pAllocaOp;
         pInst->mutable_base()->set_id(instID);
 
-        auto dynAllocSize = op.getDynAllocSize().getDefiningOp();
-        if (dynAllocSize) {
+        auto dynAllocSizeOptional = op.getDynAllocSize();
+        if (dynAllocSizeOptional) {
+          auto dynAllocSize = dynAllocSizeOptional.getDefiningOp();
           auto dynAllocSizeID = internOperation(opCache, dynAllocSize);
 
           protocir::CIROpID pdynAllocSizeID;
