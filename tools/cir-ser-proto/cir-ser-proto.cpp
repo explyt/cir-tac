@@ -56,42 +56,46 @@ int main(int argc, char *argv[]) {
   auto &bodyRegion = (*module).getBodyRegion();
   for (auto &bodyBlock : bodyRegion) {
     for (auto &func : bodyBlock) {
-      std::ignore =
-          Serializer::internFunction(functionCache, cast<cir::FuncOp>(func));
+      if (isa<cir::FuncOp>(func)) {
+        std::ignore =
+            Serializer::internFunction(functionCache, cast<cir::FuncOp>(func));
+      }
     }
   }
   for (auto &bodyBlock : bodyRegion) {
     for (auto &func : bodyBlock) {
-      unsigned long funcIdx =
-          Serializer::internFunction(functionCache, cast<cir::FuncOp>(func));
-      protocir::CIRFunction *pFunction = pModule.add_functions();
-      protocir::CIRFunctionID pFunctionID;
-      pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
-      pFunction->mutable_id()->set_id(funcIdx);
-      std::string functionName = cast<cir::FuncOp>(func).getSymName().str();
-      *pFunction->mutable_name() = functionName;
-      BlockCache blockCache;
-      OperationCache opCache;
-      for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
-        for (auto &inst : block) {
-          std::ignore = Serializer::internOperation(opCache, &inst);
+      if (isa<cir::FuncOp>(func)) {
+        unsigned long funcIdx =
+            Serializer::internFunction(functionCache, cast<cir::FuncOp>(func));
+        protocir::CIRFunction *pFunction = pModule.add_functions();
+        protocir::CIRFunctionID pFunctionID;
+        pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
+        pFunction->mutable_id()->set_id(funcIdx);
+        std::string functionName = cast<cir::FuncOp>(func).getSymName().str();
+        *pFunction->mutable_name() = functionName;
+        BlockCache blockCache;
+        OperationCache opCache;
+        for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
+          for (auto &inst : block) {
+            std::ignore = Serializer::internOperation(opCache, &inst);
+          }
         }
-      }
-      for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
-        unsigned long blockIdx = Serializer::internBlock(blockCache, &block);
-        protocir::CIRBlock *pBlock = pFunction->add_blocks();
-        protocir::CIRBlockID pBlockID;
-        pBlockID.set_id(blockIdx);
-        for (auto &inst : block) {
-          auto pInst = pBlock->add_operations();
-          Serializer::serializeOperation(inst, pInst, pModuleID, typeCache,
-                                         opCache, blockCache, functionCache);
+        for (auto &block : cast<cir::FuncOp>(func).getFunctionBody()) {
+          unsigned long blockIdx = Serializer::internBlock(blockCache, &block);
+          protocir::CIRBlock *pBlock = pFunction->add_blocks();
+          protocir::CIRBlockID pBlockID;
+          pBlockID.set_id(blockIdx);
+          for (auto &inst : block) {
+            auto pInst = pBlock->add_operations();
+            Serializer::serializeOperation(inst, pInst, pModuleID, typeCache,
+                                           opCache, blockCache, functionCache);
+          }
         }
-      }
-      for (auto &type : cast<cir::FuncOp>(func).getArgumentTypes()) {
-        auto pType = pFunction->add_arguments_types();
-        pType->mutable_module_id()->CopyFrom(pModuleID);
-        pType->set_id(Serializer::internType(typeCache, type));
+        for (auto &type : cast<cir::FuncOp>(func).getArgumentTypes()) {
+          auto pType = pFunction->add_arguments_types();
+          pType->mutable_module_id()->CopyFrom(pModuleID);
+          pType->set_id(Serializer::internType(typeCache, type));
+        }
       }
     }
   }

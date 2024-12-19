@@ -55,9 +55,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAllocaOp pAllocaOp;
         pInst->mutable_base()->set_id(instID);
 
-        auto dynAllocSizeOptional = op.getDynAllocSize();
-        if (dynAllocSizeOptional) {
-          auto dynAllocSize = dynAllocSizeOptional.getDefiningOp();
+        auto dynAllocSizeRaw = op.getDynAllocSize();
+        if (dynAllocSizeRaw) {
+          auto dynAllocSize = dynAllocSizeRaw.getDefiningOp();
           auto dynAllocSizeID = internOperation(opCache, dynAllocSize);
 
           protocir::CIROpID pdynAllocSizeID;
@@ -138,8 +138,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         *pAssumeAlignedOp.mutable_pointer() = ppointerID;
 
-        auto offset = op.getOffset().getDefiningOp();
-        if (offset) {
+        auto offsetRaw = op.getOffset();
+        if (offsetRaw) {
+          auto offset = offsetRaw.getDefiningOp();
           auto offsetID = internOperation(opCache, offset);
 
           protocir::CIROpID poffsetID;
@@ -702,8 +703,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRCatchParamOp pCatchParamOp;
         pInst->mutable_base()->set_id(instID);
 
-        auto exceptionPtr = op.getExceptionPtr().getDefiningOp();
-        if (exceptionPtr) {
+        auto exceptionPtrRaw = op.getExceptionPtr();
+        if (exceptionPtrRaw) {
+          auto exceptionPtr = exceptionPtrRaw.getDefiningOp();
           auto exceptionPtrID = internOperation(opCache, exceptionPtr);
 
           protocir::CIROpID pexceptionPtrID;
@@ -2194,8 +2196,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRResumeOp pResumeOp;
         pInst->mutable_base()->set_id(instID);
 
-        auto exceptionPtr = op.getExceptionPtr().getDefiningOp();
-        if (exceptionPtr) {
+        auto exceptionPtrRaw = op.getExceptionPtr();
+        if (exceptionPtrRaw) {
+          auto exceptionPtr = exceptionPtrRaw.getDefiningOp();
           auto exceptionPtrID = internOperation(opCache, exceptionPtr);
 
           protocir::CIROpID pexceptionPtrID;
@@ -2204,8 +2207,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pResumeOp.mutable_exception_ptr() = pexceptionPtrID;
         }
 
-        auto typeId = op.getTypeId().getDefiningOp();
-        if (typeId) {
+        auto typeIdRaw = op.getTypeId();
+        if (typeIdRaw) {
+          auto typeId = typeIdRaw.getDefiningOp();
           auto typeIdID = internOperation(opCache, typeId);
 
           protocir::CIROpID ptypeIdID;
@@ -2644,8 +2648,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRThrowOp pThrowOp;
         pInst->mutable_base()->set_id(instID);
 
-        auto exceptionPtr = op.getExceptionPtr().getDefiningOp();
-        if (exceptionPtr) {
+        auto exceptionPtrRaw = op.getExceptionPtr();
+        if (exceptionPtrRaw) {
+          auto exceptionPtr = exceptionPtrRaw.getDefiningOp();
           auto exceptionPtrID = internOperation(opCache, exceptionPtr);
 
           protocir::CIROpID pexceptionPtrID;
@@ -2868,8 +2873,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRVTTAddrPointOp pVTTAddrPointOp;
         pInst->mutable_base()->set_id(instID);
 
-        auto symAddr = op.getSymAddr().getDefiningOp();
-        if (symAddr) {
+        auto symAddrRaw = op.getSymAddr();
+        if (symAddrRaw) {
+          auto symAddr = symAddrRaw.getDefiningOp();
           auto symAddrID = internOperation(opCache, symAddr);
 
           protocir::CIROpID psymAddrID;
@@ -2896,8 +2902,9 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRVTableAddrPointOp pVTableAddrPointOp;
         pInst->mutable_base()->set_id(instID);
 
-        auto symAddr = op.getSymAddr().getDefiningOp();
-        if (symAddr) {
+        auto symAddrRaw = op.getSymAddr();
+        if (symAddrRaw) {
+          auto symAddr = symAddrRaw.getDefiningOp();
           auto symAddrID = internOperation(opCache, symAddr);
 
           protocir::CIROpID psymAddrID;
