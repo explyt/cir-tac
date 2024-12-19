@@ -49,6 +49,9 @@ public:
                                  TypeCache &typeCache, OperationCache &opCache,
                                  BlockCache &blockCache,
                                  FunctionCache &functionCache);
+
+  static protocir::CIRAtomicFetchKind
+  serializeAtomicFetchKind(::cir::AtomicFetchKind &cirKind);
 };
 
 } // namespace protocir

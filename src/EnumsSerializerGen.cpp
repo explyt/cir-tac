@@ -4,8 +4,7 @@
 
 using namespace protocir;
 
-CIRAsmFlavor
-EnumSerializer::serializeAsmFlavor(::cir::AsmFlavor &cirKind) {
+CIRAsmFlavor EnumSerializer::serializeAsmFlavor(::cir::AsmFlavor &cirKind) {
   switch (cirKind) {
 
   case ::cir::AsmFlavor::x86_att:
@@ -13,7 +12,6 @@ EnumSerializer::serializeAsmFlavor(::cir::AsmFlavor &cirKind) {
 
   case ::cir::AsmFlavor::x86_intel:
     return protocir::CIRAsmFlavor::AsmFlavor_x86_intel;
-
   }
 }
 
@@ -44,12 +42,10 @@ EnumSerializer::serializeAtomicFetchKind(::cir::AtomicFetchKind &cirKind) {
 
   case ::cir::AtomicFetchKind::Min:
     return protocir::CIRAtomicFetchKind::AtomicFetchKind_Min;
-
   }
 }
 
-CIRAwaitKind
-EnumSerializer::serializeAwaitKind(::cir::AwaitKind &cirKind) {
+CIRAwaitKind EnumSerializer::serializeAwaitKind(::cir::AwaitKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::AwaitKind::init:
@@ -63,12 +59,10 @@ EnumSerializer::serializeAwaitKind(::cir::AwaitKind &cirKind) {
 
   case ::cir::AwaitKind::final:
     return protocir::CIRAwaitKind::AwaitKind_final;
-
   }
 }
 
-CIRBinOpKind
-EnumSerializer::serializeBinOpKind(::cir::BinOpKind &cirKind) {
+CIRBinOpKind EnumSerializer::serializeBinOpKind(::cir::BinOpKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::BinOpKind::Mul:
@@ -94,7 +88,6 @@ EnumSerializer::serializeBinOpKind(::cir::BinOpKind &cirKind) {
 
   case ::cir::BinOpKind::Or:
     return protocir::CIRBinOpKind::BinOpKind_Or;
-
   }
 }
 
@@ -110,7 +103,6 @@ EnumSerializer::serializeBinOpOverflowKind(::cir::BinOpOverflowKind &cirKind) {
 
   case ::cir::BinOpOverflowKind::Mul:
     return protocir::CIRBinOpOverflowKind::BinOpOverflowKind_Mul;
-
   }
 }
 
@@ -126,12 +118,10 @@ EnumSerializer::serializeCallingConv(::cir::CallingConv &cirKind) {
 
   case ::cir::CallingConv::SpirFunction:
     return protocir::CIRCallingConv::CallingConv_SpirFunction;
-
   }
 }
 
-CIRCaseOpKind
-EnumSerializer::serializeCaseOpKind(::cir::CaseOpKind &cirKind) {
+CIRCaseOpKind EnumSerializer::serializeCaseOpKind(::cir::CaseOpKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::CaseOpKind::Default:
@@ -145,12 +135,10 @@ EnumSerializer::serializeCaseOpKind(::cir::CaseOpKind &cirKind) {
 
   case ::cir::CaseOpKind::Range:
     return protocir::CIRCaseOpKind::CaseOpKind_Range;
-
   }
 }
 
-CIRCastKind
-EnumSerializer::serializeCastKind(::cir::CastKind &cirKind) {
+CIRCastKind EnumSerializer::serializeCastKind(::cir::CastKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::CastKind::int_to_bool:
@@ -224,7 +212,6 @@ EnumSerializer::serializeCastKind(::cir::CastKind &cirKind) {
 
   case ::cir::CastKind::int_complex_to_float_complex:
     return protocir::CIRCastKind::CastKind_int_complex_to_float_complex;
-
   }
 }
 
@@ -237,12 +224,10 @@ EnumSerializer::serializeCatchParamKind(::cir::CatchParamKind &cirKind) {
 
   case ::cir::CatchParamKind::end:
     return protocir::CIRCatchParamKind::CatchParamKind_end;
-
   }
 }
 
-CIRCmpOpKind
-EnumSerializer::serializeCmpOpKind(::cir::CmpOpKind &cirKind) {
+CIRCmpOpKind EnumSerializer::serializeCmpOpKind(::cir::CmpOpKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::CmpOpKind::lt:
@@ -262,7 +247,6 @@ EnumSerializer::serializeCmpOpKind(::cir::CmpOpKind &cirKind) {
 
   case ::cir::CmpOpKind::ne:
     return protocir::CIRCmpOpKind::CmpOpKind_ne;
-
   }
 }
 
@@ -275,7 +259,6 @@ EnumSerializer::serializeCmpOrdering(::cir::CmpOrdering &cirKind) {
 
   case ::cir::CmpOrdering::Partial:
     return protocir::CIRCmpOrdering::CmpOrdering_Partial;
-
   }
 }
 
@@ -288,7 +271,6 @@ EnumSerializer::serializeComplexBinOpKind(::cir::ComplexBinOpKind &cirKind) {
 
   case ::cir::ComplexBinOpKind::Div:
     return protocir::CIRComplexBinOpKind::ComplexBinOpKind_Div;
-
   }
 }
 
@@ -310,7 +292,6 @@ EnumSerializer::serializeComplexRangeKind(::cir::ComplexRangeKind &cirKind) {
 
   case ::cir::ComplexRangeKind::None:
     return protocir::CIRComplexRangeKind::ComplexRangeKind_None;
-
   }
 }
 
@@ -323,7 +304,6 @@ EnumSerializer::serializeDynamicCastKind(::cir::DynamicCastKind &cirKind) {
 
   case ::cir::DynamicCastKind::ref:
     return protocir::CIRDynamicCastKind::DynamicCastKind_ref;
-
   }
 }
 
@@ -335,7 +315,8 @@ EnumSerializer::serializeGlobalLinkageKind(::cir::GlobalLinkageKind &cirKind) {
     return protocir::CIRGlobalLinkageKind::GlobalLinkageKind_ExternalLinkage;
 
   case ::cir::GlobalLinkageKind::AvailableExternallyLinkage:
-    return protocir::CIRGlobalLinkageKind::GlobalLinkageKind_AvailableExternallyLinkage;
+    return protocir::CIRGlobalLinkageKind::
+        GlobalLinkageKind_AvailableExternallyLinkage;
 
   case ::cir::GlobalLinkageKind::LinkOnceAnyLinkage:
     return protocir::CIRGlobalLinkageKind::GlobalLinkageKind_LinkOnceAnyLinkage;
@@ -356,16 +337,15 @@ EnumSerializer::serializeGlobalLinkageKind(::cir::GlobalLinkageKind &cirKind) {
     return protocir::CIRGlobalLinkageKind::GlobalLinkageKind_PrivateLinkage;
 
   case ::cir::GlobalLinkageKind::ExternalWeakLinkage:
-    return protocir::CIRGlobalLinkageKind::GlobalLinkageKind_ExternalWeakLinkage;
+    return protocir::CIRGlobalLinkageKind::
+        GlobalLinkageKind_ExternalWeakLinkage;
 
   case ::cir::GlobalLinkageKind::CommonLinkage:
     return protocir::CIRGlobalLinkageKind::GlobalLinkageKind_CommonLinkage;
-
   }
 }
 
-CIRInlineKind
-EnumSerializer::serializeInlineKind(::cir::InlineKind &cirKind) {
+CIRInlineKind EnumSerializer::serializeInlineKind(::cir::InlineKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::InlineKind::NoInline:
@@ -376,12 +356,10 @@ EnumSerializer::serializeInlineKind(::cir::InlineKind &cirKind) {
 
   case ::cir::InlineKind::InlineHint:
     return protocir::CIRInlineKind::InlineKind_InlineHint;
-
   }
 }
 
-CIRMemOrder
-EnumSerializer::serializeMemOrder(::cir::MemOrder &cirKind) {
+CIRMemOrder EnumSerializer::serializeMemOrder(::cir::MemOrder &cirKind) {
   switch (cirKind) {
 
   case ::cir::MemOrder::Relaxed:
@@ -401,23 +379,22 @@ EnumSerializer::serializeMemOrder(::cir::MemOrder &cirKind) {
 
   case ::cir::MemOrder::SequentiallyConsistent:
     return protocir::CIRMemOrder::MemOrder_SequentiallyConsistent;
-
   }
 }
 
-CIRSignedOverflowBehavior
-EnumSerializer::serializeSignedOverflowBehavior(::cir::sob::SignedOverflowBehavior &cirKind) {
+CIRSignedOverflowBehavior EnumSerializer::serializeSignedOverflowBehavior(
+    ::cir::sob::SignedOverflowBehavior &cirKind) {
   switch (cirKind) {
 
   case ::cir::sob::SignedOverflowBehavior::undefined:
-    return protocir::CIRSignedOverflowBehavior::SignedOverflowBehavior_undefined;
+    return protocir::CIRSignedOverflowBehavior::
+        SignedOverflowBehavior_undefined;
 
   case ::cir::sob::SignedOverflowBehavior::defined:
     return protocir::CIRSignedOverflowBehavior::SignedOverflowBehavior_defined;
 
   case ::cir::sob::SignedOverflowBehavior::trapping:
     return protocir::CIRSignedOverflowBehavior::SignedOverflowBehavior_trapping;
-
   }
 }
 
@@ -430,7 +407,6 @@ EnumSerializer::serializeSizeInfoType(::cir::SizeInfoType &cirKind) {
 
   case ::cir::SizeInfoType::max:
     return protocir::CIRSizeInfoType::SizeInfoType_max;
-
   }
 }
 
@@ -446,12 +422,10 @@ EnumSerializer::serializeSourceLanguage(::cir::SourceLanguage &cirKind) {
 
   case ::cir::SourceLanguage::OpenCLC:
     return protocir::CIRSourceLanguage::SourceLanguage_OpenCLC;
-
   }
 }
 
-CIRTLS_Model
-EnumSerializer::serializeTLS_Model(::cir::TLS_Model &cirKind) {
+CIRTLS_Model EnumSerializer::serializeTLS_Model(::cir::TLS_Model &cirKind) {
   switch (cirKind) {
 
   case ::cir::TLS_Model::GeneralDynamic:
@@ -465,7 +439,6 @@ EnumSerializer::serializeTLS_Model(::cir::TLS_Model &cirKind) {
 
   case ::cir::TLS_Model::LocalExec:
     return protocir::CIRTLS_Model::TLS_Model_LocalExec;
-
   }
 }
 
@@ -487,7 +460,6 @@ EnumSerializer::serializeUnaryOpKind(::cir::UnaryOpKind &cirKind) {
 
   case ::cir::UnaryOpKind::Not:
     return protocir::CIRUnaryOpKind::UnaryOpKind_Not;
-
   }
 }
 
@@ -503,6 +475,5 @@ EnumSerializer::serializeVisibilityKind(::cir::VisibilityKind &cirKind) {
 
   case ::cir::VisibilityKind::Protected:
     return protocir::CIRVisibilityKind::VisibilityKind_Protected;
-
   }
 }

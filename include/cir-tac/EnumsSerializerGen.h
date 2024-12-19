@@ -6,98 +6,90 @@
 
 namespace protocir {
 class EnumSerializer {
-// ATT or Intel
-  static protocir::CIRAsmFlavor
-  serializeAsmFlavor(::cir::AsmFlavor &cirKind);
+public:
+  // ATT or Intel
+  static protocir::CIRAsmFlavor serializeAsmFlavor(::cir::AsmFlavor &cirKind);
 
-// Binary opcode for atomic fetch operations
+  // Binary opcode for atomic fetch operations
   static protocir::CIRAtomicFetchKind
   serializeAtomicFetchKind(::cir::AtomicFetchKind &cirKind);
 
-// await kind
-  static protocir::CIRAwaitKind
-  serializeAwaitKind(::cir::AwaitKind &cirKind);
+  // await kind
+  static protocir::CIRAwaitKind serializeAwaitKind(::cir::AwaitKind &cirKind);
 
-// binary operation (arith and logic) kind
-  static protocir::CIRBinOpKind
-  serializeBinOpKind(::cir::BinOpKind &cirKind);
+  // binary operation (arith and logic) kind
+  static protocir::CIRBinOpKind serializeBinOpKind(::cir::BinOpKind &cirKind);
 
-// checked binary arithmetic operation kind
+  // checked binary arithmetic operation kind
   static protocir::CIRBinOpOverflowKind
   serializeBinOpOverflowKind(::cir::BinOpOverflowKind &cirKind);
 
-// calling convention
+  // calling convention
   static protocir::CIRCallingConv
   serializeCallingConv(::cir::CallingConv &cirKind);
 
-// case kind
+  // case kind
   static protocir::CIRCaseOpKind
   serializeCaseOpKind(::cir::CaseOpKind &cirKind);
 
-// cast kind
-  static protocir::CIRCastKind
-  serializeCastKind(::cir::CastKind &cirKind);
+  // cast kind
+  static protocir::CIRCastKind serializeCastKind(::cir::CastKind &cirKind);
 
-// Designate limits for begin/end of catch param handling
+  // Designate limits for begin/end of catch param handling
   static protocir::CIRCatchParamKind
   serializeCatchParamKind(::cir::CatchParamKind &cirKind);
 
-// compare operation kind
-  static protocir::CIRCmpOpKind
-  serializeCmpOpKind(::cir::CmpOpKind &cirKind);
+  // compare operation kind
+  static protocir::CIRCmpOpKind serializeCmpOpKind(::cir::CmpOpKind &cirKind);
 
-// three-way comparison ordering kind
+  // three-way comparison ordering kind
   static protocir::CIRCmpOrdering
   serializeCmpOrdering(::cir::CmpOrdering &cirKind);
 
-// complex number binary operation kind
+  // complex number binary operation kind
   static protocir::CIRComplexBinOpKind
   serializeComplexBinOpKind(::cir::ComplexBinOpKind &cirKind);
 
-// complex multiplication and division implementation
+  // complex multiplication and division implementation
   static protocir::CIRComplexRangeKind
   serializeComplexRangeKind(::cir::ComplexRangeKind &cirKind);
 
-// dynamic cast kind
+  // dynamic cast kind
   static protocir::CIRDynamicCastKind
   serializeDynamicCastKind(::cir::DynamicCastKind &cirKind);
 
-// Linkage type/kind
+  // Linkage type/kind
   static protocir::CIRGlobalLinkageKind
   serializeGlobalLinkageKind(::cir::GlobalLinkageKind &cirKind);
 
-// inlineKind
+  // inlineKind
   static protocir::CIRInlineKind
   serializeInlineKind(::cir::InlineKind &cirKind);
 
-// Memory order according to C++11 memory model
-  static protocir::CIRMemOrder
-  serializeMemOrder(::cir::MemOrder &cirKind);
+  // Memory order according to C++11 memory model
+  static protocir::CIRMemOrder serializeMemOrder(::cir::MemOrder &cirKind);
 
-// the behavior for signed overflow
+  // the behavior for signed overflow
   static protocir::CIRSignedOverflowBehavior
   serializeSignedOverflowBehavior(::cir::sob::SignedOverflowBehavior &cirKind);
 
-// size info type
+  // size info type
   static protocir::CIRSizeInfoType
   serializeSizeInfoType(::cir::SizeInfoType &cirKind);
 
-// Source language
+  // Source language
   static protocir::CIRSourceLanguage
   serializeSourceLanguage(::cir::SourceLanguage &cirKind);
 
-// TLS model
-  static protocir::CIRTLS_Model
-  serializeTLS_Model(::cir::TLS_Model &cirKind);
+  // TLS model
+  static protocir::CIRTLS_Model serializeTLS_Model(::cir::TLS_Model &cirKind);
 
-// unary operation kind
+  // unary operation kind
   static protocir::CIRUnaryOpKind
   serializeUnaryOpKind(::cir::UnaryOpKind &cirKind);
 
-// C/C++ visibility
+  // C/C++ visibility
   static protocir::CIRVisibilityKind
   serializeVisibilityKind(::cir::VisibilityKind &cirKind);
-
-
 };
 } // namespace protocir

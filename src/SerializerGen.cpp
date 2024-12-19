@@ -223,6 +223,14 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         *pAtomicCmpXchg.mutable_desired() = pdesiredID;
 
+        auto succOrder = op.getSuccOrder();
+        auto psuccOrder = EnumSerializer::serializeMemOrder(succOrder);
+        pAtomicCmpXchg.set_succ_order(psuccOrder);
+
+        auto failOrder = op.getFailOrder();
+        auto pfailOrder = EnumSerializer::serializeMemOrder(failOrder);
+        pAtomicCmpXchg.set_fail_order(pfailOrder);
+
         auto weak = op.getWeak();
         pAtomicCmpXchg.set_weak(weak);
 
@@ -252,6 +260,14 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pvalID.set_id(valID);
 
         *pAtomicFetch.mutable_val() = pvalID;
+
+        auto binop = op.getBinop();
+        auto pbinop = EnumSerializer::serializeAtomicFetchKind(binop);
+        pAtomicFetch.set_binop(pbinop);
+
+        auto memOrder = op.getMemOrder();
+        auto pmemOrder = EnumSerializer::serializeMemOrder(memOrder);
+        pAtomicFetch.set_mem_order(pmemOrder);
 
         auto isVolatile = op.getIsVolatile();
         pAtomicFetch.set_is_volatile(isVolatile);
@@ -283,6 +299,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         *pAtomicXchg.mutable_val() = pvalID;
 
+        auto memOrder = op.getMemOrder();
+        auto pmemOrder = EnumSerializer::serializeMemOrder(memOrder);
+        pAtomicXchg.set_mem_order(pmemOrder);
+
         auto isVolatile = op.getIsVolatile();
         pAtomicXchg.set_is_volatile(isVolatile);
 
@@ -293,6 +313,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::AwaitOp op) {
         protocir::CIRAwaitOp pAwaitOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeAwaitKind(kind);
+        pAwaitOp.set_kind(pkind);
 
         pInst->mutable_await_op()->CopyFrom(pAwaitOp);
       })
@@ -344,6 +368,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         *pBinOp.mutable_rhs() = prhsID;
 
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeBinOpKind(kind);
+        pBinOp.set_kind(pkind);
+
         auto noUnsignedWrap = op.getNoUnsignedWrap();
         pBinOp.set_no_unsigned_wrap(noUnsignedWrap);
 
@@ -374,6 +402,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         prhsID.set_id(rhsID);
 
         *pBinOpOverflowOp.mutable_rhs() = prhsID;
+
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeBinOpOverflowKind(kind);
+        pBinOpOverflowOp.set_kind(pkind);
 
         pInst->mutable_bin_op_overflow_op()->CopyFrom(pBinOpOverflowOp);
       })
@@ -571,6 +603,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         auto sideEffects = op.getSideEffects();
         pInlineAsmOp.set_side_effects(sideEffects);
 
+        auto asmFlavor = op.getAsmFlavor();
+        auto pasmFlavor = EnumSerializer::serializeAsmFlavor(asmFlavor);
+        pInlineAsmOp.set_asm_flavor(pasmFlavor);
+
         auto operandsSegments = op.getOperandsSegments();
         for (auto eoperandsSegments : operandsSegments) {
           pInlineAsmOp.add_operands_segments(eoperandsSegments);
@@ -600,6 +636,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pCallOp.mutable_callee() = callee;
         }
 
+        auto callingConv = op.getCallingConv();
+        auto pcallingConv = EnumSerializer::serializeCallingConv(callingConv);
+        pCallOp.set_calling_conv(pcallingConv);
+
         pInst->mutable_call_op()->CopyFrom(pCallOp);
       })
 
@@ -607,6 +647,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::CaseOp op) {
         protocir::CIRCaseOp pCaseOp;
         pInst->mutable_base()->set_id(instID);
+
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeCaseOpKind(kind);
+        pCaseOp.set_kind(pkind);
 
         pInst->mutable_case_op()->CopyFrom(pCaseOp);
       })
@@ -624,6 +668,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         *pCastOp.mutable_src() = psrcID;
 
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeCastKind(kind);
+        pCastOp.set_kind(pkind);
+
         pInst->mutable_cast_op()->CopyFrom(pCastOp);
       })
 
@@ -640,6 +688,13 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           pexceptionPtrID.set_id(exceptionPtrID);
 
           *pCatchParamOp.mutable_exception_ptr() = pexceptionPtrID;
+        }
+
+        auto kindOptional = op.getKind();
+        if (kindOptional) {
+          auto kind = kindOptional.value();
+          auto pkind = EnumSerializer::serializeCatchParamKind(kind);
+          pCatchParamOp.set_kind(pkind);
         }
 
         pInst->mutable_catch_param_op()->CopyFrom(pCatchParamOp);
@@ -706,6 +761,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         *pCmpOp.mutable_rhs() = prhsID;
 
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeCmpOpKind(kind);
+        pCmpOp.set_kind(pkind);
+
         pInst->mutable_cmp_op()->CopyFrom(pCmpOp);
       })
 
@@ -753,6 +812,14 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         prhsID.set_id(rhsID);
 
         *pComplexBinOp.mutable_rhs() = prhsID;
+
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeComplexBinOpKind(kind);
+        pComplexBinOp.set_kind(pkind);
+
+        auto range = op.getRange();
+        auto prange = EnumSerializer::serializeComplexRangeKind(range);
+        pComplexBinOp.set_range(prange);
 
         auto promoted = op.getPromoted();
         pComplexBinOp.set_promoted(promoted);
@@ -1002,6 +1069,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         *pDynamicCastOp.mutable_src() = psrcID;
 
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeDynamicCastKind(kind);
+        pDynamicCastOp.set_kind(pkind);
+
         auto relativeLayout = op.getRelativeLayout();
         pDynamicCastOp.set_relative_layout(relativeLayout);
 
@@ -1248,8 +1319,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         auto symName = op.getSymName();
         *pFuncOp.mutable_sym_name() = symName;
 
-        auto globalVisibility = op.getGlobalVisibility();
-        *pFuncOp.mutable_global_visibility() = globalVisibility;
+        auto globalVisibility = op.getGlobalVisibility().getValue();
+        auto pglobalVisibility =
+            EnumSerializer::serializeVisibilityKind(globalVisibility);
+        pFuncOp.set_global_visibility(pglobalVisibility);
 
         auto functionType = op.getFunctionType();
         auto functionTypeID = internType(typeCache, functionType);
@@ -1273,6 +1346,14 @@ void Serializer::serializeOperation(mlir::Operation &inst,
 
         auto dsolocal = op.getDsolocal();
         pFuncOp.set_dsolocal(dsolocal);
+
+        auto linkage = op.getLinkage();
+        auto plinkage = EnumSerializer::serializeGlobalLinkageKind(linkage);
+        pFuncOp.set_linkage(plinkage);
+
+        auto callingConv = op.getCallingConv();
+        auto pcallingConv = EnumSerializer::serializeCallingConv(callingConv);
+        pFuncOp.set_calling_conv(pcallingConv);
 
         auto symVisibilityOptional = op.getSymVisibility();
         if (symVisibilityOptional) {
@@ -1414,8 +1495,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         auto symName = op.getSymName();
         *pGlobalOp.mutable_sym_name() = symName;
 
-        auto globalVisibility = op.getGlobalVisibility();
-        *pGlobalOp.mutable_global_visibility() = globalVisibility;
+        auto globalVisibility = op.getGlobalVisibility().getValue();
+        auto pglobalVisibility =
+            EnumSerializer::serializeVisibilityKind(globalVisibility);
+        pGlobalOp.set_global_visibility(pglobalVisibility);
 
         auto symVisibilityOptional = op.getSymVisibility();
         if (symVisibilityOptional) {
@@ -1430,6 +1513,17 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         psymTypeID.set_id(symTypeID);
 
         *pGlobalOp.mutable_sym_type() = psymTypeID;
+
+        auto linkage = op.getLinkage();
+        auto plinkage = EnumSerializer::serializeGlobalLinkageKind(linkage);
+        pGlobalOp.set_linkage(plinkage);
+
+        auto tlsModelOptional = op.getTlsModel();
+        if (tlsModelOptional) {
+          auto tlsModel = tlsModelOptional.value();
+          auto ptlsModel = EnumSerializer::serializeTLS_Model(tlsModel);
+          pGlobalOp.set_tls_model(ptlsModel);
+        }
 
         auto comdat = op.getComdat();
         pGlobalOp.set_comdat(comdat);
@@ -1640,6 +1734,13 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         if (alignmentOptional) {
           auto alignment = alignmentOptional.value();
           pLoadOp.set_alignment(alignment);
+        }
+
+        auto memOrderOptional = op.getMemOrder();
+        if (memOrderOptional) {
+          auto memOrder = memOrderOptional.value();
+          auto pmemOrder = EnumSerializer::serializeMemOrder(memOrder);
+          pLoadOp.set_mem_order(pmemOrder);
         }
 
         pInst->mutable_load_op()->CopyFrom(pLoadOp);
@@ -1937,6 +2038,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pptrID.set_id(ptrID);
 
         *pObjSizeOp.mutable_ptr() = pptrID;
+
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeSizeInfoType(kind);
+        pObjSizeOp.set_kind(pkind);
 
         auto dynamic = op.getDynamic();
         pObjSizeOp.set_dynamic(dynamic);
@@ -2415,6 +2520,13 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           pStoreOp.set_alignment(alignment);
         }
 
+        auto memOrderOptional = op.getMemOrder();
+        if (memOrderOptional) {
+          auto memOrder = memOrderOptional.value();
+          auto pmemOrder = EnumSerializer::serializeMemOrder(memOrder);
+          pStoreOp.set_mem_order(pmemOrder);
+        }
+
         pInst->mutable_store_op()->CopyFrom(pStoreOp);
       })
 
@@ -2578,6 +2690,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           *pTryCallOp.mutable_callee() = callee;
         }
 
+        auto callingConv = op.getCallingConv();
+        auto pcallingConv = EnumSerializer::serializeCallingConv(callingConv);
+        pTryCallOp.set_calling_conv(pcallingConv);
+
         pInst->mutable_try_call_op()->CopyFrom(pTryCallOp);
       })
 
@@ -2607,6 +2723,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         pinputID.set_id(inputID);
 
         *pUnaryOp.mutable_input() = pinputID;
+
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeUnaryOpKind(kind);
+        pUnaryOp.set_kind(pkind);
 
         pInst->mutable_unary_op()->CopyFrom(pUnaryOp);
       })
@@ -2770,6 +2890,10 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         prhsID.set_id(rhsID);
 
         *pVecCmpOp.mutable_rhs() = prhsID;
+
+        auto kind = op.getKind();
+        auto pkind = EnumSerializer::serializeCmpOpKind(kind);
+        pVecCmpOp.set_kind(pkind);
 
         pInst->mutable_vec_cmp_op()->CopyFrom(pVecCmpOp);
       })
