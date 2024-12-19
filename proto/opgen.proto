@@ -699,7 +699,7 @@ message CIRSwitchFlatOp {
   repeated uint32 case_operand_segments = 4;
 
   CIRBlockID default_destination = 5;
-  CIRBlockID case_destinations = 6;
+  repeated CIRBlockID case_destinations = 6;
 }
 
 message CIRSwitchOp { CIROpID condition = 1; }

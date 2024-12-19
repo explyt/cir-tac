@@ -535,6 +535,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           edestOperandsFalseProto->set_id(edestOperandsFalseID);
         }
 
+        auto destTrue = op.getDestTrue();
+        auto destTrueID = internBlock(blockCache, destTrue);
+        protocir::CIRBlockID pdestTrueID;
+        pdestTrueID.set_id(destTrueID);
+
+        *pBrCondOp.mutable_dest_true() = pdestTrueID;
+
+        auto destFalse = op.getDestFalse();
+        auto destFalseID = internBlock(blockCache, destFalse);
+        protocir::CIRBlockID pdestFalseID;
+        pdestFalseID.set_id(destFalseID);
+
+        *pBrCondOp.mutable_dest_false() = pdestFalseID;
+
         pInst->mutable_br_cond_op()->CopyFrom(pBrCondOp);
       })
 
@@ -550,6 +564,13 @@ void Serializer::serializeOperation(mlir::Operation &inst,
               internOperation(opCache, edestOperands.getDefiningOp());
           edestOperandsProto->set_id(edestOperandsID);
         }
+
+        auto dest = op.getDest();
+        auto destID = internBlock(blockCache, dest);
+        protocir::CIRBlockID pdestID;
+        pdestID.set_id(destID);
+
+        *pBrOp.mutable_dest() = pdestID;
 
         pInst->mutable_br_op()->CopyFrom(pBrOp);
       })
@@ -2567,6 +2588,21 @@ void Serializer::serializeOperation(mlir::Operation &inst,
           pSwitchFlatOp.add_case_operand_segments(ecaseOperandSegments);
         }
 
+        auto defaultDestination = op.getDefaultDestination();
+        auto defaultDestinationID = internBlock(blockCache, defaultDestination);
+        protocir::CIRBlockID pdefaultDestinationID;
+        pdefaultDestinationID.set_id(defaultDestinationID);
+
+        *pSwitchFlatOp.mutable_default_destination() = pdefaultDestinationID;
+
+        auto caseDestinations = op.getCaseDestinations();
+        for (auto ecaseDestinations : caseDestinations) {
+          auto ecaseDestinationsProto = pSwitchFlatOp.add_case_destinations();
+          auto ecaseDestinationsID = internBlock(blockCache, ecaseDestinations);
+          protocir::CIRBlockID pecaseDestinationsID;
+          pecaseDestinationsID.set_id(ecaseDestinationsID);
+        }
+
         pInst->mutable_switch_flat_op()->CopyFrom(pSwitchFlatOp);
       })
 
@@ -2693,6 +2729,20 @@ void Serializer::serializeOperation(mlir::Operation &inst,
         auto callingConv = op.getCallingConv();
         auto pcallingConv = EnumSerializer::serializeCallingConv(callingConv);
         pTryCallOp.set_calling_conv(pcallingConv);
+
+        auto cont = op.getCont();
+        auto contID = internBlock(blockCache, cont);
+        protocir::CIRBlockID pcontID;
+        pcontID.set_id(contID);
+
+        *pTryCallOp.mutable_cont() = pcontID;
+
+        auto landingPad = op.getLandingPad();
+        auto landingPadID = internBlock(blockCache, landingPad);
+        protocir::CIRBlockID plandingPadID;
+        plandingPadID.set_id(landingPadID);
+
+        *pTryCallOp.mutable_landing_pad() = plandingPadID;
 
         pInst->mutable_try_call_op()->CopyFrom(pTryCallOp);
       })
