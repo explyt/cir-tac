@@ -4,6 +4,7 @@ package protocir;
 option java_package = "org.jacodb.impl.grpc";
 
 import "setup.proto";
+import "type.proto";
 import "opgen.proto";
 
 message CIRBlock {
@@ -17,11 +18,6 @@ message CIRFunction {
   repeated CIRBlock blocks = 3;
   repeated CIRTypeID arguments_types = 4;
   optional CIRTypeID return_type = 5;
-}
-
-message CIRType {
-  CIRTypeID id = 1;
-  string name = 2;
 }
 
 message CIRModule {

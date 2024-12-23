@@ -7,6 +7,7 @@ set(PROTOS
     model.proto
     opgen.proto
     setup.proto
+    type.proto
 )
 
 protobuf_generate_cpp(PROTO_SRC PROTO_HEADER ${PROTOS})
