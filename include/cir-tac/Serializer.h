@@ -1,4 +1,5 @@
 #include "proto/model.pb.h"
+#include "proto/type.pb.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <llvm/ADT/DenseMap.h>
@@ -50,8 +51,8 @@ public:
                                  BlockCache &blockCache,
                                  FunctionCache &functionCache);
 
-  static protocir::CIRAtomicFetchKind
-  serializeAtomicFetchKind(::cir::AtomicFetchKind &cirKind);
+  static protocir::CIRType serializeType(::mlir::Type &cirKind,
+                                         TypeCache &typeCache);
 };
 
 } // namespace protocir

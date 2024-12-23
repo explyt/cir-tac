@@ -103,7 +103,10 @@ int main(int argc, char *argv[]) {
     auto pType = pModule.add_types();
     pType->mutable_id()->set_id(type.getSecond());
     pType->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
-    *pType->mutable_name() = type.getFirst().getAbstractType().getName().str();
+    std::string nameStr;
+    llvm::raw_string_ostream nameStream(nameStr);
+    type.getFirst().print(nameStream);
+    *pType->mutable_name() = nameStr;
   }
   std::string binary;
   pModule.SerializeToString(&binary);

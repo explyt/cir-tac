@@ -1,118 +1,93 @@
 #include "cir-tac/Serializer.h"
+#include "proto/type.pb.h"
 
+#include <clang/CIR/Dialect/IR/CIRTypes.h>
 #include <llvm/ADT/TypeSwitch.h>
 
 using namespace protocir;
 
-void Serializer::serializeOperation(mlir::Operation &inst,
-                                    protocir::CIROp *pInst,
-                                    protocir::CIRModuleID pModuleID,
-                                    TypeCache &typeCache,
-                                    OperationCache &opCache,
-                                    BlockCache &blockCache,
-                                    FunctionCache &functionCache
+protocir::CIRType Serializer::serializeType(::mlir::Type &cirType,
+                                            TypeCache &typeCache) {
+  protocir::CIRType pType;
+  llvm::TypeSwitch<mlir::Type>(cirType)
+      .Case<cir::IntType>([&pType](cir::IntType type) {
+        protocir::CIRIntType intType;
+        intType.set_width(type.getWidth());
+        intType.set_is_signed(type.getIsSigned());
 
-) {
-  auto instID = internOperation(opCache, &inst);
-  llvm::TypeSwitch<mlir::Operation *>(&inst)
-      .Case<cir::AllocaOp>(
-          [instID, pInst, pModuleID, &typeCache](cir::AllocaOp op) {
-            protocir::CIRAllocaOp pAllocaOp;
-            pAllocaOp.mutable_base()->set_id(instID);
-            protocir::CIRTypeID pTypeID;
-            pTypeID.mutable_module_id()->CopyFrom(pModuleID);
-            pTypeID.set_id(internType(typeCache, op.getAllocaType()));
-            pAllocaOp.mutable_alloca_type()->CopyFrom(pTypeID);
-            if (op.getAlignment().has_value()) {
-              pAllocaOp.set_alignment(op.getAlignment().value());
-            }
-            pInst->mutable_alloca()->CopyFrom(pAllocaOp);
-          })
-      .Case<cir::BinOp>([instID, pInst, pModuleID, &typeCache](cir::BinOp op) {
-        protocir::CIRBinOp pBinOp;
-        pBinOp.mutable_base()->set_id(instID);
-        pInst->mutable_bin()->CopyFrom(pBinOp);
+        pType.mutable_int_type()->CopyFrom(intType);
       })
-      .Case<cir::LoadOp>([instID, pInst, pModuleID, &typeCache,
-                          &opCache](cir::LoadOp op) {
-        protocir::CIRLoadOp pLoadOp;
-        pLoadOp.mutable_base()->set_id(instID);
-        auto addressID = internOperation(opCache, op.getAddr().getDefiningOp());
-        pLoadOp.mutable_address()->set_id(addressID);
-        auto resultTypeID = internType(typeCache, op.getResult().getType());
-        pLoadOp.mutable_result_type()->set_id(resultTypeID);
-        pInst->mutable_load()->CopyFrom(pLoadOp);
+      .Case<cir::SingleType>([&pType](cir::SingleType type) {
+        protocir::CIRSingleType singleType;
+        pType.mutable_single_type()->CopyFrom(singleType);
       })
-      .Case<cir::StoreOp>([instID, pInst, pModuleID, &typeCache,
-                           &opCache](cir::StoreOp op) {
-        protocir::CIRStoreOp pStoreOp;
-        pStoreOp.mutable_base()->set_id(instID);
-        auto addressID = internOperation(opCache, op.getAddr().getDefiningOp());
-        pStoreOp.mutable_address()->set_id(addressID);
-        auto valueID = internOperation(opCache, op.getAddr().getDefiningOp());
-        pStoreOp.mutable_value()->set_id(valueID);
-        pInst->mutable_store()->CopyFrom(pStoreOp);
+      .Case<cir::DoubleType>([&pType](cir::DoubleType type) {
+        protocir::CIRDoubleType doubleType;
+        pType.mutable_double_type()->CopyFrom(doubleType);
       })
-      .Case<cir::ConstantOp>(
-          [instID, pInst, pModuleID, &typeCache, &opCache](cir::ConstantOp op) {
-            protocir::CIRConstantOp pConstantOp;
-            pConstantOp.mutable_base()->set_id(instID);
-            auto resultTypeID = internType(typeCache, op.getResult().getType());
-            pConstantOp.mutable_result_type()->set_id(resultTypeID);
-            pInst->mutable_constant()->CopyFrom(pConstantOp);
-          })
-      .Case<cir::CallOp>([instID, pInst, pModuleID, &typeCache, &opCache,
-                          &functionCache](cir::CallOp op) {
-        protocir::CIRCallOp pCallOp;
-        pCallOp.mutable_base()->set_id(instID);
-        if (op.getCallee().has_value()) {
-          auto callee = op.getCallee().value();
-          *pCallOp.mutable_callee() = callee.str();
-        }
-        for (auto arg : op.getArgOperands()) {
-          auto pArg = pCallOp.add_arguments();
-          auto argLine = internOperation(opCache, arg.getDefiningOp());
-          pArg->set_id(argLine);
-        }
-        if (op.getNumResults() > 0) {
-          auto resultTypeID = internType(typeCache, op.getResult().getType());
-          pCallOp.mutable_result_type()->set_id(resultTypeID);
-        }
-        if (auto callable = op.resolveCallable()) {
-          auto callableID =
-              internFunction(functionCache, cast<cir::FuncOp>(callable));
-        }
-        pInst->mutable_call()->CopyFrom(pCallOp);
+      .Case<cir::FP16Type>([&pType](cir::FP16Type type) {
+        protocir::CIRFP16Type fp16Type;
+        pType.mutable_fp16_type()->CopyFrom(fp16Type);
       })
-      .Case<cir::ReturnOp>(
-          [instID, pInst, pModuleID, &typeCache, &opCache](cir::ReturnOp op) {
-            protocir::CIRReturnOp pReturnOp;
-            pReturnOp.mutable_base()->set_id(instID);
-            for (auto input : op.getInput()) {
-              auto inputID = internOperation(opCache, input.getDefiningOp());
-              pReturnOp.add_input()->set_id(inputID);
-            }
-            pInst->mutable_return_()->CopyFrom(pReturnOp);
-          })
-      .Case<cir::GetGlobalOp>([instID, pInst, pModuleID, &typeCache,
-                               &opCache](cir::GetGlobalOp op) {
-        protocir::CIRGetGlobalOp pGetGlobalOp;
-        pGetGlobalOp.mutable_base()->set_id(instID);
-        *pGetGlobalOp.mutable_name() = op.getName().str();
-        pInst->mutable_get_global()->CopyFrom(pGetGlobalOp);
+      .Case<cir::BF16Type>([&pType](cir::BF16Type type) {
+        protocir::CIRBF16Type bf16Type;
+        pType.mutable_bf16_type()->CopyFrom(bf16Type);
       })
-      .Case<cir::CastOp>(
-          [instID, pInst, pModuleID, &typeCache, &opCache](cir::CastOp op) {
-            protocir::CIRCastOp pCastOp;
-            pCastOp.mutable_base()->set_id(instID);
-            auto srcID = internOperation(opCache, op.getSrc().getDefiningOp());
-            pCastOp.mutable_src()->set_id(srcID);
-            auto resultTypeID = internType(typeCache, op.getResult().getType());
-            pCastOp.mutable_result_type()->set_id(resultTypeID);
-            pInst->mutable_cast()->CopyFrom(pCastOp);
-          })
-      .Default([](mlir::Operation *op) {
-        op->dump();
+      .Case<cir::FP80Type>([&pType](cir::FP80Type type) {
+        protocir::CIRFP80Type fp80Type;
+        pType.mutable_fp80_type()->CopyFrom(fp80Type);
+      })
+      .Case<cir::FP128Type>([&pType](cir::FP128Type type) {
+        protocir::CIRFP128Type fp128Type;
+        pType.mutable_fp128_type()->CopyFrom(fp128Type);
+      })
+      .Case<cir::LongDoubleType>([&pType](cir::LongDoubleType type) {
+        protocir::CIRLongDoubleType longDoubleType;
+        pType.mutable_long_double_type()->CopyFrom(longDoubleType);
+      })
+      .Case<cir::ComplexType>([&pType](cir::ComplexType type) {
+        protocir::CIRComplexType complexType;
+        pType.mutable_complex_type()->CopyFrom(complexType);
+      })
+      .Case<cir::PointerType>([&pType](cir::PointerType type) {
+        protocir::CIRPointerType pointerType;
+        pType.mutable_pointer_type()->CopyFrom(pointerType);
+      })
+      .Case<cir::DataMemberType>([&pType](cir::DataMemberType type) {
+        protocir::CIRDataMemberType dataMemberType;
+        pType.mutable_data_member_type()->CopyFrom(dataMemberType);
+      })
+      .Case<cir::BoolType>([&pType](cir::BoolType type) {
+        protocir::CIRBoolType boolType;
+        pType.mutable_bool_type()->CopyFrom(boolType);
+      })
+      .Case<cir::ArrayType>([&pType](cir::ArrayType type) {
+        protocir::CIRArrayType arrayType;
+        pType.mutable_array_type()->CopyFrom(arrayType);
+      })
+      .Case<cir::VectorType>([&pType](cir::VectorType type) {
+        protocir::CIRVectorType vectorType;
+        pType.mutable_vector_type()->CopyFrom(vectorType);
+      })
+      .Case<cir::FuncType>([&pType](cir::FuncType type) {
+        protocir::CIRFuncType funcType;
+        pType.mutable_func_type()->CopyFrom(funcType);
+      })
+      .Case<cir::MethodType>([&pType](cir::MethodType type) {
+        protocir::CIRMethodType methodType;
+        pType.mutable_method_type()->CopyFrom(methodType);
+      })
+      .Case<cir::ExceptionInfoType>([&pType](cir::ExceptionInfoType type) {
+        protocir::CIRExceptionInfoType exceptionInfoType;
+        pType.mutable_exception_info_type()->CopyFrom(exceptionInfoType);
+      })
+      .Case<cir::VoidType>([&pType](cir::VoidType type) {
+        protocir::CIRVoidType voidType;
+        pType.mutable_void_type()->CopyFrom(voidType);
+      })
+      .Default([](mlir::Type type) {
+        type.dump();
         llvm_unreachable("NIY");
       });
+  return pType;
 }

@@ -6,6 +6,7 @@ set(LIBS
 
 add_library(protoSerializer
   EnumsSerializerGen.cpp
+  Serializer.cpp
   SerializerGen.cpp
 )
 

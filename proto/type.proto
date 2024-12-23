@@ -23,12 +23,12 @@ message CIRType {
   string name = 2;
   oneof kind {
     CIRIntType int_type = 3;
-    CIRSignleType single_type = 4;
+    CIRSingleType single_type = 4;
     CIRDoubleType double_type = 5;
     CIRFP16Type fp16_type = 6;
-    CIRBFloat16Type float16 = 7;
-    CIRFP80Type fp80 = 8;
-    CIRFP128Type fp128 = 9;
+    CIRBF16Type bf16_type = 7;
+    CIRFP80Type fp80_type = 8;
+    CIRFP128Type fp128_type = 9;
     CIRLongDoubleType long_double_type = 10;
     CIRComplexType complex_type = 11;
     CIRPointerType pointer_type = 12;
@@ -38,7 +38,7 @@ message CIRType {
     CIRVectorType vector_type = 16;
     CIRFuncType func_type = 17;
     CIRMethodType method_type = 18;
-    CIRExceptionType exception_type = 19;
+    CIRExceptionInfoType exception_info_type = 19;
     CIRVoidType void_type = 20;
   }
 }
@@ -48,31 +48,21 @@ message CIRIntType {
   bool is_signed = 2;
 }
 
-message CIRSignleType {
-}
+message CIRSingleType {}
 
-message CIRDoubleType {
-}
+message CIRDoubleType {}
 
-message CIRFP16Type {
-}
+message CIRFP16Type {}
 
-message CIRBFloat16Type {
-}
+message CIRBF16Type {}
 
-message CIRFP80Type {
-}
+message CIRFP80Type {}
 
-message CIRFP128Type {
-}
+message CIRFP128Type {}
 
-message CIRLongDoubleType {
-  CIRTypeID underlying = 1;
-}
+message CIRLongDoubleType { CIRTypeID underlying = 1; }
 
-message CIRComplexType {
-  CIRTypeID element_ty = 1;
-}
+message CIRComplexType { CIRTypeID element_ty = 1; }
 
 message CIRPointerType {
   CIRTypeID pointee = 1;
@@ -84,8 +74,7 @@ message CIRDataMemberType {
   CIRStructType cls_ty = 2;
 }
 
-message CIRBoolType {
-}
+message CIRBoolType {}
 
 message CIRArrayType {
   CIRTypeID elt_ty = 1;
@@ -108,8 +97,6 @@ message CIRMethodType {
   CIRStructType cls_ty = 2;
 }
 
-message CIRExceptionType {
-}
+message CIRExceptionInfoType {}
 
-message CIRVoidType {
-}
+message CIRVoidType {}
