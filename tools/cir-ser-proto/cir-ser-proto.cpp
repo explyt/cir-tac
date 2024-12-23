@@ -110,10 +110,5 @@ int main(int argc, char *argv[]) {
   }
   std::string binary;
   pModule.SerializeToString(&binary);
-  std::filesystem::path relOutPath = argv[2];
-
-  auto absOutPath = std::filesystem::absolute(relOutPath);
-  std::ofstream out(absOutPath.c_str());
-  out << binary;
-  out.close();
+  llvm::outs() << binary;
 }
