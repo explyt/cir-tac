@@ -7,14 +7,14 @@ message CIRModuleID { string id = 1; }
 
 message CIRFunctionID {
   CIRModuleID module_id = 1;
-  uint64 id = 2;
+  string id = 2;
 }
 
 message CIRBlockID { uint64 id = 1; }
 
 message CIRTypeID {
   CIRModuleID module_id = 1;
-  uint64 id = 2;
+  string id = 2;
 }
 
 message CIROpID { uint64 id = 1; }

@@ -5,20 +5,21 @@
 #include <llvm/ADT/DenseMap.h>
 #include <mlir/IR/Types.h>
 
-using TypeCache = llvm::DenseMap<mlir::Type, uint64_t>;
+using TypeCache = llvm::DenseMap<mlir::Type, std::string>;
 
 using OperationCache = llvm::DenseMap<mlir::Operation *, uint64_t>;
 
 using BlockCache = llvm::DenseMap<mlir::Block *, uint64_t>;
 
-using FunctionCache = llvm::DenseMap<cir::FuncOp, uint64_t>;
-
 namespace protocir {
 class Serializer {
 public:
-  static uint64_t internType(TypeCache &cache, mlir::Type type) {
+  static std::string internType(TypeCache &cache, mlir::Type type) {
     if (!cache.contains(type)) {
-      cache[type] = cache.size();
+      std::string idStr;
+      llvm::raw_string_ostream nameStream(idStr);
+      type.print(nameStream);
+      cache[type] = idStr;
     }
     return cache.at(type);
   }
@@ -38,18 +39,10 @@ public:
     return cache.at(block);
   }
 
-  static uint64_t internFunction(FunctionCache &cache, cir::FuncOp operation) {
-    if (!cache.contains(operation)) {
-      cache[operation] = cache.size();
-    }
-    return cache.at(operation);
-  }
-
   static void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
                                  protocir::CIRModuleID pModuleID,
                                  TypeCache &typeCache, OperationCache &opCache,
-                                 BlockCache &blockCache,
-                                 FunctionCache &functionCache);
+                                 BlockCache &blockCache);
 
   static protocir::CIRType serializeType(::mlir::Type &cirKind,
                                          TypeCache &typeCache);

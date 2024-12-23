@@ -12,10 +12,7 @@ void Serializer::serializeOperation(mlir::Operation &inst,
                                     protocir::CIRModuleID pModuleID,
                                     TypeCache &typeCache,
                                     OperationCache &opCache,
-                                    BlockCache &blockCache,
-                                    FunctionCache &functionCache
-
-) {
+                                    BlockCache &blockCache) {
   auto instID = internOperation(opCache, &inst);
   llvm::TypeSwitch<mlir::Operation *>(&inst)
 

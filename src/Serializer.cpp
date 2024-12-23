@@ -9,6 +9,10 @@ using namespace protocir;
 protocir::CIRType Serializer::serializeType(::mlir::Type &cirType,
                                             TypeCache &typeCache) {
   protocir::CIRType pType;
+  std::string nameStr;
+  llvm::raw_string_ostream nameStream(nameStr);
+  cirType.print(nameStream);
+  *pType.mutable_id()->mutable_id() = nameStr;
   llvm::TypeSwitch<mlir::Type>(cirType)
       .Case<cir::IntType>([&pType](cir::IntType type) {
         protocir::CIRIntType intType;
