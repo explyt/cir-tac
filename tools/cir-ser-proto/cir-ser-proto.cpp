@@ -58,10 +58,8 @@ int main(int argc, char *argv[]) {
       if (auto cirFunc = llvm::dyn_cast<cir::FuncOp>(func)) {
         protocir::CIRFunction *pFunction = pModule.add_functions();
         protocir::CIRFunctionID pFunctionID;
-        std::string functionName = cirFunc.getSymName().str();
-        *pFunction->mutable_name() = functionName;
         pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
-        auto funcId = functionName;
+        std::string funcId = cirFunc.getSymName().str();
         pFunction->mutable_id()->set_id(funcId);
         BlockCache blockCache;
         OperationCache opCache;
@@ -76,16 +74,14 @@ int main(int argc, char *argv[]) {
           protocir::CIRBlockID pBlockID;
           pBlockID.set_id(blockIdx);
           for (auto &inst : block) {
-            auto pInst = pBlock->add_operations();
-            Serializer::serializeOperation(inst, pInst, pModuleID, typeCache,
-                                           opCache, blockCache);
+            auto pInst = Serializer::serializeOperation(
+                inst, pModuleID, typeCache, opCache, blockCache);
+            pBlock->add_operations()->CopyFrom(pInst);
           }
         }
-        for (auto &type : cirFunc.getArgumentTypes()) {
-          auto pType = pFunction->add_arguments_types();
-          pType->mutable_module_id()->CopyFrom(pModuleID);
-          pType->set_id(Serializer::internType(typeCache, type));
-        }
+        auto pInfo = Serializer::serializeOperation(func, pModuleID, typeCache,
+                                                    opCache, blockCache);
+        pFunction->mutable_info()->CopyFrom(pInfo.func_op());
       }
     }
   }

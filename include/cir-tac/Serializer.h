@@ -39,10 +39,11 @@ public:
     return cache.at(block);
   }
 
-  static void serializeOperation(mlir::Operation &inst, protocir::CIROp *pInst,
-                                 protocir::CIRModuleID pModuleID,
-                                 TypeCache &typeCache, OperationCache &opCache,
-                                 BlockCache &blockCache);
+  static protocir::CIROp serializeOperation(mlir::Operation &inst,
+                                            protocir::CIRModuleID pModuleID,
+                                            TypeCache &typeCache,
+                                            OperationCache &opCache,
+                                            BlockCache &blockCache);
 
   static protocir::CIRType serializeType(::mlir::Type &cirKind,
                                          TypeCache &typeCache);

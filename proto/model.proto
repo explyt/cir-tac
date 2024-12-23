@@ -14,10 +14,8 @@ message CIRBlock {
 
 message CIRFunction {
   CIRFunctionID id = 1;
-  string name = 2;
-  repeated CIRBlock blocks = 3;
-  repeated CIRTypeID arguments_types = 4;
-  optional CIRTypeID return_type = 5;
+  repeated CIRBlock blocks = 2;
+  CIRFuncOp info = 3;
 }
 
 message CIRModule {
