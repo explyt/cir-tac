@@ -24,6 +24,7 @@
 #include <cinttypes>
 #include <fstream>
 #include <iostream>
+#include <tuple>
 #include <vector>
 
 using namespace protocir;
@@ -74,8 +75,8 @@ int main(int argc, char *argv[]) {
           protocir::CIRBlock *pBlock = pFunction->add_blocks();
           for (auto argumentType : block.getArgumentTypes()) {
             auto pargumentType =
-                Serializer::serializeType(argumentType, typeCache);
-            pBlock->add_argument_types()->CopyFrom(pargumentType);
+                Serializer::serializeType(argumentType, pModuleID, typeCache);
+            pBlock->add_argument_types()->CopyFrom(pargumentType.id());
           }
           protocir::CIRBlockID pBlockID;
           pBlockID.set_id(blockIdx);
@@ -102,8 +103,19 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  for (auto &type : typeCache) {
-    auto pType = Serializer::serializeType(type.getFirst(), typeCache);
+  auto typeCacheSize = 0;
+  do {
+    typeCacheSize = typeCache.size();
+    auto typeCacheCopy = typeCache;
+    for (auto &type : typeCacheCopy) {
+      std::ignore =
+          Serializer::serializeType(type.getFirst(), pModuleID, typeCache);
+    }
+  } while (typeCacheSize < typeCache.size());
+  auto typeCacheCopy = typeCache;
+  for (auto &type : typeCacheCopy) {
+    auto pType =
+        Serializer::serializeType(type.getFirst(), pModuleID, typeCache);
     pModule.add_types()->CopyFrom(pType);
   }
   std::string binary;

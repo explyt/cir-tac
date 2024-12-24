@@ -15,7 +15,7 @@ message CIRStructType {
   string name = 1;
   CIRRecordKind kind = 2;
   bool packed = 3;
-  repeated CIRType members = 4;
+  repeated CIRTypeID members = 4;
 }
 
 message CIRType {
@@ -40,6 +40,7 @@ message CIRType {
     CIRMethodType method_type = 18;
     CIRExceptionInfoType exception_info_type = 19;
     CIRVoidType void_type = 20;
+    CIRStructType struct_type = 21;
   }
 }
 
@@ -71,7 +72,7 @@ message CIRPointerType {
 
 message CIRDataMemberType {
   CIRTypeID member_ty = 1;
-  CIRStructType cls_ty = 2;
+  CIRTypeID cls_ty = 2;
 }
 
 message CIRBoolType {}
@@ -94,7 +95,7 @@ message CIRFuncType {
 
 message CIRMethodType {
   CIRTypeID member_func_ty = 1;
-  CIRStructType cls_ty = 2;
+  CIRTypeID cls_ty = 2;
 }
 
 message CIRExceptionInfoType {}

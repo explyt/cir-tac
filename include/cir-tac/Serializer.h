@@ -2,6 +2,7 @@
 #include "proto/type.pb.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
+#include <clang/CIR/Dialect/IR/CIRTypes.h>
 #include <llvm/ADT/DenseMap.h>
 #include <mlir/IR/Types.h>
 
@@ -52,7 +53,11 @@ public:
                                            BlockCache &blockCache);
 
   static protocir::CIRType serializeType(::mlir::Type &cirKind,
+                                         protocir::CIRModuleID pModuleID,
                                          TypeCache &typeCache);
+
+  static protocir::CIRRecordKind
+  serializeRecordKind(::cir::StructType::RecordKind cirKind);
 };
 
 } // namespace protocir
