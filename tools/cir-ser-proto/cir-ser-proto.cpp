@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
       mlir::parseSourceFile<mlir::ModuleOp>(relPath.c_str(), parseConfig);
   protocir::CIRModule pModule;
   protocir::CIRModuleID pModuleID;
-  std::string moduleId = "myModule";
+  std::string moduleId = (*module).getName().value_or("").str();
   *pModuleID.mutable_id() = moduleId;
   pModule.mutable_id()->CopyFrom(pModuleID);
   TypeCache typeCache;
