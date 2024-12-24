@@ -24,4 +24,21 @@ message CIRTypeID {
 
 message CIROpID { uint64 id = 1; }
 
-message CIROpIDs { repeated CIROpID range = 1; }
+message CIRValue {
+  oneof value {
+    CIROpValue op_value = 1;
+    CIRArgValue arg_value = 2;
+  }
+}
+
+message CIROpValue {
+  CIROpID op_id = 1;
+  uint64 result_id = 2;
+}
+
+message CIRArgValue {
+  CIRBlockID block_id = 1;
+  uint64 arg_id = 2;
+}
+
+message CIRValues { repeated CIRValue range = 1; }
