@@ -5,6 +5,11 @@ option java_package = "org.jacodb.impl.grpc";
 
 message CIRModuleID { string id = 1; }
 
+message CIRGlobalID {
+  CIRModuleID module_id = 1;
+  string id = 2;
+}
+
 message CIRFunctionID {
   CIRModuleID module_id = 1;
   string id = 2;

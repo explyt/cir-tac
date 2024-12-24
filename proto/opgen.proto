@@ -444,6 +444,7 @@ message CIRFuncOp {
   optional string aliasee = 13;
   bool global_ctor = 14;
   bool global_dtor = 15;
+  optional string ast = 16;
 }
 
 message CIRGetBitfieldOp {
@@ -483,11 +484,12 @@ message CIRGlobalOp {
   CIRTypeID sym_type = 4;
   CIRGlobalLinkageKind linkage = 5;
   optional CIRTLS_Model tls_model = 6;
-  bool comdat = 7;
-  bool constant = 8;
-  bool dsolocal = 9;
-  optional uint64 alignment = 10;
-  optional string section = 11;
+  optional string initial_value = 7;
+  bool comdat = 8;
+  bool constant = 9;
+  bool dsolocal = 10;
+  optional uint64 alignment = 11;
+  optional string section = 12;
 }
 
 message CIRGotoOp { string label = 1; }

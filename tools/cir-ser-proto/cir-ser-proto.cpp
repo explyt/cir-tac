@@ -54,8 +54,8 @@ int main(int argc, char *argv[]) {
   TypeCache typeCache;
   auto &bodyRegion = (*module).getBodyRegion();
   for (auto &bodyBlock : bodyRegion) {
-    for (auto &func : bodyBlock) {
-      if (auto cirFunc = llvm::dyn_cast<cir::FuncOp>(func)) {
+    for (auto &topOp : bodyBlock) {
+      if (auto cirFunc = llvm::dyn_cast<cir::FuncOp>(topOp)) {
         protocir::CIRFunction *pFunction = pModule.add_functions();
         protocir::CIRFunctionID pFunctionID;
         pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
         BlockCache blockCache;
         OperationCache opCache;
         for (auto &block : cirFunc.getFunctionBody()) {
+          std::ignore = Serializer::internBlock(blockCache, &block);
           for (auto &inst : block) {
             std::ignore = Serializer::internOperation(opCache, &inst);
           }
@@ -79,9 +80,20 @@ int main(int argc, char *argv[]) {
             pBlock->add_operations()->CopyFrom(pInst);
           }
         }
-        auto pInfo = Serializer::serializeOperation(func, pModuleID, typeCache,
+        auto pInfo = Serializer::serializeOperation(topOp, pModuleID, typeCache,
                                                     opCache, blockCache);
         pFunction->mutable_info()->CopyFrom(pInfo.func_op());
+      } else if (auto cirGlobal = llvm::dyn_cast<cir::GlobalOp>(topOp)) {
+        protocir::CIRGlobal *pGlobal = pModule.add_globals();
+        protocir::CIRGlobalID pGlobalID;
+        pGlobal->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
+        std::string globalId = cirGlobal.getSymName().str();
+        pGlobal->mutable_id()->set_id(globalId);
+        BlockCache blockCache;
+        OperationCache opCache;
+        auto pInfo = Serializer::serializeOperation(topOp, pModuleID, typeCache,
+                                                    opCache, blockCache);
+        pGlobal->mutable_info()->CopyFrom(pInfo.global_op());
       }
     }
   }

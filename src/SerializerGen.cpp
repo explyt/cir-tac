@@ -1776,6 +1776,16 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         auto globalDtorOptional = op.getGlobalDtor();
         pFuncOp.set_global_dtor(globalDtorOptional.has_value());
 
+        auto astOptional = op.getAst();
+        if (astOptional) {
+          auto ast = astOptional.value();
+
+          std::string astStr;
+          llvm::raw_string_ostream astRawStream(astStr);
+          ast.print(astRawStream);
+          *pFuncOp.mutable_ast() = astStr;
+        }
+
         pInst.mutable_func_op()->CopyFrom(pFuncOp);
       })
 
@@ -1959,6 +1969,16 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
           auto tlsModel = tlsModelOptional.value();
           auto ptlsModel = EnumSerializer::serializeTLS_Model(tlsModel);
           pGlobalOp.set_tls_model(ptlsModel);
+        }
+
+        auto initialValueOptional = op.getInitialValue();
+        if (initialValueOptional) {
+          auto initialValue = initialValueOptional.value();
+
+          std::string initialValueStr;
+          llvm::raw_string_ostream initialValueRawStream(initialValueStr);
+          initialValue.print(initialValueRawStream);
+          *pGlobalOp.mutable_initial_value() = initialValueStr;
         }
 
         auto comdat = op.getComdat();

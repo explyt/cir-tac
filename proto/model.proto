@@ -18,8 +18,14 @@ message CIRFunction {
   CIRFuncOp info = 3;
 }
 
+message CIRGlobal {
+  CIRGlobalID id = 1;
+  CIRGlobalOp info = 3;
+}
+
 message CIRModule {
   CIRModuleID id = 1;
   repeated CIRFunction functions = 2;
-  repeated CIRType types = 3;
+  repeated CIRGlobal globals = 3;
+  repeated CIRType types = 4;
 }
