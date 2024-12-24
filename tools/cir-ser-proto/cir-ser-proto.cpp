@@ -72,6 +72,11 @@ int main(int argc, char *argv[]) {
         for (auto &block : cirFunc.getFunctionBody()) {
           unsigned long blockIdx = Serializer::internBlock(blockCache, &block);
           protocir::CIRBlock *pBlock = pFunction->add_blocks();
+          for (auto argumentType : block.getArgumentTypes()) {
+            auto pargumentType =
+                Serializer::serializeType(argumentType, typeCache);
+            pBlock->add_argument_types()->CopyFrom(pargumentType);
+          }
           protocir::CIRBlockID pBlockID;
           pBlockID.set_id(blockIdx);
           for (auto &inst : block) {
