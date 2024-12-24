@@ -26,19 +26,19 @@ message CIROpID { uint64 id = 1; }
 
 message CIRValue {
   oneof value {
-    CIROpValue op_value = 1;
-    CIRArgValue arg_value = 2;
+    CIROpResult op_result = 1;
+    CIRBlockArgument block_argument = 2;
   }
 }
 
-message CIROpValue {
-  CIROpID op_id = 1;
-  uint64 result_id = 2;
+message CIROpResult {
+  CIROpID owner = 1;
+  uint64 result_number = 2;
 }
 
-message CIRArgValue {
-  CIRBlockID block_id = 1;
-  uint64 arg_id = 2;
+message CIRBlockArgument {
+  CIRBlockID owner = 1;
+  uint64 arg_number = 2;
 }
 
 message CIRValues { repeated CIRValue range = 1; }

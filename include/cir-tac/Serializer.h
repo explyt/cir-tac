@@ -45,6 +45,12 @@ public:
                                             OperationCache &opCache,
                                             BlockCache &blockCache);
 
+  static protocir::CIRValue serializeValue(mlir::Value &value,
+                                           protocir::CIRModuleID pModuleID,
+                                           TypeCache &typeCache,
+                                           OperationCache &opCache,
+                                           BlockCache &blockCache);
+
   static protocir::CIRType serializeType(::mlir::Type &cirKind,
                                          TypeCache &typeCache);
 };

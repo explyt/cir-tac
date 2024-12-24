@@ -1,10 +1,51 @@
 #include "cir-tac/Serializer.h"
+#include "proto/setup.pb.h"
 #include "proto/type.pb.h"
 
 #include <clang/CIR/Dialect/IR/CIRTypes.h>
 #include <llvm/ADT/TypeSwitch.h>
+#include <mlir/IR/Value.h>
 
 using namespace protocir;
+
+protocir::CIRValue Serializer::serializeValue(mlir::Value &mlirValue,
+                                              protocir::CIRModuleID pModuleID,
+                                              TypeCache &typeCache,
+                                              OperationCache &opCache,
+                                              BlockCache &blockCache) {
+  protocir::CIRValue pValue;
+
+  llvm::TypeSwitch<mlir::Value>(mlirValue)
+      .Case<mlir::OpResult>(
+          [&pValue, &opCache, &blockCache](mlir::OpResult value) {
+            protocir::CIROpResult opResult;
+            auto op = value.getOwner();
+            auto opID = Serializer::internOperation(opCache, op);
+            protocir::CIROpID popID;
+            popID.set_id(opID);
+            *opResult.mutable_owner() = popID;
+            auto resultNumber = value.getResultNumber();
+            opResult.set_result_number(resultNumber);
+            pValue.mutable_op_result()->CopyFrom(opResult);
+          })
+      .Case<mlir::BlockArgument>(
+          [&pValue, &opCache, &blockCache](mlir::BlockArgument value) {
+            protocir::CIRBlockArgument blockArgument;
+            auto block = value.getOwner();
+            auto blockID = Serializer::internBlock(blockCache, block);
+            protocir::CIRBlockID pblockID;
+            pblockID.set_id(blockID);
+            *blockArgument.mutable_owner() = pblockID;
+            auto argNumber = value.getArgNumber();
+            blockArgument.set_arg_number(argNumber);
+            pValue.mutable_block_argument()->CopyFrom(blockArgument);
+          })
+      .Default([](mlir::Value value) {
+        value.dump();
+        llvm_unreachable("NIY");
+      });
+  return pValue;
+}
 
 protocir::CIRType Serializer::serializeType(::mlir::Type &cirType,
                                             TypeCache &typeCache) {
