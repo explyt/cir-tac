@@ -14,6 +14,12 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                                BlockCache &blockCache) {
   protocir::CIROp pInst;
 
+  auto resultTypes = inst.getResultTypes();
+  for (const auto &resultType : resultTypes) {
+    auto resultTypeID = internType(typeCache, resultType);
+    pInst.add_result_types()->set_id(resultTypeID);
+  }
+
   auto instID = internOperation(opCache, &inst);
   llvm::TypeSwitch<mlir::Operation *>(&inst)
 
@@ -21,12 +27,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                          &opCache](cir::AbsOp op) {
         protocir::CIRAbsOp pAbsOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -45,12 +45,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAllocExceptionOp pAllocExceptionOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto size = op.getSize();
         pAllocExceptionOp.set_size(size);
 
@@ -61,12 +55,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::AllocaOp op) {
         protocir::CIRAllocaOp pAllocaOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto dynAllocSizeRaw = op.getDynAllocSize();
         if (dynAllocSizeRaw) {
@@ -106,12 +94,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRArrayCtor pArrayCtor;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
                                                     opCache, blockCache);
@@ -124,12 +106,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::ArrayDtor op) {
         protocir::CIRArrayDtor pArrayDtor;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
@@ -144,12 +120,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                    &opCache](cir::AssumeAlignedOp op) {
         protocir::CIRAssumeAlignedOp pAssumeAlignedOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto pointer = op.getPointer();
         auto pointerValue = Serializer::serializeValue(
@@ -174,12 +144,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAssumeOp pAssumeOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto predicate = op.getPredicate();
         auto predicateValue = Serializer::serializeValue(
             predicate, pModuleID, typeCache, opCache, blockCache);
@@ -193,12 +157,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                       &opCache](cir::AssumeSepStorageOp op) {
         protocir::CIRAssumeSepStorageOp pAssumeSepStorageOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto ptr1 = op.getPtr1();
         auto ptr1Value = Serializer::serializeValue(ptr1, pModuleID, typeCache,
@@ -217,12 +175,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                  &blockCache, &opCache](cir::AtomicCmpXchg op) {
         protocir::CIRAtomicCmpXchg pAtomicCmpXchg;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto ptr = op.getPtr();
         auto ptrValue = Serializer::serializeValue(ptr, pModuleID, typeCache,
@@ -261,12 +213,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAtomicFetch pAtomicFetch;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto ptr = op.getPtr();
         auto ptrValue = Serializer::serializeValue(ptr, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -299,12 +245,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAtomicXchg pAtomicXchg;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto ptr = op.getPtr();
         auto ptrValue = Serializer::serializeValue(ptr, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -330,12 +270,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRAwaitOp pAwaitOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto kind = op.getKind();
         auto pkind = EnumSerializer::serializeAwaitKind(kind);
         pAwaitOp.set_kind(pkind);
@@ -348,12 +282,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                    &opCache](cir::BaseClassAddrOp op) {
         protocir::CIRBaseClassAddrOp pBaseClassAddrOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto derivedAddr = op.getDerivedAddr();
         auto derivedAddrValue = Serializer::serializeValue(
@@ -376,12 +304,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                          &opCache](cir::BinOp op) {
         protocir::CIRBinOp pBinOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
@@ -412,12 +334,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRBinOpOverflowOp pBinOpOverflowOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -440,12 +356,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRBitClrsbOp pBitClrsbOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
             input, pModuleID, typeCache, opCache, blockCache);
@@ -458,12 +368,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::BitClzOp op) {
         protocir::CIRBitClzOp pBitClzOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
@@ -478,12 +382,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRBitCtzOp pBitCtzOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
             input, pModuleID, typeCache, opCache, blockCache);
@@ -496,12 +394,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::BitFfsOp op) {
         protocir::CIRBitFfsOp pBitFfsOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
@@ -516,12 +408,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRBitParityOp pBitParityOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
             input, pModuleID, typeCache, opCache, blockCache);
@@ -535,12 +421,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRBitPopcountOp pBitPopcountOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
             input, pModuleID, typeCache, opCache, blockCache);
@@ -553,12 +433,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::BrCondOp op) {
         protocir::CIRBrCondOp pBrCondOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto cond = op.getCond();
         auto condValue = Serializer::serializeValue(cond, pModuleID, typeCache,
@@ -603,12 +477,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRBrOp pBrOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto destOperands = op.getDestOperands();
         for (auto edestOperands : destOperands) {
           auto edestOperandsProto = pBrOp.add_dest_operands();
@@ -632,12 +500,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRBreakOp pBreakOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_break_op()->CopyFrom(pBreakOp);
       })
 
@@ -645,12 +507,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                               &blockCache, &opCache](cir::ByteswapOp op) {
         protocir::CIRByteswapOp pByteswapOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
@@ -664,12 +520,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                &blockCache, &opCache](cir::InlineAsmOp op) {
         protocir::CIRInlineAsmOp pInlineAsmOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto operands = op.getOperands();
         for (auto eoperands : operands) {
@@ -708,12 +558,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRCallOp pCallOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto argOps = op.getArgOps();
         for (auto eargOps : argOps) {
           auto eargOpsProto = pCallOp.add_arg_ops();
@@ -743,12 +587,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRCaseOp pCaseOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto kind = op.getKind();
         auto pkind = EnumSerializer::serializeCaseOpKind(kind);
         pCaseOp.set_kind(pkind);
@@ -760,12 +598,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::CastOp op) {
         protocir::CIRCastOp pCastOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -783,12 +615,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                 &blockCache, &opCache](cir::CatchParamOp op) {
         protocir::CIRCatchParamOp pCatchParamOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto exceptionPtrRaw = op.getExceptionPtr();
         if (exceptionPtrRaw) {
@@ -812,12 +638,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRCeilOp pCeilOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -830,12 +650,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                 &blockCache, &opCache](cir::ClearCacheOp op) {
         protocir::CIRClearCacheOp pClearCacheOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto begin = op.getBegin();
         auto beginValue = Serializer::serializeValue(
@@ -854,12 +668,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                          &opCache](cir::CmpOp op) {
         protocir::CIRCmpOp pCmpOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
@@ -883,12 +691,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRCmpThreeWayOp pCmpThreeWayOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -906,12 +708,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                 &blockCache, &opCache](cir::ComplexBinOp op) {
         protocir::CIRComplexBinOp pComplexBinOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
@@ -943,12 +739,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRComplexCreateOp pComplexCreateOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto real = op.getReal();
         auto realValue = Serializer::serializeValue(real, pModuleID, typeCache,
                                                     opCache, blockCache);
@@ -967,12 +757,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRComplexImagOp pComplexImagOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto operand = op.getOperand();
         auto operandValue = Serializer::serializeValue(
             operand, pModuleID, typeCache, opCache, blockCache);
@@ -987,12 +771,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRComplexImagPtrOp pComplexImagPtrOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto operand = op.getOperand();
         auto operandValue = Serializer::serializeValue(
             operand, pModuleID, typeCache, opCache, blockCache);
@@ -1005,12 +783,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                  &blockCache, &opCache](cir::ComplexRealOp op) {
         protocir::CIRComplexRealOp pComplexRealOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto operand = op.getOperand();
         auto operandValue = Serializer::serializeValue(
@@ -1026,12 +798,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRComplexRealPtrOp pComplexRealPtrOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto operand = op.getOperand();
         auto operandValue = Serializer::serializeValue(
             operand, pModuleID, typeCache, opCache, blockCache);
@@ -1044,12 +810,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                &blockCache, &opCache](cir::ConditionOp op) {
         protocir::CIRConditionOp pConditionOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto condition = op.getCondition();
         auto conditionValue = Serializer::serializeValue(
@@ -1064,12 +824,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRConstantOp pConstantOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         std::string valueStr;
         llvm::raw_string_ostream valueRawStream(valueStr);
         op.getValue().print(valueRawStream);
@@ -1083,12 +837,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRContinueOp pContinueOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_continue_op()->CopyFrom(pContinueOp);
       })
 
@@ -1096,12 +844,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::CopyOp op) {
         protocir::CIRCopyOp pCopyOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto dst = op.getDst();
         auto dstValue = Serializer::serializeValue(dst, pModuleID, typeCache,
@@ -1124,12 +866,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRCopysignOp pCopysignOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1148,12 +884,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRCosOp pCosOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1167,12 +897,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                       &opCache](cir::DerivedClassAddrOp op) {
         protocir::CIRDerivedClassAddrOp pDerivedClassAddrOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto baseAddr = op.getBaseAddr();
         auto baseAddrValue = Serializer::serializeValue(
@@ -1196,12 +920,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRDoWhileOp pDoWhileOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_do_while_op()->CopyFrom(pDoWhileOp);
       })
 
@@ -1209,12 +927,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                  &blockCache, &opCache](cir::DynamicCastOp op) {
         protocir::CIRDynamicCastOp pDynamicCastOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -1236,12 +948,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIREhInflightOp pEhInflightOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto cleanup = op.getCleanup();
         pEhInflightOp.set_cleanup(cleanup);
 
@@ -1253,12 +959,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIREhTypeIdOp pEhTypeIdOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto typeSym = op.getTypeSym();
         *pEhTypeIdOp.mutable_type_sym() = typeSym;
 
@@ -1269,12 +969,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::Exp2Op op) {
         protocir::CIRExp2Op pExp2Op;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -1289,12 +983,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRExpOp pExpOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1307,12 +995,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::ExpectOp op) {
         protocir::CIRExpectOp pExpectOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto val = op.getVal();
         auto valValue = Serializer::serializeValue(val, pModuleID, typeCache,
@@ -1341,12 +1023,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRFAbsOp pFAbsOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1359,12 +1035,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::FMaxOp op) {
         protocir::CIRFMaxOp pFMaxOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
@@ -1384,12 +1054,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRFMinOp pFMinOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1407,12 +1071,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::FModOp op) {
         protocir::CIRFModOp pFModOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
@@ -1432,12 +1090,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRFloorOp pFloorOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1451,12 +1103,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRForOp pForOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_for_op()->CopyFrom(pForOp);
       })
 
@@ -1464,12 +1110,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                &blockCache, &opCache](cir::FrameAddrOp op) {
         protocir::CIRFrameAddrOp pFrameAddrOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto level = op.getLevel();
         auto levelValue = Serializer::serializeValue(
@@ -1485,12 +1125,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRFreeExceptionOp pFreeExceptionOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto ptr = op.getPtr();
         auto ptrValue = Serializer::serializeValue(ptr, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1503,12 +1137,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::FuncOp op) {
         protocir::CIRFuncOp pFuncOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto symName = op.getSymName();
         *pFuncOp.mutable_sym_name() = symName;
@@ -1588,12 +1216,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRGetBitfieldOp pGetBitfieldOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
                                                     opCache, blockCache);
@@ -1610,12 +1232,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRGetGlobalOp pGetGlobalOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto name = op.getName();
         *pGetGlobalOp.mutable_name() = name;
 
@@ -1629,12 +1245,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                &blockCache, &opCache](cir::GetMemberOp op) {
         protocir::CIRGetMemberOp pGetMemberOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
@@ -1659,12 +1269,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRGetMethodOp pGetMethodOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto method = op.getMethod();
         auto methodValue = Serializer::serializeValue(
             method, pModuleID, typeCache, opCache, blockCache);
@@ -1684,12 +1288,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRGetRuntimeMemberOp pGetRuntimeMemberOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
                                                     opCache, blockCache);
@@ -1707,12 +1305,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::GlobalOp op) {
         protocir::CIRGlobalOp pGlobalOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto symName = op.getSymName();
         *pGlobalOp.mutable_sym_name() = symName;
@@ -1786,12 +1378,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRGotoOp pGotoOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto label = op.getLabel();
         *pGotoOp.mutable_label() = label;
 
@@ -1802,12 +1388,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                         &opCache](cir::IfOp op) {
         protocir::CIRIfOp pIfOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto condition = op.getCondition();
         auto conditionValue = Serializer::serializeValue(
@@ -1822,12 +1402,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRIsConstantOp pIsConstantOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto val = op.getVal();
         auto valValue = Serializer::serializeValue(val, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1840,12 +1414,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                &blockCache, &opCache](cir::IsFPClassOp op) {
         protocir::CIRIsFPClassOp pIsFPClassOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -1863,12 +1431,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRIterBeginOp pIterBeginOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto container = op.getContainer();
         auto containerValue = Serializer::serializeValue(
             container, pModuleID, typeCache, opCache, blockCache);
@@ -1884,12 +1446,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::IterEndOp op) {
         protocir::CIRIterEndOp pIterEndOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto container = op.getContainer();
         auto containerValue = Serializer::serializeValue(
@@ -1907,12 +1463,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                        &opCache](cir::LLVMIntrinsicCallOp op) {
         protocir::CIRLLVMIntrinsicCallOp pLLVMIntrinsicCallOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto argOps = op.getArgOps();
         for (auto eargOps : argOps) {
@@ -1933,12 +1483,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRLLrintOp pLLrintOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -1951,12 +1495,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::LLroundOp op) {
         protocir::CIRLLroundOp pLLroundOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -1971,12 +1509,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRLabelOp pLabelOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto label = op.getLabel();
         *pLabelOp.mutable_label() = label;
 
@@ -1987,12 +1519,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::LoadOp op) {
         protocir::CIRLoadOp pLoadOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
@@ -2026,12 +1552,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRLog10Op pLog10Op;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2044,12 +1564,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::Log2Op op) {
         protocir::CIRLog2Op pLog2Op;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -2064,12 +1578,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRLogOp pLogOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2082,12 +1590,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::LrintOp op) {
         protocir::CIRLrintOp pLrintOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -2102,12 +1604,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRLroundOp pLroundOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2120,12 +1616,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::MemChrOp op) {
         protocir::CIRMemChrOp pMemChrOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -2151,12 +1641,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRMemCpyInlineOp pMemCpyInlineOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto dst = op.getDst();
         auto dstValue = Serializer::serializeValue(dst, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2177,12 +1661,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::MemCpyOp op) {
         protocir::CIRMemCpyOp pMemCpyOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto dst = op.getDst();
         auto dstValue = Serializer::serializeValue(dst, pModuleID, typeCache,
@@ -2206,12 +1684,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::MemMoveOp op) {
         protocir::CIRMemMoveOp pMemMoveOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto dst = op.getDst();
         auto dstValue = Serializer::serializeValue(dst, pModuleID, typeCache,
@@ -2237,12 +1709,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRMemSetInlineOp pMemSetInlineOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto dst = op.getDst();
         auto dstValue = Serializer::serializeValue(dst, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2263,12 +1729,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::MemSetOp op) {
         protocir::CIRMemSetOp pMemSetOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto dst = op.getDst();
         auto dstValue = Serializer::serializeValue(dst, pModuleID, typeCache,
@@ -2293,12 +1753,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRNearbyintOp pNearbyintOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2311,12 +1765,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::ObjSizeOp op) {
         protocir::CIRObjSizeOp pObjSizeOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto ptr = op.getPtr();
         auto ptrValue = Serializer::serializeValue(ptr, pModuleID, typeCache,
@@ -2338,12 +1786,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRPowOp pPowOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2361,12 +1803,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                               &blockCache, &opCache](cir::PrefetchOp op) {
         protocir::CIRPrefetchOp pPrefetchOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
@@ -2387,12 +1823,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRPtrDiffOp pPtrDiffOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2410,12 +1840,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::PtrMaskOp op) {
         protocir::CIRPtrMaskOp pPtrMaskOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto ptr = op.getPtr();
         auto ptrValue = Serializer::serializeValue(ptr, pModuleID, typeCache,
@@ -2435,12 +1859,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRPtrStrideOp pPtrStrideOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto base = op.getBase();
         auto baseValue = Serializer::serializeValue(base, pModuleID, typeCache,
                                                     opCache, blockCache);
@@ -2458,12 +1876,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::ResumeOp op) {
         protocir::CIRResumeOp pResumeOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto exceptionPtrRaw = op.getExceptionPtr();
         if (exceptionPtrRaw) {
@@ -2490,12 +1902,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRReturnAddrOp pReturnAddrOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto level = op.getLevel();
         auto levelValue = Serializer::serializeValue(
             level, pModuleID, typeCache, opCache, blockCache);
@@ -2508,12 +1914,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::ReturnOp op) {
         protocir::CIRReturnOp pReturnOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto input = op.getInput();
         for (auto einput : input) {
@@ -2531,12 +1931,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRRintOp pRintOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2549,12 +1943,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::RotateOp op) {
         protocir::CIRRotateOp pRotateOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -2577,12 +1965,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRRoundOp pRoundOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2596,12 +1978,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRScopeOp pScopeOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_scope_op()->CopyFrom(pScopeOp);
       })
 
@@ -2609,12 +1985,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::SelectOp op) {
         protocir::CIRSelectOp pSelectOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto condition = op.getCondition();
         auto conditionValue = Serializer::serializeValue(
@@ -2639,12 +2009,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRSetBitfieldOp pSetBitfieldOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto addr = op.getAddr();
         auto addrValue = Serializer::serializeValue(addr, pModuleID, typeCache,
                                                     opCache, blockCache);
@@ -2665,12 +2029,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::ShiftOp op) {
         protocir::CIRShiftOp pShiftOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto value = op.getValue();
         auto valueValue = Serializer::serializeValue(
@@ -2693,12 +2051,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRSignBitOp pSignBitOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
             input, pModuleID, typeCache, opCache, blockCache);
@@ -2712,12 +2064,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRSinOp pSinOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2730,12 +2076,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                           &opCache](cir::SqrtOp op) {
         protocir::CIRSqrtOp pSqrtOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -2751,12 +2091,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRStackRestoreOp pStackRestoreOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto ptr = op.getPtr();
         auto ptrValue = Serializer::serializeValue(ptr, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -2770,12 +2104,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRStackSaveOp pStackSaveOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_stack_save_op()->CopyFrom(pStackSaveOp);
       })
 
@@ -2783,12 +2111,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::StdFindOp op) {
         protocir::CIRStdFindOp pStdFindOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto first = op.getFirst();
         auto firstValue = Serializer::serializeValue(
@@ -2815,12 +2137,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::StoreOp op) {
         protocir::CIRStoreOp pStoreOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto value = op.getValue();
         auto valueValue = Serializer::serializeValue(
@@ -2855,12 +2171,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                 &blockCache, &opCache](cir::SwitchFlatOp op) {
         protocir::CIRSwitchFlatOp pSwitchFlatOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto condition = op.getCondition();
         auto conditionValue = Serializer::serializeValue(
@@ -2914,12 +2224,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRSwitchOp pSwitchOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto condition = op.getCondition();
         auto conditionValue = Serializer::serializeValue(
             condition, pModuleID, typeCache, opCache, blockCache);
@@ -2933,12 +2237,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRTernaryOp pTernaryOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto cond = op.getCond();
         auto condValue = Serializer::serializeValue(cond, pModuleID, typeCache,
                                                     opCache, blockCache);
@@ -2951,12 +2249,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::ThrowOp op) {
         protocir::CIRThrowOp pThrowOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto exceptionPtrRaw = op.getExceptionPtr();
         if (exceptionPtrRaw) {
@@ -2985,12 +2277,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRTrapOp pTrapOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_trap_op()->CopyFrom(pTrapOp);
       })
 
@@ -2998,12 +2284,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::TruncOp op) {
         protocir::CIRTruncOp pTruncOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto src = op.getSrc();
         auto srcValue = Serializer::serializeValue(src, pModuleID, typeCache,
@@ -3017,12 +2297,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::TryCallOp op) {
         protocir::CIRTryCallOp pTryCallOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto contOperands = op.getContOperands();
         for (auto econtOperands : contOperands) {
@@ -3080,12 +2354,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRTryOp pTryOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto synthetic = op.getSynthetic();
         pTryOp.set_synthetic(synthetic);
 
@@ -3099,12 +2367,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::UnaryOp op) {
         protocir::CIRUnaryOp pUnaryOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto input = op.getInput();
         auto inputValue = Serializer::serializeValue(
@@ -3123,12 +2385,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRUnreachableOp pUnreachableOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_unreachable_op()->CopyFrom(pUnreachableOp);
       })
 
@@ -3136,12 +2392,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::VAArgOp op) {
         protocir::CIRVAArgOp pVAArgOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto argList = op.getArgList();
         auto argListValue = Serializer::serializeValue(
@@ -3155,12 +2405,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                             &opCache](cir::VACopyOp op) {
         protocir::CIRVACopyOp pVACopyOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto dstList = op.getDstList();
         auto dstListValue = Serializer::serializeValue(
@@ -3180,12 +2424,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRVAEndOp pVAEndOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto argList = op.getArgList();
         auto argListValue = Serializer::serializeValue(
             argList, pModuleID, typeCache, opCache, blockCache);
@@ -3198,12 +2436,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                              &opCache](cir::VAStartOp op) {
         protocir::CIRVAStartOp pVAStartOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto argList = op.getArgList();
         auto argListValue = Serializer::serializeValue(
@@ -3218,12 +2450,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                   &opCache](cir::VTTAddrPointOp op) {
         protocir::CIRVTTAddrPointOp pVTTAddrPointOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto symAddrRaw = op.getSymAddr();
         if (symAddrRaw) {
@@ -3249,12 +2475,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                      &opCache](cir::VTableAddrPointOp op) {
         protocir::CIRVTableAddrPointOp pVTableAddrPointOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto symAddrRaw = op.getSymAddr();
         if (symAddrRaw) {
@@ -3283,12 +2503,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRVecCmpOp pVecCmpOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto lhs = op.getLhs();
         auto lhsValue = Serializer::serializeValue(lhs, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -3311,12 +2525,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRVecCreateOp pVecCreateOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto elements = op.getElements();
         for (auto eelements : elements) {
           auto eelementsProto = pVecCreateOp.add_elements();
@@ -3332,12 +2540,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                 &blockCache, &opCache](cir::VecExtractOp op) {
         protocir::CIRVecExtractOp pVecExtractOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto vec = op.getVec();
         auto vecValue = Serializer::serializeValue(vec, pModuleID, typeCache,
@@ -3356,12 +2558,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                &blockCache, &opCache](cir::VecInsertOp op) {
         protocir::CIRVecInsertOp pVecInsertOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto vec = op.getVec();
         auto vecValue = Serializer::serializeValue(vec, pModuleID, typeCache,
@@ -3387,12 +2583,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRVecShuffleDynamicOp pVecShuffleDynamicOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto vec = op.getVec();
         auto vecValue = Serializer::serializeValue(vec, pModuleID, typeCache,
                                                    opCache, blockCache);
@@ -3410,12 +2600,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                 &blockCache, &opCache](cir::VecShuffleOp op) {
         protocir::CIRVecShuffleOp pVecShuffleOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto vec1 = op.getVec1();
         auto vec1Value = Serializer::serializeValue(vec1, pModuleID, typeCache,
@@ -3435,12 +2619,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRVecSplatOp pVecSplatOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         auto value = op.getValue();
         auto valueValue = Serializer::serializeValue(
             value, pModuleID, typeCache, opCache, blockCache);
@@ -3453,12 +2631,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                                 &blockCache, &opCache](cir::VecTernaryOp op) {
         protocir::CIRVecTernaryOp pVecTernaryOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto cond = op.getCond();
         auto condValue = Serializer::serializeValue(cond, pModuleID, typeCache,
@@ -3483,12 +2655,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
         protocir::CIRWhileOp pWhileOp;
         pInst.mutable_base()->set_id(instID);
 
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
-
         pInst.mutable_while_op()->CopyFrom(pWhileOp);
       })
 
@@ -3496,12 +2662,6 @@ protocir::CIROp Serializer::serializeOperation(mlir::Operation &inst,
                            &opCache](cir::YieldOp op) {
         protocir::CIRYieldOp pYieldOp;
         pInst.mutable_base()->set_id(instID);
-
-        auto resultTypes = op.getOperation()->getResultTypes();
-        for (const auto &resultType : resultTypes) {
-          auto resultTypeID = internType(typeCache, resultType);
-          pInst.add_result_types()->set_id(resultTypeID);
-        }
 
         auto args = op.getArgs();
         for (auto eargs : args) {
