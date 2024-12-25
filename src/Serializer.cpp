@@ -6,6 +6,7 @@
 #include <clang/CIR/Dialect/IR/CIRTypes.h>
 #include <llvm/ADT/TypeSwitch.h>
 #include <llvm/Support/Casting.h>
+#include <mlir-c/IR.h>
 #include <mlir/IR/Value.h>
 
 using namespace protocir;
@@ -16,6 +17,12 @@ protocir::CIRValue Serializer::serializeValue(mlir::Value &mlirValue,
                                               OperationCache &opCache,
                                               BlockCache &blockCache) {
   protocir::CIRValue pValue;
+  auto type = mlirValue.getType();
+  auto typeID = internType(typeCache, type);
+  protocir::CIRTypeID ptype;
+  *ptype.mutable_module_id() = pModuleID;
+  *ptype.mutable_id() = typeID;
+  *pValue.mutable_type() = ptype;
 
   llvm::TypeSwitch<mlir::Value>(mlirValue)
       .Case<mlir::OpResult>(
