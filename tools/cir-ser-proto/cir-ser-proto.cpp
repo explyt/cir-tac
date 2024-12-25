@@ -21,11 +21,7 @@
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 
-#include <cinttypes>
-#include <fstream>
-#include <iostream>
 #include <tuple>
-#include <vector>
 
 using namespace protocir;
 

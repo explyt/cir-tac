@@ -1,4 +1,4 @@
-#include "proto/model.pb.h"
+#include "proto/opgen.pb.h"
 #include "proto/type.pb.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
