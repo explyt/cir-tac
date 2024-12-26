@@ -8,10 +8,10 @@ CIRAsmFlavor EnumSerializer::serializeAsmFlavor(::cir::AsmFlavor &cirKind) {
   switch (cirKind) {
 
   case ::cir::AsmFlavor::x86_att:
-    return protocir::CIRAsmFlavor::AsmFlavor_x86_att;
+    return protocir::CIRAsmFlavor::AsmFlavor_X86Att;
 
   case ::cir::AsmFlavor::x86_intel:
-    return protocir::CIRAsmFlavor::AsmFlavor_x86_intel;
+    return protocir::CIRAsmFlavor::AsmFlavor_X86Intel;
   }
 }
 
@@ -49,16 +49,16 @@ CIRAwaitKind EnumSerializer::serializeAwaitKind(::cir::AwaitKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::AwaitKind::init:
-    return protocir::CIRAwaitKind::AwaitKind_init;
+    return protocir::CIRAwaitKind::AwaitKind_Init;
 
   case ::cir::AwaitKind::user:
-    return protocir::CIRAwaitKind::AwaitKind_user;
+    return protocir::CIRAwaitKind::AwaitKind_User;
 
   case ::cir::AwaitKind::yield:
-    return protocir::CIRAwaitKind::AwaitKind_yield;
+    return protocir::CIRAwaitKind::AwaitKind_Yield;
 
   case ::cir::AwaitKind::final:
-    return protocir::CIRAwaitKind::AwaitKind_final;
+    return protocir::CIRAwaitKind::AwaitKind_Final;
   }
 }
 
@@ -142,76 +142,76 @@ CIRCastKind EnumSerializer::serializeCastKind(::cir::CastKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::CastKind::int_to_bool:
-    return protocir::CIRCastKind::CastKind_int_to_bool;
+    return protocir::CIRCastKind::CastKind_IntToBool;
 
   case ::cir::CastKind::array_to_ptrdecay:
-    return protocir::CIRCastKind::CastKind_array_to_ptrdecay;
+    return protocir::CIRCastKind::CastKind_ArrayToPtrdecay;
 
   case ::cir::CastKind::integral:
-    return protocir::CIRCastKind::CastKind_integral;
+    return protocir::CIRCastKind::CastKind_Integral;
 
   case ::cir::CastKind::bitcast:
-    return protocir::CIRCastKind::CastKind_bitcast;
+    return protocir::CIRCastKind::CastKind_Bitcast;
 
   case ::cir::CastKind::floating:
-    return protocir::CIRCastKind::CastKind_floating;
+    return protocir::CIRCastKind::CastKind_Floating;
 
   case ::cir::CastKind::ptr_to_bool:
-    return protocir::CIRCastKind::CastKind_ptr_to_bool;
+    return protocir::CIRCastKind::CastKind_PtrToBool;
 
   case ::cir::CastKind::float_to_int:
-    return protocir::CIRCastKind::CastKind_float_to_int;
+    return protocir::CIRCastKind::CastKind_FloatToInt;
 
   case ::cir::CastKind::int_to_ptr:
-    return protocir::CIRCastKind::CastKind_int_to_ptr;
+    return protocir::CIRCastKind::CastKind_IntToPtr;
 
   case ::cir::CastKind::ptr_to_int:
-    return protocir::CIRCastKind::CastKind_ptr_to_int;
+    return protocir::CIRCastKind::CastKind_PtrToInt;
 
   case ::cir::CastKind::float_to_bool:
-    return protocir::CIRCastKind::CastKind_float_to_bool;
+    return protocir::CIRCastKind::CastKind_FloatToBool;
 
   case ::cir::CastKind::bool_to_int:
-    return protocir::CIRCastKind::CastKind_bool_to_int;
+    return protocir::CIRCastKind::CastKind_BoolToInt;
 
   case ::cir::CastKind::int_to_float:
-    return protocir::CIRCastKind::CastKind_int_to_float;
+    return protocir::CIRCastKind::CastKind_IntToFloat;
 
   case ::cir::CastKind::bool_to_float:
-    return protocir::CIRCastKind::CastKind_bool_to_float;
+    return protocir::CIRCastKind::CastKind_BoolToFloat;
 
   case ::cir::CastKind::address_space:
-    return protocir::CIRCastKind::CastKind_address_space;
+    return protocir::CIRCastKind::CastKind_AddressSpace;
 
   case ::cir::CastKind::float_to_complex:
-    return protocir::CIRCastKind::CastKind_float_to_complex;
+    return protocir::CIRCastKind::CastKind_FloatToComplex;
 
   case ::cir::CastKind::int_to_complex:
-    return protocir::CIRCastKind::CastKind_int_to_complex;
+    return protocir::CIRCastKind::CastKind_IntToComplex;
 
   case ::cir::CastKind::float_complex_to_real:
-    return protocir::CIRCastKind::CastKind_float_complex_to_real;
+    return protocir::CIRCastKind::CastKind_FloatComplexToReal;
 
   case ::cir::CastKind::int_complex_to_real:
-    return protocir::CIRCastKind::CastKind_int_complex_to_real;
+    return protocir::CIRCastKind::CastKind_IntComplexToReal;
 
   case ::cir::CastKind::float_complex_to_bool:
-    return protocir::CIRCastKind::CastKind_float_complex_to_bool;
+    return protocir::CIRCastKind::CastKind_FloatComplexToBool;
 
   case ::cir::CastKind::int_complex_to_bool:
-    return protocir::CIRCastKind::CastKind_int_complex_to_bool;
+    return protocir::CIRCastKind::CastKind_IntComplexToBool;
 
   case ::cir::CastKind::float_complex:
-    return protocir::CIRCastKind::CastKind_float_complex;
+    return protocir::CIRCastKind::CastKind_FloatComplex;
 
   case ::cir::CastKind::float_complex_to_int_complex:
-    return protocir::CIRCastKind::CastKind_float_complex_to_int_complex;
+    return protocir::CIRCastKind::CastKind_FloatComplexToIntComplex;
 
   case ::cir::CastKind::int_complex:
-    return protocir::CIRCastKind::CastKind_int_complex;
+    return protocir::CIRCastKind::CastKind_IntComplex;
 
   case ::cir::CastKind::int_complex_to_float_complex:
-    return protocir::CIRCastKind::CastKind_int_complex_to_float_complex;
+    return protocir::CIRCastKind::CastKind_IntComplexToFloatComplex;
   }
 }
 
@@ -220,10 +220,10 @@ EnumSerializer::serializeCatchParamKind(::cir::CatchParamKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::CatchParamKind::begin:
-    return protocir::CIRCatchParamKind::CatchParamKind_begin;
+    return protocir::CIRCatchParamKind::CatchParamKind_Begin;
 
   case ::cir::CatchParamKind::end:
-    return protocir::CIRCatchParamKind::CatchParamKind_end;
+    return protocir::CIRCatchParamKind::CatchParamKind_End;
   }
 }
 
@@ -231,22 +231,22 @@ CIRCmpOpKind EnumSerializer::serializeCmpOpKind(::cir::CmpOpKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::CmpOpKind::lt:
-    return protocir::CIRCmpOpKind::CmpOpKind_lt;
+    return protocir::CIRCmpOpKind::CmpOpKind_Lt;
 
   case ::cir::CmpOpKind::le:
-    return protocir::CIRCmpOpKind::CmpOpKind_le;
+    return protocir::CIRCmpOpKind::CmpOpKind_Le;
 
   case ::cir::CmpOpKind::gt:
-    return protocir::CIRCmpOpKind::CmpOpKind_gt;
+    return protocir::CIRCmpOpKind::CmpOpKind_Gt;
 
   case ::cir::CmpOpKind::ge:
-    return protocir::CIRCmpOpKind::CmpOpKind_ge;
+    return protocir::CIRCmpOpKind::CmpOpKind_Ge;
 
   case ::cir::CmpOpKind::eq:
-    return protocir::CIRCmpOpKind::CmpOpKind_eq;
+    return protocir::CIRCmpOpKind::CmpOpKind_Eq;
 
   case ::cir::CmpOpKind::ne:
-    return protocir::CIRCmpOpKind::CmpOpKind_ne;
+    return protocir::CIRCmpOpKind::CmpOpKind_Ne;
   }
 }
 
@@ -300,10 +300,10 @@ EnumSerializer::serializeDynamicCastKind(::cir::DynamicCastKind &cirKind) {
   switch (cirKind) {
 
   case ::cir::DynamicCastKind::ptr:
-    return protocir::CIRDynamicCastKind::DynamicCastKind_ptr;
+    return protocir::CIRDynamicCastKind::DynamicCastKind_Ptr;
 
   case ::cir::DynamicCastKind::ref:
-    return protocir::CIRDynamicCastKind::DynamicCastKind_ref;
+    return protocir::CIRDynamicCastKind::DynamicCastKind_Ref;
   }
 }
 
@@ -388,13 +388,13 @@ CIRSignedOverflowBehavior EnumSerializer::serializeSignedOverflowBehavior(
 
   case ::cir::sob::SignedOverflowBehavior::undefined:
     return protocir::CIRSignedOverflowBehavior::
-        SignedOverflowBehavior_undefined;
+        SignedOverflowBehavior_Undefined;
 
   case ::cir::sob::SignedOverflowBehavior::defined:
-    return protocir::CIRSignedOverflowBehavior::SignedOverflowBehavior_defined;
+    return protocir::CIRSignedOverflowBehavior::SignedOverflowBehavior_Defined;
 
   case ::cir::sob::SignedOverflowBehavior::trapping:
-    return protocir::CIRSignedOverflowBehavior::SignedOverflowBehavior_trapping;
+    return protocir::CIRSignedOverflowBehavior::SignedOverflowBehavior_Trapping;
   }
 }
 
@@ -403,10 +403,10 @@ EnumSerializer::serializeSizeInfoType(::cir::SizeInfoType &cirKind) {
   switch (cirKind) {
 
   case ::cir::SizeInfoType::min:
-    return protocir::CIRSizeInfoType::SizeInfoType_min;
+    return protocir::CIRSizeInfoType::SizeInfoType_Min;
 
   case ::cir::SizeInfoType::max:
-    return protocir::CIRSizeInfoType::SizeInfoType_max;
+    return protocir::CIRSizeInfoType::SizeInfoType_Max;
   }
 }
 

@@ -10,8 +10,8 @@ import "setup.proto";
 // ATT or Intel
 
 enum CIRAsmFlavor {
-  AsmFlavor_x86_att = 0;
-  AsmFlavor_x86_intel = 1;
+  AsmFlavor_X86Att = 0;
+  AsmFlavor_X86Intel = 1;
 }
 // Binary opcode for atomic fetch operations
 
@@ -28,10 +28,10 @@ enum CIRAtomicFetchKind {
 // await kind
 
 enum CIRAwaitKind {
-  AwaitKind_init = 0;
-  AwaitKind_user = 1;
-  AwaitKind_yield = 2;
-  AwaitKind_final = 3;
+  AwaitKind_Init = 0;
+  AwaitKind_User = 1;
+  AwaitKind_Yield = 2;
+  AwaitKind_Final = 3;
 }
 // binary operation (arith and logic) kind
 
@@ -70,46 +70,46 @@ enum CIRCaseOpKind {
 // cast kind
 
 enum CIRCastKind {
-  CastKind_int_to_bool = 0;
-  CastKind_array_to_ptrdecay = 1;
-  CastKind_integral = 2;
-  CastKind_bitcast = 3;
-  CastKind_floating = 4;
-  CastKind_ptr_to_bool = 5;
-  CastKind_float_to_int = 6;
-  CastKind_int_to_ptr = 7;
-  CastKind_ptr_to_int = 8;
-  CastKind_float_to_bool = 9;
-  CastKind_bool_to_int = 10;
-  CastKind_int_to_float = 11;
-  CastKind_bool_to_float = 12;
-  CastKind_address_space = 13;
-  CastKind_float_to_complex = 14;
-  CastKind_int_to_complex = 15;
-  CastKind_float_complex_to_real = 16;
-  CastKind_int_complex_to_real = 17;
-  CastKind_float_complex_to_bool = 18;
-  CastKind_int_complex_to_bool = 19;
-  CastKind_float_complex = 20;
-  CastKind_float_complex_to_int_complex = 21;
-  CastKind_int_complex = 22;
-  CastKind_int_complex_to_float_complex = 23;
+  CastKind_IntToBool = 0;
+  CastKind_ArrayToPtrdecay = 1;
+  CastKind_Integral = 2;
+  CastKind_Bitcast = 3;
+  CastKind_Floating = 4;
+  CastKind_PtrToBool = 5;
+  CastKind_FloatToInt = 6;
+  CastKind_IntToPtr = 7;
+  CastKind_PtrToInt = 8;
+  CastKind_FloatToBool = 9;
+  CastKind_BoolToInt = 10;
+  CastKind_IntToFloat = 11;
+  CastKind_BoolToFloat = 12;
+  CastKind_AddressSpace = 13;
+  CastKind_FloatToComplex = 14;
+  CastKind_IntToComplex = 15;
+  CastKind_FloatComplexToReal = 16;
+  CastKind_IntComplexToReal = 17;
+  CastKind_FloatComplexToBool = 18;
+  CastKind_IntComplexToBool = 19;
+  CastKind_FloatComplex = 20;
+  CastKind_FloatComplexToIntComplex = 21;
+  CastKind_IntComplex = 22;
+  CastKind_IntComplexToFloatComplex = 23;
 }
 // Designate limits for begin/end of catch param handling
 
 enum CIRCatchParamKind {
-  CatchParamKind_begin = 0;
-  CatchParamKind_end = 1;
+  CatchParamKind_Begin = 0;
+  CatchParamKind_End = 1;
 }
 // compare operation kind
 
 enum CIRCmpOpKind {
-  CmpOpKind_lt = 0;
-  CmpOpKind_le = 1;
-  CmpOpKind_gt = 2;
-  CmpOpKind_ge = 3;
-  CmpOpKind_eq = 4;
-  CmpOpKind_ne = 5;
+  CmpOpKind_Lt = 0;
+  CmpOpKind_Le = 1;
+  CmpOpKind_Gt = 2;
+  CmpOpKind_Ge = 3;
+  CmpOpKind_Eq = 4;
+  CmpOpKind_Ne = 5;
 }
 // three-way comparison ordering kind
 
@@ -135,8 +135,8 @@ enum CIRComplexRangeKind {
 // dynamic cast kind
 
 enum CIRDynamicCastKind {
-  DynamicCastKind_ptr = 0;
-  DynamicCastKind_ref = 1;
+  DynamicCastKind_Ptr = 0;
+  DynamicCastKind_Ref = 1;
 }
 // Linkage type/kind
 
@@ -172,15 +172,15 @@ enum CIRMemOrder {
 // the behavior for signed overflow
 
 enum CIRSignedOverflowBehavior {
-  SignedOverflowBehavior_undefined = 0;
-  SignedOverflowBehavior_defined = 1;
-  SignedOverflowBehavior_trapping = 2;
+  SignedOverflowBehavior_Undefined = 0;
+  SignedOverflowBehavior_Defined = 1;
+  SignedOverflowBehavior_Trapping = 2;
 }
 // size info type
 
 enum CIRSizeInfoType {
-  SizeInfoType_min = 0;
-  SizeInfoType_max = 1;
+  SizeInfoType_Min = 0;
+  SizeInfoType_Max = 1;
 }
 // Source language
 
