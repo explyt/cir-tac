@@ -21,9 +21,10 @@ jobs:
 
     steps:
     - name: Checkout clangir repo
-      uses: actions/checkout@v5${{ env.CLANGIR_VERSION }}
+      uses: actions/checkout@v5
       with:
-        repository: {{ env.CLANGIR_REPOSITORY }}
+        ref: ${{ env.CLANGIR_VERSION }}
+        repository: ${{ env.CLANGIR_REPOSITORY }}
         path: clangir
 
     - name: Install Packages (Linux)
