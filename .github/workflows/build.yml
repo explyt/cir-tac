@@ -7,15 +7,22 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-env:
-  CLANGIR_REPOSITORY: "misonijnik/clangir"
-  CLANGIR_VERSION: "88439da55209adcd64d71aa07de3e993f208cd7c"
-
 jobs:
-  build:
+  build-clangir:
     uses: ./.github/workflows/build-clangir.yml
 
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
     steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: clangir-build-artifact-${{ runner.os }}
+
     - uses: actions/checkout@v4
       with:
         path: main

@@ -47,3 +47,9 @@ jobs:
         cd clangir/llvm && mkdir -p build && cd build
         cmake -GNinja -DLLVM_ENABLE_PROJECTS="clang;mlir" -DCLANG_ENABLE_CIR=ON -DCMAKE_BUILD_TYPE=Release ..
         ninja
+
+    - name: Upload clangir build
+    - uses: actions/upload-artifact@v4
+      with:
+      name: clangir-build-artifact-${{ runner.os }}
+      path: clangir/llvm/build
