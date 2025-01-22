@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: Checkout clangir repo
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
       with:
         ref: ${{ env.CLANGIR_VERSION }}
         repository: ${{ env.CLANGIR_REPOSITORY }}
