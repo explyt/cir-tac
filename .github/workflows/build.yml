@@ -12,6 +12,7 @@ jobs:
     uses: ./.github/workflows/build-clangir.yml
 
   build:
+    needs: build-clangir
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
