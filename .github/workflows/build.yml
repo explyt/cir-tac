@@ -56,8 +56,7 @@ jobs:
         path: main
 
     - name: Build cir-tac
-      with:
-        path: main
+      working-directory: main
       run: |
         mkdir build && cd build
         cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
