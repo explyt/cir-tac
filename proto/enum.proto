@@ -5,15 +5,10 @@ syntax = "proto3";
 package protocir;
 option java_package = "org.jacodb.impl.grpc";
 
-import "google/protobuf/empty.proto";
-import "setup.proto";
-// ATT or Intel
-
 enum CIRAsmFlavor {
   AsmFlavor_X86Att = 0;
   AsmFlavor_X86Intel = 1;
 }
-// Binary opcode for atomic fetch operations
 
 enum CIRAtomicFetchKind {
   AtomicFetchKind_Add = 0;
@@ -25,7 +20,6 @@ enum CIRAtomicFetchKind {
   AtomicFetchKind_Max = 6;
   AtomicFetchKind_Min = 7;
 }
-// await kind
 
 enum CIRAwaitKind {
   AwaitKind_Init = 0;
@@ -33,7 +27,6 @@ enum CIRAwaitKind {
   AwaitKind_Yield = 2;
   AwaitKind_Final = 3;
 }
-// binary operation (arith and logic) kind
 
 enum CIRBinOpKind {
   BinOpKind_Mul = 0;
@@ -45,21 +38,18 @@ enum CIRBinOpKind {
   BinOpKind_Xor = 6;
   BinOpKind_Or = 7;
 }
-// checked binary arithmetic operation kind
 
 enum CIRBinOpOverflowKind {
   BinOpOverflowKind_Add = 0;
   BinOpOverflowKind_Sub = 1;
   BinOpOverflowKind_Mul = 2;
 }
-// calling convention
 
 enum CIRCallingConv {
   CallingConv_C = 0;
   CallingConv_SpirKernel = 1;
   CallingConv_SpirFunction = 2;
 }
-// case kind
 
 enum CIRCaseOpKind {
   CaseOpKind_Default = 0;
@@ -67,7 +57,6 @@ enum CIRCaseOpKind {
   CaseOpKind_Anyof = 2;
   CaseOpKind_Range = 3;
 }
-// cast kind
 
 enum CIRCastKind {
   CastKind_IntToBool = 0;
@@ -95,13 +84,11 @@ enum CIRCastKind {
   CastKind_IntComplex = 22;
   CastKind_IntComplexToFloatComplex = 23;
 }
-// Designate limits for begin/end of catch param handling
 
 enum CIRCatchParamKind {
   CatchParamKind_Begin = 0;
   CatchParamKind_End = 1;
 }
-// compare operation kind
 
 enum CIRCmpOpKind {
   CmpOpKind_Lt = 0;
@@ -111,19 +98,16 @@ enum CIRCmpOpKind {
   CmpOpKind_Eq = 4;
   CmpOpKind_Ne = 5;
 }
-// three-way comparison ordering kind
 
 enum CIRCmpOrdering {
   CmpOrdering_Strong = 0;
   CmpOrdering_Partial = 1;
 }
-// complex number binary operation kind
 
 enum CIRComplexBinOpKind {
   ComplexBinOpKind_Mul = 0;
   ComplexBinOpKind_Div = 1;
 }
-// complex multiplication and division implementation
 
 enum CIRComplexRangeKind {
   ComplexRangeKind_Full = 0;
@@ -132,13 +116,11 @@ enum CIRComplexRangeKind {
   ComplexRangeKind_Basic = 3;
   ComplexRangeKind_None = 4;
 }
-// dynamic cast kind
 
 enum CIRDynamicCastKind {
   DynamicCastKind_Ptr = 0;
   DynamicCastKind_Ref = 1;
 }
-// Linkage type/kind
 
 enum CIRGlobalLinkageKind {
   GlobalLinkageKind_ExternalLinkage = 0;
@@ -152,14 +134,12 @@ enum CIRGlobalLinkageKind {
   GlobalLinkageKind_ExternalWeakLinkage = 8;
   GlobalLinkageKind_CommonLinkage = 9;
 }
-// inlineKind
 
 enum CIRInlineKind {
   InlineKind_NoInline = 0;
   InlineKind_AlwaysInline = 1;
   InlineKind_InlineHint = 2;
 }
-// Memory order according to C++11 memory model
 
 enum CIRMemOrder {
   MemOrder_Relaxed = 0;
@@ -169,35 +149,30 @@ enum CIRMemOrder {
   MemOrder_AcquireRelease = 4;
   MemOrder_SequentiallyConsistent = 5;
 }
-// the behavior for signed overflow
 
 enum CIRSignedOverflowBehavior {
   SignedOverflowBehavior_Undefined = 0;
   SignedOverflowBehavior_Defined = 1;
   SignedOverflowBehavior_Trapping = 2;
 }
-// size info type
 
 enum CIRSizeInfoType {
   SizeInfoType_Min = 0;
   SizeInfoType_Max = 1;
 }
-// Source language
 
 enum CIRSourceLanguage {
   SourceLanguage_C = 0;
   SourceLanguage_CXX = 1;
   SourceLanguage_OpenCLC = 2;
 }
-// TLS model
 
-enum CIRTLS_Model {
-  TLS_Model_GeneralDynamic = 0;
-  TLS_Model_LocalDynamic = 1;
-  TLS_Model_InitialExec = 2;
-  TLS_Model_LocalExec = 3;
+enum CIRTLSModel {
+  TLSModel_GeneralDynamic = 0;
+  TLSModel_LocalDynamic = 1;
+  TLSModel_InitialExec = 2;
+  TLSModel_LocalExec = 3;
 }
-// unary operation kind
 
 enum CIRUnaryOpKind {
   UnaryOpKind_Inc = 0;
@@ -206,10 +181,15 @@ enum CIRUnaryOpKind {
   UnaryOpKind_Minus = 3;
   UnaryOpKind_Not = 4;
 }
-// C/C++ visibility
 
 enum CIRVisibilityKind {
   VisibilityKind_Default = 0;
   VisibilityKind_Hidden = 1;
   VisibilityKind_Protected = 2;
+}
+
+enum CIRRecordKind {
+  CIRRecordKind_Class = 0;
+  CIRRecordKind_Union = 1;
+  CIRRecordKind_Struct = 2;
 }

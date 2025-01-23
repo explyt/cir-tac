@@ -3,11 +3,12 @@ find_package(Protobuf REQUIRED CONFIG)
 include_directories(${PROTOBUF_INCLUDE_DIR})
 
 set(PROTOS
-    enumgen.proto
-    model.proto
-    opgen.proto
-    setup.proto
+    enum.proto
     type.proto
+    setup.proto
+    attr.proto
+    op.proto
+    model.proto
 )
 
 protobuf_generate_cpp(PROTO_SRC PROTO_HEADER ${PROTOS})
