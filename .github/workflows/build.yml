@@ -20,6 +20,17 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Install Packages (Linux)
+      if: startsWith(runner.os, 'Linux')
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf
+
+    - name: Install Packages (macOS)
+      if: startsWith(runner.os, 'macOS')
+      run: |
+        brew install protobuf
+
     - uses: actions/download-artifact@v4
       with:
         name: clangir-build-artifact-${{ runner.os }}
