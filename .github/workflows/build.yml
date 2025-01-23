@@ -23,6 +23,7 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: clangir-build-artifact-${{ runner.os }}
+        path: clangir/llvm/build
 
     - uses: actions/checkout@v4
       with:
