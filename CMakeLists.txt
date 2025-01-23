@@ -22,7 +22,7 @@ include_directories(SYSTEM ${CLANG_INCLUDE_DIRS})
 include_directories(SYSTEM ${MLIR_INCLUDE_DIRS})
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 
-find_package(Protobuf REQUIRED CONFIG)
+find_package(Protobuf REQUIRED)
 message(STATUS "Found Protobuf ${PROTOBUF_PACKAGE_VERSION}")
 message(STATUS "Using Protobuf.cmake in: ${PROTOBUF_DIR}")
 

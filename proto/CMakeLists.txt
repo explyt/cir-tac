@@ -1,5 +1,6 @@
 include(FindProtobuf)
-find_package(Protobuf REQUIRED CONFIG)
+find_package(Protobuf REQUIRED)
+find_package(absl REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIR})
 
 set(PROTOS
@@ -13,8 +14,11 @@ set(PROTOS
 protobuf_generate_cpp(PROTO_SRC PROTO_HEADER ${PROTOS})
 add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
 target_link_libraries(
-    proto ${Protobuf_LIBRARIES}
+    proto PRIVATE ${Protobuf_LIBRARIES}
     protobuf::libprotobuf
+    absl::base
+    absl::strings
+    absl::log
     absl::log_internal_message
     absl::log_internal_check_op
     absl::raw_logging_internal
