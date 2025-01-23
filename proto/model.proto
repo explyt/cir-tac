@@ -7,6 +7,10 @@ import "setup.proto";
 import "type.proto";
 import "opgen.proto";
 
+message CIRBlockList {
+  repeated CIRBlock block = 1;
+}
+
 message CIRBlock {
   CIRBlockID id = 1;
   repeated CIROp operations = 2;
@@ -15,7 +19,7 @@ message CIRBlock {
 
 message CIRFunction {
   CIRFunctionID id = 1;
-  repeated CIRBlock blocks = 2;
+  CIRBlockList blocks = 2;
   CIRFuncOp info = 3;
 }
 
