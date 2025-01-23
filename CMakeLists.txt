@@ -13,7 +13,7 @@ find_package(MLIR REQUIRED HINTS ${CLANGIR_BUILD_DIR})
 message(STATUS "Found MLIR ${MLIR_PACKAGE_VERSION}")
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
 
-find_package(CLANG REQUIRED HINTS ${CLANGIR_BUILD_DIR})
+find_package(Clang REQUIRED HINTS ${CLANGIR_BUILD_DIR})
 message(STATUS "Found Clang ${CLANG_PACKAGE_VERSION}")
 message(STATUS "Using ClangConfig.cmake in: ${CLANG_DIR}")
 
@@ -23,13 +23,13 @@ include_directories(SYSTEM ${MLIR_INCLUDE_DIRS})
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 
 find_package(Protobuf REQUIRED CONFIG)
-message(STATUS "Found Protobuf ${Protobuf_PACKAGE_VERSION}")
-message(STATUS "Using Protobuf.cmake in: ${Protobuf_DIR}")
+message(STATUS "Found Protobuf ${PROTOBUF_PACKAGE_VERSION}")
+message(STATUS "Using Protobuf.cmake in: ${PROTOBUF_DIR}")
 
 add_subdirectory(proto)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${Protobuf_INCLUDE_DIRS})
+include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 include_directories(include)
 
