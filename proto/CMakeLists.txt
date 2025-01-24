@@ -18,7 +18,7 @@ target_link_libraries(
     protobuf::libprotobuf
     absl::base
     absl::strings
-    absl::log_internal_message
+    # absl::log_internal_message
     absl::log_internal_check_op
     absl::raw_logging_internal
     absl::spinlock_wait
