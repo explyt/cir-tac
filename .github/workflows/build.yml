@@ -36,7 +36,7 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/archive/refs/tags/v29.3.zip -O protobuf-v29.3.zip
         unzip protobuf-v29.3.zip
         cd protobuf-29.3
-        cmake . -DCMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=protobuf-29.3-install -Dprotobuf_BUILD_TESTS=OFF
+        cmake . -DCMAKE_CXX_STANDARD=17 -Dprotobuf_BUILD_TESTS=OFF
         cmake --build . --config Release --target install
         export PATH=protobuf-29.3-install:$PATH
 
