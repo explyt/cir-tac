@@ -102,6 +102,16 @@ int main(int argc, char *argv[]) {
   }
 
   TypeSerializer typeSerializer(pModuleID, typeCache);
+
+  auto typeCacheSize = 0;
+  do {
+    typeCacheSize = typeCache.map().size();
+    auto typeCacheCopy = typeCache;
+    for (auto &type : typeCacheCopy.map()) {
+      typeSerializer.serializeMLIRType(type.getFirst());
+    }
+  } while (typeCacheSize < typeCache.map().size());
+
   for (auto &type : typeCache.map()) {
     auto pType = typeSerializer.serializeMLIRType(type.getFirst());
     *pModule.add_types() = pType;
