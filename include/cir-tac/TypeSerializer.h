@@ -22,6 +22,7 @@ public:
   MLIRType serializeMLIRType(mlir::Type);
 
   MLIRNoneType serializeMLIRNoneType(mlir::NoneType);
+  MLIRIndexType serializeMLIRIndexType(mlir::IndexType);
   MLIRIntegerType serializeMLIRIntegerType(mlir::IntegerType);
 
   CIRArrayType serializeCIRArrayType(cir::ArrayType);

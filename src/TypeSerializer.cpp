@@ -20,6 +20,10 @@ MLIRType TypeSerializer::serializeMLIRType(mlir::Type type) {
     auto serialized = serializeMLIRNoneType(type);
     *pType.mutable_none_type() = serialized;
   })
+  .Case<mlir::IndexType>([this, &pType](mlir::IndexType type) {
+    auto serialized = serializeMLIRIndexType(type);
+    *pType.mutable_index_type() = serialized;
+  })
   .Case<mlir::IntegerType>([this, &pType](mlir::IntegerType type) {
     auto serialized = serializeMLIRIntegerType(type);
     *pType.mutable_integer_type() = serialized;
@@ -110,6 +114,11 @@ MLIRType TypeSerializer::serializeMLIRType(mlir::Type type) {
 
 MLIRNoneType TypeSerializer::serializeMLIRNoneType(mlir::NoneType type) {
   MLIRNoneType serialized;
+  return serialized;
+}
+
+MLIRIndexType TypeSerializer::serializeMLIRIndexType(mlir::IndexType type) {
+  MLIRIndexType serialized;
   return serialized;
 }
 
