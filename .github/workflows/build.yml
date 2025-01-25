@@ -88,6 +88,6 @@ jobs:
     - name: Build cir-tac
       working-directory: main
       run: |
-        export CMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/protobuf-install:$CMAKE_PREFIX_PATH
+        sudo mv protobuf-install/* /usr/local
         mkdir build && cd build
         cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
