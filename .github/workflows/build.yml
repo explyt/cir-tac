@@ -33,18 +33,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y -q --no-install-recommends \
           ninja-build libabsl-dev
-        wget https://github.com/abseil/abseil-cpp/archive/refs/tags/20240722.1.zip -O abseil-cpp-20240722.1.zip
-        unzip abseil-cpp-20240722.1.zip
-        cd abseil-cpp-20240722.1 && mkdir build && cd build
-        cmake -D CMAKE_INSTALL_PREFIX=/usr \
-              -D CMAKE_BUILD_TYPE=Release  \
-              -D ABSL_PROPAGATE_CXX_STD=ON \
-              -D BUILD_SHARED_LIBS=ON      \
-              -D CMAKE_INSTALL_PREFIX=/usr/local \
-              -G Ninja ..
-        ninja
-        sudo ninja install
-        cd ../../
         git clone --recursive https://github.com/protocolbuffers/protobuf.git
         cd protobuf
         git checkout v29.3
@@ -52,10 +40,6 @@ jobs:
         mkdir build && cd build
         cmake -D CMAKE_BUILD_TYPE=Release \
               -D protobuf_BUILD_TESTS=OFF \
-              -D CMAKE_SKIP_INSTALL_RPATH=ON \
-              -D protobuf_ABSL_PROVIDER=package \
-              -D protobuf_BUILD_LIBUPB=OFF \
-              # -D protobuf_BUILD_SHARED_LIBS=ON \
               -D CMAKE_INSTALL_PREFIX=/usr/local \
               -G Ninja ..
         ninja
