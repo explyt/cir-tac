@@ -40,26 +40,26 @@ jobs:
               -D CMAKE_BUILD_TYPE=Release  \
               -D ABSL_PROPAGATE_CXX_STD=ON \
               -D BUILD_SHARED_LIBS=ON      \
-              -D CMAKE_INSTALL_PREFIX=abseil-cpp-20240722.1-install \
+              -D CMAKE_INSTALL_PREFIX=/usr/local \
               -G Ninja ..
         ninja
-        ninja install
-        export PATH=abseil-cpp-20240722.1-install:$PATH
+        sudo ninja install
         cd ../../
-        wget https://github.com/protocolbuffers/protobuf/archive/refs/tags/v29.3.zip -O protobuf-v29.3.zip
-        unzip protobuf-v29.3.zip
-        cd protobuf-29.3 && mkdir build && cd build
+        git clone --recursive https://github.com/protocolbuffers/protobuf.git
+        cd protobuf
+        git checkout v29.3
+        git submodule update --init --recursive
+        mkdir build && cd build
         cmake -D CMAKE_BUILD_TYPE=Release \
               -D protobuf_BUILD_TESTS=OFF \
               -D CMAKE_SKIP_INSTALL_RPATH=ON \
               -D protobuf_ABSL_PROVIDER=package \
               -D protobuf_BUILD_LIBUPB=OFF \
               -D protobuf_BUILD_SHARED_LIBS=ON \
-              -D CMAKE_INSTALL_PREFIX=protobuf-29.3-install \
+              -D CMAKE_INSTALL_PREFIX=/usr/local \
               -G Ninja ..
         ninja
-        ninja install
-        export PATH=protobuf-29.3-install:$PATH
+        sudo ninja install
 
     - name: Install Packages (macOS)
       if: startsWith(runner.os, 'macOS')
