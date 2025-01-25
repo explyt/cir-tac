@@ -23,13 +23,13 @@ include_directories(SYSTEM ${MLIR_INCLUDE_DIRS})
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 
 find_package(Protobuf CONFIG REQUIRED)
-message(STATUS "Found Protobuf ${PROTOBUF_PACKAGE_VERSION}")
-message(STATUS "Using Protobuf.cmake in: ${PROTOBUF_DIR}")
+message(STATUS "Found Protobuf ${Protobuf_PACKAGE_VERSION}")
+message(STATUS "Using Protobuf.cmake in: ${Protobuf_DIR}")
 
 add_subdirectory(proto)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${PROTOBUF_INCLUDE_DIRS})
+include_directories(${Protobuf_INCLUDE_DIRS})
 
 include_directories(include)
 
