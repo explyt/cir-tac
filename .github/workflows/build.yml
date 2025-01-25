@@ -59,6 +59,7 @@ jobs:
           ninja
           sudo ninja install
         fi
+        sudo mv protobuf-install/* /usr/local
 
     - name: Install Packages (macOS)
       if: startsWith(runner.os, 'macOS')
@@ -88,6 +89,5 @@ jobs:
     - name: Build cir-tac
       working-directory: main
       run: |
-        sudo mv protobuf-install/* /usr/local
         mkdir build && cd build
         cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
