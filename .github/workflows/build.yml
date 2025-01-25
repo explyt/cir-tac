@@ -59,7 +59,7 @@ jobs:
           ninja
           sudo ninja install
         fi
-        sudo mv protobuf-install/* /usr/local
+        sudo mv $GITHUB_WORKSPACE/protobuf-install/* /usr/local
 
     - name: Install Packages (macOS)
       if: startsWith(runner.os, 'macOS')
