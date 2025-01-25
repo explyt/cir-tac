@@ -33,17 +33,34 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y -q --no-install-recommends \
           ninja-build libabsl-dev
-        git clone --recursive https://github.com/protocolbuffers/protobuf.git
-        cd protobuf
-        git checkout v29.3
-        git submodule update --init --recursive
-        mkdir build && cd build
-        cmake -D CMAKE_BUILD_TYPE=Release \
-              -D protobuf_BUILD_TESTS=OFF \
-              -D CMAKE_INSTALL_PREFIX=/usr/local \
-              -G Ninja ..
-        ninja
-        sudo ninja install
+
+    - name: Cache Protobuf install (Linux)
+      if: startsWith(runner.os, 'Linux')
+      id: cache-protobuf-install
+      uses: actions/cache@v4
+      with:
+        path: protobuf-install
+        key: ${{ runner.os }}-protobuf-install
+
+    - name: Install Protobuf (Linux)
+      if: startsWith(runner.os, 'Linux')
+      run: |
+        if [[ ! -d protobuf-install ]]
+        then
+          git clone --recursive https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git checkout v29.3
+          git submodule update --init --recursive
+          mkdir build && cd build
+          cmake -D CMAKE_BUILD_TYPE=Release \
+                -D protobuf_BUILD_TESTS=OFF \
+                -D CMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/protobuf-install \
+                -G Ninja ..
+          ninja
+          sudo ninja install
+        fi
+        export PATH=$PATH:$GITHUB_WORKSPACE/protobuf-install/bin
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE/protobuf-install/lib
 
     - name: Install Packages (macOS)
       if: startsWith(runner.os, 'macOS')
