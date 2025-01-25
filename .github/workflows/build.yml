@@ -55,7 +55,7 @@ jobs:
               -D CMAKE_SKIP_INSTALL_RPATH=ON \
               -D protobuf_ABSL_PROVIDER=package \
               -D protobuf_BUILD_LIBUPB=OFF \
-              -D protobuf_BUILD_SHARED_LIBS=ON \
+              # -D protobuf_BUILD_SHARED_LIBS=ON \
               -D CMAKE_INSTALL_PREFIX=/usr/local \
               -G Ninja ..
         ninja
