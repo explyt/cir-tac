@@ -59,8 +59,6 @@ jobs:
           ninja
           sudo ninja install
         fi
-        export PATH=$PATH:$GITHUB_WORKSPACE/protobuf-install/bin
-        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE/protobuf-install/lib
 
     - name: Install Packages (macOS)
       if: startsWith(runner.os, 'macOS')
@@ -90,5 +88,6 @@ jobs:
     - name: Build cir-tac
       working-directory: main
       run: |
+        export CMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/protobuf-install:$CMAKE_PREFIX_PATH
         mkdir build && cd build
         cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
