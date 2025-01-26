@@ -1,8 +1,7 @@
-include(FindProtobuf)
-find_package(Protobuf REQUIRED CONFIG)
-include_directories(${PROTOBUF_INCLUDE_DIR})
+find_package(Protobuf CONFIG REQUIRED)
+include_directories(${Protobuf_INCLUDE_DIR})
 
-set(PROTOS
+set(PROTOSRC
     enumgen.proto
     model.proto
     opgen.proto
@@ -10,10 +9,16 @@ set(PROTOS
     type.proto
 )
 
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER ${PROTOS})
-add_library(proto ${PROTO_HEADER} ${PROTO_SRC})
+add_library(proto OBJECT ${PROTOSRC})
+
+protobuf_generate(
+    TARGET proto
+    IMPORT_DIRS .
+    PROTOS
+    ${PROTOSRC}
+)
+
 target_link_libraries(
-    proto ${Protobuf_LIBRARIES}
-    absl::log_internal_message
-    absl::log_internal_check_op
+    proto PRIVATE
+    protobuf::libprotobuf
 )

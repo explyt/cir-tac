@@ -1,0 +1,93 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  CLANGIR_REPOSITORY: "misonijnik/clangir"
+  CLANGIR_VERSION: "88439da55209adcd64d71aa07de3e993f208cd7c"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout clangir repo
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.CLANGIR_VERSION }}
+        repository: ${{ env.CLANGIR_REPOSITORY }}
+        path: clangir
+
+    - name: Install Packages (Linux)
+      if: startsWith(runner.os, 'Linux')
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y -q --no-install-recommends \
+          ninja-build libabsl-dev
+
+    - name: Cache Protobuf install (Linux)
+      if: startsWith(runner.os, 'Linux')
+      id: cache-protobuf-install
+      uses: actions/cache@v4
+      with:
+        path: protobuf-install
+        key: ${{ runner.os }}-protobuf-install
+
+    - name: Install Protobuf (Linux)
+      if: startsWith(runner.os, 'Linux')
+      run: |
+        if [[ ! -d protobuf-install ]]
+        then
+          git clone --recursive https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git checkout v29.3
+          git submodule update --init --recursive
+          mkdir build && cd build
+          cmake -D CMAKE_BUILD_TYPE=Release \
+                -D protobuf_BUILD_TESTS=OFF \
+                -D CMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/protobuf-install \
+                -G Ninja ..
+          ninja
+          sudo ninja install
+        fi
+        sudo cp -r $GITHUB_WORKSPACE/protobuf-install/* /usr/local
+
+    - name: Install Packages (macOS)
+      if: startsWith(runner.os, 'macOS')
+      run: |
+        brew install protobuf ninja
+
+    - name: Cache clangir build
+      id: cache-clangir-build
+      uses: actions/cache@v4
+      with:
+        path: clangir/llvm/build
+        key: ${{ runner.os }}-clangir-build
+
+    - name: Build clangir
+      run: |
+        if [[ ! -d clangir/llvm/build ]]
+        then
+          cd clangir/llvm && mkdir -p build && cd build
+          cmake -GNinja -DLLVM_ENABLE_PROJECTS="clang;mlir" -DCLANG_ENABLE_CIR=ON -DCMAKE_BUILD_TYPE=Release ..
+          ninja
+        fi
+
+    - uses: actions/checkout@v4
+      with:
+        path: main
+
+    - name: Build cir-tac
+      working-directory: main
+      run: |
+        mkdir build && cd build
+        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
