@@ -1,3 +1,4 @@
+// clang-format off
 syntax = "proto3";
 
 package protocir;
@@ -5,17 +6,21 @@ option java_package = "org.jacodb.impl.grpc";
 
 import "setup.proto";
 import "type.proto";
-import "opgen.proto";
+import "op.proto";
 
-message CIRBlock {
-  CIRBlockID id = 1;
-  repeated CIROp operations = 2;
-  repeated CIRTypeID argument_types = 3;
+message MLIRBlock {
+  MLIRBlockID id = 1;
+  repeated MLIROp operations = 2;
+  repeated MLIRTypeID argument_types = 3;
+}
+
+message MLIRBlockList {
+  repeated MLIRBlock block = 1;
 }
 
 message CIRFunction {
   CIRFunctionID id = 1;
-  repeated CIRBlock blocks = 2;
+  MLIRBlockList blocks = 2;
   CIRFuncOp info = 3;
 }
 
@@ -24,9 +29,10 @@ message CIRGlobal {
   CIRGlobalOp info = 3;
 }
 
-message CIRModule {
-  CIRModuleID id = 1;
+message MLIRModule {
+  MLIRModuleID id = 1;
   repeated CIRFunction functions = 2;
   repeated CIRGlobal globals = 3;
-  repeated CIRType types = 4;
+  repeated MLIRType types = 4;
 }
+// clang-format on

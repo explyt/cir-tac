@@ -5,9 +5,10 @@ set(LIBS
 )
 
 add_library(protoSerializer
-  EnumsSerializerGen.cpp
-  Serializer.cpp
-  SerializerGen.cpp
+  EnumSerializer.cpp
+  TypeSerializer.cpp
+  AttrSerializer.cpp
+  OpSerializer.cpp
 )
 
 target_link_libraries(protoSerializer ${LIBS})

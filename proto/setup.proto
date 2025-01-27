@@ -1,45 +1,49 @@
+// clang-format off
 syntax = "proto3";
 
 package protocir;
 option java_package = "org.jacodb.impl.grpc";
 
-message CIRModuleID { string id = 1; }
+message MLIRModuleID { string id = 1; }
 
 message CIRGlobalID {
-  CIRModuleID module_id = 1;
+  MLIRModuleID module_id = 1;
   string id = 2;
 }
 
 message CIRFunctionID {
-  CIRModuleID module_id = 1;
+  MLIRModuleID module_id = 1;
   string id = 2;
 }
 
-message CIRBlockID { uint64 id = 1; }
+message MLIRBlockID { uint64 id = 1; }
 
-message CIRTypeID {
-  CIRModuleID module_id = 1;
+message MLIRTypeID {
+  MLIRModuleID module_id = 1;
   string id = 2;
 }
 
-message CIROpID { uint64 id = 1; }
+message MLIROpID { uint64 id = 1; }
 
-message CIRValue {
-  CIRTypeID type = 1;
+message MLIRValue {
+  MLIRTypeID type = 1;
   oneof value {
-    CIROpResult op_result = 2;
-    CIRBlockArgument block_argument = 3;
+    MLIROpResult op_result = 2;
+    MLIRBlockArgument block_argument = 3;
   }
 }
 
-message CIROpResult {
-  CIROpID owner = 1;
+message MLIROpResult {
+  MLIROpID owner = 1;
   uint64 result_number = 2;
 }
 
-message CIRBlockArgument {
-  CIRBlockID owner = 1;
+message MLIRBlockArgument {
+  MLIRBlockID owner = 1;
   uint64 arg_number = 2;
 }
 
-message CIRValues { repeated CIRValue range = 1; }
+message MLIRValueList { repeated MLIRValue list = 1; }
+
+message MLIRTypeIDList { repeated MLIRTypeID list = 1; }
+// clang-format on

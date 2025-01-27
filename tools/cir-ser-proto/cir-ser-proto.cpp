@@ -1,10 +1,14 @@
-#include "cir-tac/Serializer.h"
-
+#include "cir-tac/OpSerializer.h"
+#include "cir-tac/TypeSerializer.h"
+#include "cir-tac/Util.h"
 #include "proto/model.pb.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <clang/CIR/Passes.h>
-
+#include <llvm/ADT/DenseMap.h>
+#include <llvm/ADT/TypeSwitch.h>
+#include <llvm/Support/Casting.h>
+#include <llvm/Support/ErrorHandling.h>
 #include <mlir/Dialect/DLTI/DLTIDialect.h.inc>
 #include <mlir/Dialect/LLVMIR/LLVMDialect.h>
 #include <mlir/IR/BuiltinOps.h>
@@ -15,13 +19,6 @@
 #include <mlir/IR/Types.h>
 #include <mlir/IR/Visitors.h>
 #include <mlir/Parser/Parser.h>
-
-#include <llvm/ADT/DenseMap.h>
-#include <llvm/ADT/TypeSwitch.h>
-#include <llvm/Support/Casting.h>
-#include <llvm/Support/ErrorHandling.h>
-
-#include <tuple>
 
 using namespace protocir;
 
@@ -43,77 +40,83 @@ int main(int argc, char *argv[]) {
   mlir::ParserConfig parseConfig(&context);
   auto module =
       mlir::parseSourceFile<mlir::ModuleOp>(relPath.c_str(), parseConfig);
-  protocir::CIRModule pModule;
-  protocir::CIRModuleID pModuleID;
+  MLIRModule pModule;
+  MLIRModuleID pModuleID;
   std::string moduleId = (*module).getName().value_or("").str();
   *pModuleID.mutable_id() = moduleId;
-  pModule.mutable_id()->CopyFrom(pModuleID);
-  TypeCache typeCache;
+  *pModule.mutable_id() = pModuleID;
+
+  TypeCache typeCache(pModuleID);
   auto &bodyRegion = (*module).getBodyRegion();
+
   for (auto &bodyBlock : bodyRegion) {
     for (auto &topOp : bodyBlock) {
       if (auto cirFunc = llvm::dyn_cast<cir::FuncOp>(topOp)) {
-        protocir::CIRFunction *pFunction = pModule.add_functions();
-        protocir::CIRFunctionID pFunctionID;
+        CIRFunction *pFunction = pModule.add_functions();
+        CIRFunctionID pFunctionID;
         pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
         std::string funcId = cirFunc.getSymName().str();
         pFunction->mutable_id()->set_id(funcId);
+
         BlockCache blockCache;
-        OperationCache opCache;
+        OpCache opCache;
+        // Populate caches
         for (auto &block : cirFunc.getFunctionBody()) {
-          std::ignore = Serializer::internBlock(blockCache, &block);
+          blockCache.getMLIRBlockID(&block);
           for (auto &inst : block) {
-            std::ignore = Serializer::internOperation(opCache, &inst);
+            opCache.getMLIROpID(&inst);
           }
         }
+
+        TypeSerializer typeSerializer(pModuleID, typeCache);
+        OpSerializer opSerializer(pModuleID, typeCache, opCache, blockCache);
+
         for (auto &block : cirFunc.getFunctionBody()) {
-          unsigned long blockIdx = Serializer::internBlock(blockCache, &block);
-          protocir::CIRBlock *pBlock = pFunction->add_blocks();
+          auto pBlockID = blockCache.getMLIRBlockID(&block);
+          MLIRBlock *pBlock = pFunction->mutable_blocks()->add_block();
+          *pBlock->mutable_id() = pBlockID;
           for (auto argumentType : block.getArgumentTypes()) {
-            auto pargumentType =
-                Serializer::serializeType(argumentType, pModuleID, typeCache);
-            pBlock->add_argument_types()->CopyFrom(pargumentType.id());
+            auto pargumentType = typeSerializer.serializeMLIRType(argumentType);
+            *pBlock->add_argument_types() = pargumentType.id();
           }
-          protocir::CIRBlockID pBlockID;
-          pBlockID.set_id(blockIdx);
           for (auto &inst : block) {
-            auto pInst = Serializer::serializeOperation(
-                inst, pModuleID, typeCache, opCache, blockCache);
-            pBlock->add_operations()->CopyFrom(pInst);
+            auto pInst = opSerializer.serializeOperation(inst);
+            *pBlock->add_operations() = pInst;
           }
         }
-        auto pInfo = Serializer::serializeOperation(topOp, pModuleID, typeCache,
-                                                    opCache, blockCache);
-        pFunction->mutable_info()->CopyFrom(pInfo.func_op());
+        auto pInfo = opSerializer.serializeOperation(topOp);
+        *pFunction->mutable_info() = pInfo.func_op();
       } else if (auto cirGlobal = llvm::dyn_cast<cir::GlobalOp>(topOp)) {
-        protocir::CIRGlobal *pGlobal = pModule.add_globals();
-        protocir::CIRGlobalID pGlobalID;
-        pGlobal->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
+        CIRGlobal *pGlobal = pModule.add_globals();
+        CIRGlobalID pGlobalID;
+        *pGlobal->mutable_id()->mutable_module_id() = pModuleID;
         std::string globalId = cirGlobal.getSymName().str();
         pGlobal->mutable_id()->set_id(globalId);
+        OpCache opCache;
         BlockCache blockCache;
-        OperationCache opCache;
-        auto pInfo = Serializer::serializeOperation(topOp, pModuleID, typeCache,
-                                                    opCache, blockCache);
-        pGlobal->mutable_info()->CopyFrom(pInfo.global_op());
+        OpSerializer opSerializer(pModuleID, typeCache, opCache, blockCache);
+        auto pInfo = opSerializer.serializeOperation(topOp);
+        *pGlobal->mutable_info() = pInfo.global_op();
       }
     }
   }
+
+  TypeSerializer typeSerializer(pModuleID, typeCache);
+
   auto typeCacheSize = 0;
   do {
-    typeCacheSize = typeCache.size();
+    typeCacheSize = typeCache.map().size();
     auto typeCacheCopy = typeCache;
-    for (auto &type : typeCacheCopy) {
-      std::ignore =
-          Serializer::serializeType(type.getFirst(), pModuleID, typeCache);
+    for (auto &type : typeCacheCopy.map()) {
+      typeSerializer.serializeMLIRType(type.getFirst());
     }
-  } while (typeCacheSize < typeCache.size());
-  auto typeCacheCopy = typeCache;
-  for (auto &type : typeCacheCopy) {
-    auto pType =
-        Serializer::serializeType(type.getFirst(), pModuleID, typeCache);
-    pModule.add_types()->CopyFrom(pType);
+  } while (typeCacheSize < typeCache.map().size());
+
+  for (auto &type : typeCache.map()) {
+    auto pType = typeSerializer.serializeMLIRType(type.getFirst());
+    *pModule.add_types() = pType;
   }
+
   std::string binary;
   pModule.SerializeToString(&binary);
   llvm::outs() << binary;
