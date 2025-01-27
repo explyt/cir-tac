@@ -2,11 +2,12 @@ find_package(Protobuf CONFIG REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIR})
 
 set(PROTOSRC
-    enumgen.proto
-    model.proto
-    opgen.proto
-    setup.proto
+    enum.proto
     type.proto
+    attr.proto
+    op.proto
+    setup.proto
+    model.proto
 )
 
 add_library(proto OBJECT ${PROTOSRC})
