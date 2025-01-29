@@ -2,7 +2,6 @@
 // clang-format off
 
 #include "cir-tac/EnumSerializer.h"
-
 #include <clang/CIR/Dialect/IR/CIRTypes.h>
 
 using namespace protocir;
@@ -404,6 +403,19 @@ CIRRecordKind serializeCIRRecordKind(cir::StructType::RecordKind e) {
     return CIRRecordKind::CIRRecordKind_Union;
   case cir::StructType::RecordKind::Struct:
     return CIRRecordKind::CIRRecordKind_Struct;
+  default:
+    assert(0 && "Unknown enum variant");
+  }
+}
+
+MLIRSignednessSemantics serializeMLIRSignednessSemantics(mlir::IntegerType::SignednessSemantics e) {
+  switch (e) {
+  case mlir::IntegerType::SignednessSemantics::Signless:
+    return MLIRSignednessSemantics::MLIRSignednessSemantics_Signless;
+  case mlir::IntegerType::SignednessSemantics::Signed:
+    return MLIRSignednessSemantics::MLIRSignednessSemantics_Signed;
+  case mlir::IntegerType::SignednessSemantics::Unsigned:
+    return MLIRSignednessSemantics::MLIRSignednessSemantics_Unsigned;
   default:
     assert(0 && "Unknown enum variant");
   }

@@ -1,3 +1,4 @@
+#include "cir-tac/AttrSerializer.h"
 #include "cir-tac/OpSerializer.h"
 #include "cir-tac/TypeSerializer.h"
 #include "cir-tac/Util.h"
@@ -47,6 +48,15 @@ int main(int argc, char *argv[]) {
   *pModule.mutable_id() = pModuleID;
 
   TypeCache typeCache(pModuleID);
+  AttributeSerializer attributeSerializer(pModuleID, typeCache);
+
+  for (auto &attr : module->getOperation()->getAttrs()) {
+    if (attr.getValue().getDialect().getNamespace() == "cir") {
+      pModule.mutable_attributes()->Add(
+          attributeSerializer.serializeMLIRNamedAttr(attr));
+    }
+  }
+
   auto &bodyRegion = (*module).getBodyRegion();
 
   for (auto &bodyBlock : bodyRegion) {

@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  CLANGIR_REPOSITORY: "misonijnik/clangir"
-  CLANGIR_VERSION: "88439da55209adcd64d71aa07de3e993f208cd7c"
+  CLANGIR_REPOSITORY: "explyt/clangir"
+  CLANGIR_VERSION: "1b052dac90f8d070aafc2034e13ae3e88552d58a"
 
 jobs:
   build:
