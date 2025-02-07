@@ -71,7 +71,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ${{ runner.os }}-clangir-build
+        key: ${{ runner.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |
