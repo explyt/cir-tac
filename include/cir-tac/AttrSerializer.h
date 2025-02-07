@@ -44,6 +44,8 @@ public:
   CIRBitfieldInfoAttr serializeCIRBitfieldInfoAttr(cir::BitfieldInfoAttr);
   CIRBoolAttr serializeCIRBoolAttr(cir::BoolAttr);
   CIRTBAAAttr serializeCIRTBAAAttr(cir::TBAAAttr);
+  CIRCatchAllAttr serializeCIRCatchAllAttr(cir::CatchAllAttr);
+  CIRCatchUnwindAttr serializeCIRCatchUnwindAttr(cir::CatchUnwindAttr);
   CIRCmpThreeWayInfoAttr serializeCIRCmpThreeWayInfoAttr(cir::CmpThreeWayInfoAttr);
   CIRComplexAttr serializeCIRComplexAttr(cir::ComplexAttr);
   CIRConstArrayAttr serializeCIRConstArrayAttr(cir::ConstArrayAttr);
@@ -77,6 +79,30 @@ public:
   CIRVTableAttr serializeCIRVTableAttr(cir::VTableAttr);
   CIRVisibilityAttr serializeCIRVisibilityAttr(cir::VisibilityAttr);
   CIRZeroAttr serializeCIRZeroAttr(cir::ZeroAttr);
+
+  CIRAsmFlavorAttr serializeCIRAsmFlavorAttr(cir::AsmFlavorAttr);
+  CIRAtomicFetchKindAttr serializeCIRAtomicFetchKindAttr(cir::AtomicFetchKindAttr);
+  CIRAwaitKindAttr serializeCIRAwaitKindAttr(cir::AwaitKindAttr);
+  CIRBinOpKindAttr serializeCIRBinOpKindAttr(cir::BinOpKindAttr);
+  CIRBinOpOverflowKindAttr serializeCIRBinOpOverflowKindAttr(cir::BinOpOverflowKindAttr);
+  CIRCallingConvAttr serializeCIRCallingConvAttr(cir::CallingConvAttr);
+  CIRCaseOpKindAttr serializeCIRCaseOpKindAttr(cir::CaseOpKindAttr);
+  CIRCastKindAttr serializeCIRCastKindAttr(cir::CastKindAttr);
+  CIRCatchParamKindAttr serializeCIRCatchParamKindAttr(cir::CatchParamKindAttr);
+  CIRCmpOpKindAttr serializeCIRCmpOpKindAttr(cir::CmpOpKindAttr);
+  CIRCmpOrderingAttr serializeCIRCmpOrderingAttr(cir::CmpOrderingAttr);
+  CIRComplexBinOpKindAttr serializeCIRComplexBinOpKindAttr(cir::ComplexBinOpKindAttr);
+  CIRComplexRangeKindAttr serializeCIRComplexRangeKindAttr(cir::ComplexRangeKindAttr);
+  CIRDynamicCastKindAttr serializeCIRDynamicCastKindAttr(cir::DynamicCastKindAttr);
+  CIRGlobalLinkageKindAttr serializeCIRGlobalLinkageKindAttr(cir::GlobalLinkageKindAttr);
+  CIRInlineKindAttr serializeCIRInlineKindAttr(cir::InlineKindAttr);
+  CIRMemOrderAttr serializeCIRMemOrderAttr(cir::MemOrderAttr);
+  CIRSignedOverflowBehaviorAttr serializeCIRSignedOverflowBehaviorAttr(cir::SignedOverflowBehaviorAttr);
+  CIRSizeInfoTypeAttr serializeCIRSizeInfoTypeAttr(cir::SizeInfoTypeAttr);
+  CIRSourceLanguageAttr serializeCIRSourceLanguageAttr(cir::SourceLanguageAttr);
+  CIRTLSModelAttr serializeCIRTLSModelAttr(cir::TLS_ModelAttr);
+  CIRUnaryOpKindAttr serializeCIRUnaryOpKindAttr(cir::UnaryOpKindAttr);
+  CIRVisibilityKindAttr serializeCIRVisibilityKindAttr(cir::VisibilityKindAttr);
 
 private:
   MLIRModuleID moduleID;
