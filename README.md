@@ -31,7 +31,7 @@ ninja
 
 > **Note**: Building with `ninja` is required for clangir.
 
-### 2. Build CIR-TAC
+### 2. Build cir-tac
 
 After building clangir, build this project:
 
