@@ -4,6 +4,10 @@ project(cir-tac)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# https://github.com/protocolbuffers/protobuf/issues/4806
+# Without that variable find_package does not set variables such as Protobuf_INLCUDE_DIRS, Protobuf_LIBRARIES...
+# (however, I do not think it is a correct approach, but at least it works)
 set(protobuf_MODULE_COMPATIBLE 1)
 
 if (NOT DEFINED CLANGIR_BUILD_DIR)
