@@ -4,7 +4,7 @@ A Protobuf-based implementation for the CIR (Clang IR) dialect of MLIR (Multi-Le
 
 ## Overview
 
-*cir-tac* provides a Protocol Buffers model for working with CIR dialect code. The project enables efficient representation and manipulation of MLIR modules, including functions, blocks, operations, and type systems.
+**cir-tac** provides a Protocol Buffers model for working with CIR dialect code. The project enables efficient representation and manipulation of MLIR modules, including functions, blocks, operations, and type systems.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ A Protobuf-based implementation for the CIR (Clang IR) dialect of MLIR (Multi-Le
 
 ## Building from Source
 
-### 1. Build Clangir (Required)
+### 1. Build ClangIR (Required)
 
 First, build [clangir](https://github.com/llvm/clangir) by following these steps:
 
