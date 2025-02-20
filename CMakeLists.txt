@@ -4,6 +4,7 @@ project(cir-tac)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(protobuf_MODULE_COMPATIBLE 1)
 
 if (NOT DEFINED CLANGIR_BUILD_DIR)
   message(FATAL_ERROR "CLANGIR_BUILD_DIR must be specified.")
