@@ -52,6 +52,10 @@ Where `PATH_TO_CLANGIR_BUILD` is the path to your clangir build directory (e.g.,
 - `proto/enum.proto` - Enumeration definitions
 - `proto/setup.proto` - Setup definitions
 
+### Tools
+- `tools/cir-ser-proto/` - Serialization tool for CIR Protocol Buffers
+  - Provides functionality for serializing CIR modules to Protocol Buffer format
+
 ## Generated Files
 
 The build process generates Protocol Buffers files for each `.proto` definition:
@@ -63,7 +67,6 @@ The build process generates Protocol Buffers files for each `.proto` definition:
 ### Code Style
 - C++ code follows LLVM coding standards
 - Protocol Buffers definitions use `snake_case` for field names
-- Generated code is automatically formatted using clang-format
 
 ### Contributing
 0. Fork the repository
