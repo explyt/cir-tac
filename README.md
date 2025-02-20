@@ -1,4 +1,4 @@
-# CIR-TAC
+# cir-tac
 
 A Protobuf-based implementation for the CIR (Clang IR) dialect of MLIR (Multi-Level IR).
 
