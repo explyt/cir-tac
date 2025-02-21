@@ -98,5 +98,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: cir-tac-${{ runner.os }}
-        path: build
+        path: main/build
         retention-days: 1
