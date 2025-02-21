@@ -93,3 +93,10 @@ jobs:
       run: |
         mkdir build && cd build
         cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
+
+    - name: Upload cir-tac build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cir-tac-${{ runner.os }}
+        path: build
+        retention-days: 1
