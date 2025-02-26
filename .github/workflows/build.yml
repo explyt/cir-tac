@@ -12,7 +12,7 @@ on:
 
 env:
   CLANGIR_REPOSITORY: "explyt/clangir"
-  CLANGIR_VERSION: "1b052dac90f8d070aafc2034e13ae3e88552d58a"
+  CLANGIR_VERSION: "27.11.2024"
 
 jobs:
   build:
