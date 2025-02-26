@@ -5,10 +5,17 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name'
+        required: true
+        default: 'debug'
 
 permissions: write-all
 
 jobs:
+  build:
+    uses: ./.github/workflows/build.yml
   release:
     name: 'Release'
     runs-on: ubuntu-latest
@@ -36,7 +43,21 @@ jobs:
         run: |
           git config --global --add safe.directory ${GITHUB_WORKSPACE}
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/artifacts
+
+      - name: Compress release files
+        working-directory: ${{ github.workspace }}/artifacts
+        run: |
+          chmod +x cir-tac-macOS/main/build/tools/cir-ser-proto/cir-ser-proto
+          chmod +x cir-tac-Linux/main/build/tools/cir-ser-proto/cir-ser-proto
+          tar -czvf cir-tac-macOS.tar.gz -C cir-tac-macOS/main/build/tools/cir-ser-proto cir-ser-proto
+          tar -czvf cir-tac-Linux.tar.gz -C cir-tac-Linux/main/build/tools/cir-ser-proto cir-ser-proto
+
       - name: 'Release'
+        if: ${{ github.event_name == 'push' }}
         uses: cycjimmy/semantic-release-action@v4
         with:
           semantic_version: 23.0.0
@@ -44,6 +65,21 @@ jobs:
             @semantic-release/commit-analyzer@11.1.0
             @semantic-release/exec@6.0.3
             conventional-changelog-conventionalcommits@7.0.2
+          fail_on_unmatched_files: true
+          files: |
+            LICENSE
+            ${{ github.workspace }}/artifacts/*
+
+      - name: 'Pre-Release'
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || 'debug'}}
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            LICENSE
+            ${{ github.workspace }}/artifacts/*
 
       - name: 'Get release_version and pass to next job'
         id: release_version
