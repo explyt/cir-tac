@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 12 * * 1,4'
+  workflow_call:
 
 env:
   CLANGIR_REPOSITORY: "explyt/clangir"
@@ -93,3 +94,10 @@ jobs:
       run: |
         mkdir build && cd build
         cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
+
+    - name: Upload cir-tac build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cir-tac-${{ runner.os }}-${{ runner.arch }}
+        path: main/build/tools/cir-ser-proto/cir-ser-proto
+        retention-days: 1
