@@ -118,7 +118,7 @@
         "labels": false,
         "releasedLabels": false,
         "assets": [
-          "artifacts/**"
+          "artifacts/*"
         ]
       }
     ],
