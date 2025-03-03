@@ -189,15 +189,15 @@ enum CIRVisibilityKind {
 }
 
 enum CIRRecordKind {
-  CIRRecordKind_Class = 0;
-  CIRRecordKind_Union = 1;
-  CIRRecordKind_Struct = 2;
+  RecordKind_Class = 0;
+  RecordKind_Union = 1;
+  RecordKind_Struct = 2;
 }
 
 enum MLIRSignednessSemantics {
-  MLIRSignednessSemantics_Signless = 0;
-  MLIRSignednessSemantics_Signed = 1;
-  MLIRSignednessSemantics_Unsigned = 2;
+  SignednessSemantics_Signless = 0;
+  SignednessSemantics_Signed = 1;
+  SignednessSemantics_Unsigned = 2;
 }
 
 // clang-format on
