@@ -1,10 +1,8 @@
-// clang-format off
 syntax = "proto3";
 
 package protocir;
 option java_package = "org.jacodb.impl.grpc";
 
-import "attr.proto";
 import "setup.proto";
 import "type.proto";
 import "op.proto";
@@ -32,9 +30,7 @@ message CIRGlobal {
 
 message MLIRModule {
   MLIRModuleID id = 1;
-  repeated MLIRNamedAttr attributes = 2;
-  repeated CIRFunction functions = 3;
-  repeated CIRGlobal globals = 4;
-  repeated MLIRType types = 5;
+  repeated CIRFunction functions = 2;
+  repeated CIRGlobal globals = 3;
+  repeated MLIRType types = 4;
 }
-// clang-format on

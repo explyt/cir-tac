@@ -398,11 +398,11 @@ CIRVisibilityKind serializeCIRVisibilityKind(cir::VisibilityKind e) {
 CIRRecordKind serializeCIRRecordKind(cir::StructType::RecordKind e) {
   switch (e) {
   case cir::StructType::RecordKind::Class:
-    return CIRRecordKind::CIRRecordKind_Class;
+    return CIRRecordKind::RecordKind_Class;
   case cir::StructType::RecordKind::Union:
-    return CIRRecordKind::CIRRecordKind_Union;
+    return CIRRecordKind::RecordKind_Union;
   case cir::StructType::RecordKind::Struct:
-    return CIRRecordKind::CIRRecordKind_Struct;
+    return CIRRecordKind::RecordKind_Struct;
   default:
     assert(0 && "Unknown enum variant");
   }
@@ -411,11 +411,11 @@ CIRRecordKind serializeCIRRecordKind(cir::StructType::RecordKind e) {
 MLIRSignednessSemantics serializeMLIRSignednessSemantics(mlir::IntegerType::SignednessSemantics e) {
   switch (e) {
   case mlir::IntegerType::SignednessSemantics::Signless:
-    return MLIRSignednessSemantics::MLIRSignednessSemantics_Signless;
+    return MLIRSignednessSemantics::SignednessSemantics_Signless;
   case mlir::IntegerType::SignednessSemantics::Signed:
-    return MLIRSignednessSemantics::MLIRSignednessSemantics_Signed;
+    return MLIRSignednessSemantics::SignednessSemantics_Signed;
   case mlir::IntegerType::SignednessSemantics::Unsigned:
-    return MLIRSignednessSemantics::MLIRSignednessSemantics_Unsigned;
+    return MLIRSignednessSemantics::SignednessSemantics_Unsigned;
   default:
     assert(0 && "Unknown enum variant");
   }

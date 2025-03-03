@@ -1,4 +1,3 @@
-// clang-format off
 syntax = "proto3";
 
 package protocir;
@@ -46,4 +45,8 @@ message MLIRBlockArgument {
 message MLIRValueList { repeated MLIRValue list = 1; }
 
 message MLIRTypeIDList { repeated MLIRTypeID list = 1; }
-// clang-format on
+
+message MLIRAPFloat {
+  string value = 1;
+  int32 semantics = 2;
+}
