@@ -11,6 +11,7 @@ using namespace protocir;
 MLIROp OpSerializer::serializeOperation(mlir::Operation &op) {
   MLIROp pOp;
   *pOp.mutable_location() = attributeSerializer.serializeMLIRLocation(op.getLoc());
+  *pOp.mutable_id() = opCache.getMLIROpID(&op);
 
   llvm::TypeSwitch<mlir::Operation *>(&op)
   .Case<cir::AbsOp>([this, &pOp](cir::AbsOp op) {
