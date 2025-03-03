@@ -13,203 +13,201 @@ using namespace protocir;
 
 MLIRType TypeSerializer::serializeMLIRType(mlir::Type type) {
   MLIRType pType;
-
   *pType.mutable_id() = typeCache.getMLIRTypeID(type);
-
   llvm::TypeSwitch<mlir::Type>(type)
-  .Case<mlir::BFloat16Type>([this, &pType](mlir::BFloat16Type type) {
+  .Case<mlir::BFloat16Type>([&](mlir::BFloat16Type type) {
     auto serialized = serializeMLIRBFloat16Type(type);
     *pType.mutable_mlirb_float16_type() = serialized;
   })
-  .Case<mlir::ComplexType>([this, &pType](mlir::ComplexType type) {
+  .Case<mlir::ComplexType>([&](mlir::ComplexType type) {
     auto serialized = serializeMLIRComplexType(type);
     *pType.mutable_mlir_complex_type() = serialized;
   })
-  .Case<mlir::Float4E2M1FNType>([this, &pType](mlir::Float4E2M1FNType type) {
+  .Case<mlir::Float4E2M1FNType>([&](mlir::Float4E2M1FNType type) {
     auto serialized = serializeMLIRFloat4E2M1FNType(type);
     *pType.mutable_mlir_float4_e2_m1_fn_type() = serialized;
   })
-  .Case<mlir::Float6E2M3FNType>([this, &pType](mlir::Float6E2M3FNType type) {
+  .Case<mlir::Float6E2M3FNType>([&](mlir::Float6E2M3FNType type) {
     auto serialized = serializeMLIRFloat6E2M3FNType(type);
     *pType.mutable_mlir_float6_e2_m3_fn_type() = serialized;
   })
-  .Case<mlir::Float6E3M2FNType>([this, &pType](mlir::Float6E3M2FNType type) {
+  .Case<mlir::Float6E3M2FNType>([&](mlir::Float6E3M2FNType type) {
     auto serialized = serializeMLIRFloat6E3M2FNType(type);
     *pType.mutable_mlir_float6_e3_m2_fn_type() = serialized;
   })
-  .Case<mlir::Float8E3M4Type>([this, &pType](mlir::Float8E3M4Type type) {
+  .Case<mlir::Float8E3M4Type>([&](mlir::Float8E3M4Type type) {
     auto serialized = serializeMLIRFloat8E3M4Type(type);
     *pType.mutable_mlir_float8_e3_m4_type() = serialized;
   })
-  .Case<mlir::Float8E4M3Type>([this, &pType](mlir::Float8E4M3Type type) {
+  .Case<mlir::Float8E4M3Type>([&](mlir::Float8E4M3Type type) {
     auto serialized = serializeMLIRFloat8E4M3Type(type);
     *pType.mutable_mlir_float8_e4_m3_type() = serialized;
   })
-  .Case<mlir::Float8E4M3B11FNUZType>([this, &pType](mlir::Float8E4M3B11FNUZType type) {
+  .Case<mlir::Float8E4M3B11FNUZType>([&](mlir::Float8E4M3B11FNUZType type) {
     auto serialized = serializeMLIRFloat8E4M3B11FNUZType(type);
     *pType.mutable_mlir_float8_e4_m3_b11_fnuz_type() = serialized;
   })
-  .Case<mlir::Float8E4M3FNType>([this, &pType](mlir::Float8E4M3FNType type) {
+  .Case<mlir::Float8E4M3FNType>([&](mlir::Float8E4M3FNType type) {
     auto serialized = serializeMLIRFloat8E4M3FNType(type);
     *pType.mutable_mlir_float8_e4_m3_fn_type() = serialized;
   })
-  .Case<mlir::Float8E4M3FNUZType>([this, &pType](mlir::Float8E4M3FNUZType type) {
+  .Case<mlir::Float8E4M3FNUZType>([&](mlir::Float8E4M3FNUZType type) {
     auto serialized = serializeMLIRFloat8E4M3FNUZType(type);
     *pType.mutable_mlir_float8_e4_m3_fnuz_type() = serialized;
   })
-  .Case<mlir::Float8E5M2Type>([this, &pType](mlir::Float8E5M2Type type) {
+  .Case<mlir::Float8E5M2Type>([&](mlir::Float8E5M2Type type) {
     auto serialized = serializeMLIRFloat8E5M2Type(type);
     *pType.mutable_mlir_float8_e5_m2_type() = serialized;
   })
-  .Case<mlir::Float8E5M2FNUZType>([this, &pType](mlir::Float8E5M2FNUZType type) {
+  .Case<mlir::Float8E5M2FNUZType>([&](mlir::Float8E5M2FNUZType type) {
     auto serialized = serializeMLIRFloat8E5M2FNUZType(type);
     *pType.mutable_mlir_float8_e5_m2_fnuz_type() = serialized;
   })
-  .Case<mlir::Float8E8M0FNUType>([this, &pType](mlir::Float8E8M0FNUType type) {
+  .Case<mlir::Float8E8M0FNUType>([&](mlir::Float8E8M0FNUType type) {
     auto serialized = serializeMLIRFloat8E8M0FNUType(type);
     *pType.mutable_mlir_float8_e8_m0_fnu_type() = serialized;
   })
-  .Case<mlir::Float16Type>([this, &pType](mlir::Float16Type type) {
+  .Case<mlir::Float16Type>([&](mlir::Float16Type type) {
     auto serialized = serializeMLIRFloat16Type(type);
     *pType.mutable_mlir_float16_type() = serialized;
   })
-  .Case<mlir::Float32Type>([this, &pType](mlir::Float32Type type) {
+  .Case<mlir::Float32Type>([&](mlir::Float32Type type) {
     auto serialized = serializeMLIRFloat32Type(type);
     *pType.mutable_mlir_float32_type() = serialized;
   })
-  .Case<mlir::Float64Type>([this, &pType](mlir::Float64Type type) {
+  .Case<mlir::Float64Type>([&](mlir::Float64Type type) {
     auto serialized = serializeMLIRFloat64Type(type);
     *pType.mutable_mlir_float64_type() = serialized;
   })
-  .Case<mlir::Float80Type>([this, &pType](mlir::Float80Type type) {
+  .Case<mlir::Float80Type>([&](mlir::Float80Type type) {
     auto serialized = serializeMLIRFloat80Type(type);
     *pType.mutable_mlir_float80_type() = serialized;
   })
-  .Case<mlir::Float128Type>([this, &pType](mlir::Float128Type type) {
+  .Case<mlir::Float128Type>([&](mlir::Float128Type type) {
     auto serialized = serializeMLIRFloat128Type(type);
     *pType.mutable_mlir_float128_type() = serialized;
   })
-  .Case<mlir::FloatTF32Type>([this, &pType](mlir::FloatTF32Type type) {
+  .Case<mlir::FloatTF32Type>([&](mlir::FloatTF32Type type) {
     auto serialized = serializeMLIRFloatTF32Type(type);
     *pType.mutable_mlir_float_tf32_type() = serialized;
   })
-  .Case<mlir::FunctionType>([this, &pType](mlir::FunctionType type) {
+  .Case<mlir::FunctionType>([&](mlir::FunctionType type) {
     auto serialized = serializeMLIRFunctionType(type);
     *pType.mutable_mlir_function_type() = serialized;
   })
-  .Case<mlir::IndexType>([this, &pType](mlir::IndexType type) {
+  .Case<mlir::IndexType>([&](mlir::IndexType type) {
     auto serialized = serializeMLIRIndexType(type);
     *pType.mutable_mlir_index_type() = serialized;
   })
-  .Case<mlir::IntegerType>([this, &pType](mlir::IntegerType type) {
+  .Case<mlir::IntegerType>([&](mlir::IntegerType type) {
     auto serialized = serializeMLIRIntegerType(type);
     *pType.mutable_mlir_integer_type() = serialized;
   })
-  .Case<mlir::MemRefType>([this, &pType](mlir::MemRefType type) {
+  .Case<mlir::MemRefType>([&](mlir::MemRefType type) {
     auto serialized = serializeMLIRMemRefType(type);
     *pType.mutable_mlir_mem_ref_type() = serialized;
   })
-  .Case<mlir::NoneType>([this, &pType](mlir::NoneType type) {
+  .Case<mlir::NoneType>([&](mlir::NoneType type) {
     auto serialized = serializeMLIRNoneType(type);
     *pType.mutable_mlir_none_type() = serialized;
   })
-  .Case<mlir::OpaqueType>([this, &pType](mlir::OpaqueType type) {
+  .Case<mlir::OpaqueType>([&](mlir::OpaqueType type) {
     auto serialized = serializeMLIROpaqueType(type);
     *pType.mutable_mlir_opaque_type() = serialized;
   })
-  .Case<mlir::RankedTensorType>([this, &pType](mlir::RankedTensorType type) {
+  .Case<mlir::RankedTensorType>([&](mlir::RankedTensorType type) {
     auto serialized = serializeMLIRRankedTensorType(type);
     *pType.mutable_mlir_ranked_tensor_type() = serialized;
   })
-  .Case<mlir::TupleType>([this, &pType](mlir::TupleType type) {
+  .Case<mlir::TupleType>([&](mlir::TupleType type) {
     auto serialized = serializeMLIRTupleType(type);
     *pType.mutable_mlir_tuple_type() = serialized;
   })
-  .Case<mlir::UnrankedMemRefType>([this, &pType](mlir::UnrankedMemRefType type) {
+  .Case<mlir::UnrankedMemRefType>([&](mlir::UnrankedMemRefType type) {
     auto serialized = serializeMLIRUnrankedMemRefType(type);
     *pType.mutable_mlir_unranked_mem_ref_type() = serialized;
   })
-  .Case<mlir::UnrankedTensorType>([this, &pType](mlir::UnrankedTensorType type) {
+  .Case<mlir::UnrankedTensorType>([&](mlir::UnrankedTensorType type) {
     auto serialized = serializeMLIRUnrankedTensorType(type);
     *pType.mutable_mlir_unranked_tensor_type() = serialized;
   })
-  .Case<mlir::VectorType>([this, &pType](mlir::VectorType type) {
+  .Case<mlir::VectorType>([&](mlir::VectorType type) {
     auto serialized = serializeMLIRVectorType(type);
     *pType.mutable_mlir_vector_type() = serialized;
   })
-  .Case<cir::ArrayType>([this, &pType](cir::ArrayType type) {
+  .Case<cir::ArrayType>([&](cir::ArrayType type) {
     auto serialized = serializeCIRArrayType(type);
     *pType.mutable_cir_array_type() = serialized;
   })
-  .Case<cir::BF16Type>([this, &pType](cir::BF16Type type) {
+  .Case<cir::BF16Type>([&](cir::BF16Type type) {
     auto serialized = serializeCIRBFloat16Type(type);
     *pType.mutable_cirb_float16_type() = serialized;
   })
-  .Case<cir::BoolType>([this, &pType](cir::BoolType type) {
+  .Case<cir::BoolType>([&](cir::BoolType type) {
     auto serialized = serializeCIRBoolType(type);
     *pType.mutable_cir_bool_type() = serialized;
   })
-  .Case<cir::ComplexType>([this, &pType](cir::ComplexType type) {
+  .Case<cir::ComplexType>([&](cir::ComplexType type) {
     auto serialized = serializeCIRComplexType(type);
     *pType.mutable_cir_complex_type() = serialized;
   })
-  .Case<cir::DataMemberType>([this, &pType](cir::DataMemberType type) {
+  .Case<cir::DataMemberType>([&](cir::DataMemberType type) {
     auto serialized = serializeCIRDataMemberType(type);
     *pType.mutable_cir_data_member_type() = serialized;
   })
-  .Case<cir::DoubleType>([this, &pType](cir::DoubleType type) {
+  .Case<cir::DoubleType>([&](cir::DoubleType type) {
     auto serialized = serializeCIRDoubleType(type);
     *pType.mutable_cir_double_type() = serialized;
   })
-  .Case<cir::ExceptionInfoType>([this, &pType](cir::ExceptionInfoType type) {
+  .Case<cir::ExceptionInfoType>([&](cir::ExceptionInfoType type) {
     auto serialized = serializeCIRExceptionType(type);
     *pType.mutable_cir_exception_type() = serialized;
   })
-  .Case<cir::FP16Type>([this, &pType](cir::FP16Type type) {
+  .Case<cir::FP16Type>([&](cir::FP16Type type) {
     auto serialized = serializeCIRFP16Type(type);
     *pType.mutable_cirfp16_type() = serialized;
   })
-  .Case<cir::FP80Type>([this, &pType](cir::FP80Type type) {
+  .Case<cir::FP80Type>([&](cir::FP80Type type) {
     auto serialized = serializeCIRFP80Type(type);
     *pType.mutable_cirfp80_type() = serialized;
   })
-  .Case<cir::FP128Type>([this, &pType](cir::FP128Type type) {
+  .Case<cir::FP128Type>([&](cir::FP128Type type) {
     auto serialized = serializeCIRFP128Type(type);
     *pType.mutable_cirfp128_type() = serialized;
   })
-  .Case<cir::FuncType>([this, &pType](cir::FuncType type) {
+  .Case<cir::FuncType>([&](cir::FuncType type) {
     auto serialized = serializeCIRFuncType(type);
     *pType.mutable_cir_func_type() = serialized;
   })
-  .Case<cir::IntType>([this, &pType](cir::IntType type) {
+  .Case<cir::IntType>([&](cir::IntType type) {
     auto serialized = serializeCIRIntType(type);
     *pType.mutable_cir_int_type() = serialized;
   })
-  .Case<cir::LongDoubleType>([this, &pType](cir::LongDoubleType type) {
+  .Case<cir::LongDoubleType>([&](cir::LongDoubleType type) {
     auto serialized = serializeCIRLongDoubleType(type);
     *pType.mutable_cir_long_double_type() = serialized;
   })
-  .Case<cir::MethodType>([this, &pType](cir::MethodType type) {
+  .Case<cir::MethodType>([&](cir::MethodType type) {
     auto serialized = serializeCIRMethodType(type);
     *pType.mutable_cir_method_type() = serialized;
   })
-  .Case<cir::PointerType>([this, &pType](cir::PointerType type) {
+  .Case<cir::PointerType>([&](cir::PointerType type) {
     auto serialized = serializeCIRPointerType(type);
     *pType.mutable_cir_pointer_type() = serialized;
   })
-  .Case<cir::SingleType>([this, &pType](cir::SingleType type) {
+  .Case<cir::SingleType>([&](cir::SingleType type) {
     auto serialized = serializeCIRSingleType(type);
     *pType.mutable_cir_single_type() = serialized;
   })
-  .Case<cir::VectorType>([this, &pType](cir::VectorType type) {
+  .Case<cir::VectorType>([&](cir::VectorType type) {
     auto serialized = serializeCIRVectorType(type);
     *pType.mutable_cir_vector_type() = serialized;
   })
-  .Case<cir::VoidType>([this, &pType](cir::VoidType type) {
+  .Case<cir::VoidType>([&](cir::VoidType type) {
     auto serialized = serializeCIRVoidType(type);
     *pType.mutable_cir_void_type() = serialized;
   })
-  .Case<cir::StructType>([this, &pType](cir::StructType type) {
+  .Case<cir::StructType>([&](cir::StructType type) {
     auto serialized = serializeCIRStructType(type);
     *pType.mutable_cir_struct_type() = serialized;
   })
@@ -217,7 +215,6 @@ MLIRType TypeSerializer::serializeMLIRType(mlir::Type type) {
     type.dump();
     llvm_unreachable("unknown type during serialization");
   });
-
   return pType;
 }
 
@@ -532,5 +529,6 @@ CIRStructType TypeSerializer::serializeCIRStructType(cir::StructType type) {
   }
   return serialized;
 }
+
 
 // clang-format on

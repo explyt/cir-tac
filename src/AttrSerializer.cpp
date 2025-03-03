@@ -45,6 +45,10 @@ MLIRAttribute AttributeSerializer::serializeMLIRAttribute(mlir::Attribute attr) 
     auto serialized = serializeMLIRFlatSymbolRefAttr(attr);
     *pAttr.mutable_flat_symbol_ref_attr() = serialized;
   })
+  .Case<mlir::LocationAttr>([this, &pAttr](mlir::LocationAttr attr) {
+    auto serialized = serializeMLIRLocation(attr);
+    *pAttr.mutable_location() = serialized;
+  })
   .Case<cir::AddressSpaceAttr>([this, &pAttr](cir::AddressSpaceAttr attr) {
     auto serialized = serializeCIRAddressSpaceAttr(attr);
     *pAttr.mutable_address_space_attr() = serialized;
