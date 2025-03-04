@@ -18,7 +18,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-20.04, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -35,7 +35,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y -q --no-install-recommends \
-          ninja-build libabsl-dev
+           git python3 g++ cmake make ninja-build zlib1g-dev
 
     - name: Cache Protobuf install (Linux)
       if: startsWith(runner.os, 'Linux')
@@ -43,7 +43,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: protobuf-install
-        key: ${{ runner.os }}-protobuf-install
+        key: ${{ matrix.os }}-protobuf-install
 
     - name: Install Protobuf (Linux)
       if: startsWith(runner.os, 'Linux')
@@ -62,7 +62,6 @@ jobs:
           ninja
           sudo ninja install
         fi
-        sudo cp -r $GITHUB_WORKSPACE/protobuf-install/* /usr/local
 
     - name: Install Packages (macOS)
       if: startsWith(runner.os, 'macOS')
@@ -74,7 +73,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ${{ runner.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ${{ matrix.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |
@@ -93,7 +92,12 @@ jobs:
       working-directory: main
       run: |
         mkdir build && cd build
-        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
+        PROTOBUF_INSTALL_DIR=$GITHUB_WORKSPACE/protobuf-install
+        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build \
+              -DProtobuf_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/protobuf \
+              -Dutf8_range_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/utf8_range \
+              -Dabsl_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/absl \
+              .. && make
 
     - name: Upload cir-tac build artifact
       uses: actions/upload-artifact@v4
