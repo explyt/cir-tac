@@ -12,7 +12,7 @@ on:
 
 env:
   CLANGIR_REPOSITORY: "explyt/clangir"
-  CLANGIR_VERSION: "27.11.2024"
+  CLANGIR_VERSION: "DanielELog/deserializer_gen"
 
 jobs:
   build:
