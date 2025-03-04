@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
   AttributeSerializer attributeSerializer(pModuleID, typeCache);
 
   for (auto &attr : module->getOperation()->getAttrs()) {
-    if (attr.getValue().getDialect().getNamespace() == "cir") {
+    if (attr.getName().str().starts_with("cir")) {
       pModule.mutable_attributes()->Add(
           attributeSerializer.serializeMLIRNamedAttr(attr));
     }
