@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout clangir repo
@@ -106,8 +106,8 @@ jobs:
         path: main/build/tools/cir-ser-proto/cir-ser-proto
         retention-days: 1
 
-  build-ubuntu-self-hosted:
-    runs-on: [ self-hosted, ex44 ]
+  build-ubuntu-legacy:
+    runs-on: ubuntu-latest
     container: ubuntu:20.04
 
     steps:
