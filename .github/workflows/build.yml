@@ -35,7 +35,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y -q --no-install-recommends \
-           ninja-build
+          ninja-build
 
     - name: Cache Protobuf install (Linux)
       if: startsWith(runner.os, 'Linux')
@@ -92,7 +92,12 @@ jobs:
       working-directory: main
       run: |
         mkdir build && cd build
-        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
+        PROTOBUF_INSTALL_DIR=$GITHUB_WORKSPACE/protobuf-install
+        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build \
+              -DProtobuf_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/protobuf \
+              -Dutf8_range_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/utf8_range \
+              -Dabsl_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/absl \
+              .. && make
 
     - name: Upload cir-tac build artifact
       uses: actions/upload-artifact@v4
