@@ -15,10 +15,10 @@ env:
   CLANGIR_VERSION: "27.11.2024"
 
 jobs:
-  build-ubuntu-20.04:
+  build:
     strategy:
       matrix:
-        os20.04 [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
