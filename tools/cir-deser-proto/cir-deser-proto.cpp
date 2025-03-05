@@ -36,6 +36,11 @@ int main(int argc, char *argv[]) {
   }
 
   mlir::MLIRContext ctx;
+  mlir::DialectRegistry registry;
+  registry.insert<cir::CIRDialect>();
+  ctx.appendDialectRegistry(registry);
+  ctx.allowUnregisteredDialects();
+  ctx.loadDialect<cir::CIRDialect>();
   auto module = Deserializer::deserializeModule(ctx, pModule);
   module.print(llvm::outs());
 

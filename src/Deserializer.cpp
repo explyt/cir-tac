@@ -5,8 +5,12 @@
 #include "cir-tac/Util.h"
 #include "mlir/IR/BuiltinAttributeInterfaces.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/MLIRContext.h"
+#include "mlir/IR/Operation.h"
 #include "mlir/IR/Types.h"
+#include "mlir/Support/LLVM.h"
 #include "proto/setup.pb.h"
+#include "clang/CIR/Dialect/IR/CIRDialect.h"
 #include "clang/CIR/Dialect/IR/CIRTypes.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/ErrorHandling.h"
@@ -20,6 +24,7 @@ using namespace protocir;
 
 mlir::Type Deserializer::getType(ModuleInfo &mInfo, const MLIRTypeID &typeId) {
   auto typeIdStr = typeId.id();
+  llvm::errs() << "getting type " << typeIdStr << "\n\n";
   if (mInfo.types.find(typeIdStr) == mInfo.types.end()) {
     defineType(mInfo, mInfo.serTypes.at(typeIdStr));
   }
@@ -28,12 +33,16 @@ mlir::Type Deserializer::getType(ModuleInfo &mInfo, const MLIRTypeID &typeId) {
 }
 
 void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
+  llvm::errs() << "defining " << pTy.type_case() << "\n\n";
   auto ctx = &mInfo.ctx;
   mlir::Type rTy;
   switch (pTy.type_case()) {
   case MLIRType::TypeCase::kCirIntType: {
+    auto *nctx = new mlir::MLIRContext();
     auto ty = pTy.cir_int_type();
+    llvm::errs() << "width: " << ty.width() << " sign: " << ty.is_signed() << " ctx: " << ctx << "\n\n";
     rTy = cir::IntType::get(ctx, ty.width(), ty.is_signed());
+    llvm::errs() << "huh";
   } break;
   case MLIRType::TypeCase::kMlirIntegerType: {
     auto ty = pTy.mlir_integer_type();
@@ -266,6 +275,7 @@ void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
   }
   auto typeId = pTy.id().id();
   mInfo.types[typeId] = rTy;
+  llvm::errs() << "defined and saved " << "typeId" << "\n\n";
 }
 
 void Deserializer::defineIncompleteStruct(ModuleInfo &mInfo,
@@ -326,17 +336,37 @@ void Deserializer::aggregateTypes(ModuleInfo &mInfo,
 }
 
 void Deserializer::deserializeBlock(FunctionInfo &fInfo,
-                                    const MLIRBlock &pBlock) {
+                                    const MLIRBlock &pBlock,
+                                    bool isEntryBlock) {
+  auto *bb = fInfo.blocks[pBlock.id().id()];
+  fInfo.owner.builder.setInsertionPointToStart(bb);
   for (const auto &pOp : pBlock.operations()) {
-    auto op = OpDeserializer::deserializeMLIROp(fInfo, fInfo.owner, pOp);
-    op->setLoc(
-        AttrDeserializer::deserializeMLIRLocation(fInfo.owner, pOp.location()));
+    mlir::Operation *op;
+    if (pOp.has_get_global_op()) {
+      auto symName = pOp.get_global_op().name().root_reference().value();
+      assert(fInfo.owner.globals.count(symName));
+      op = fInfo.owner.builder.createGetGlobal(mlir::dyn_cast<cir::GlobalOp>(fInfo.owner.globals.at(symName))).getDefiningOp();
+    }
+    else {
+      op = OpDeserializer::deserializeMLIROp(fInfo, fInfo.owner, pOp);
+
+      op->setLoc(
+          AttrDeserializer::deserializeMLIRLocation(fInfo.owner, pOp.location()));
+      llvm::errs() << "loc: ";
+      op->getLoc().print(llvm::errs());
+      llvm::errs() << "\n\n";
+    }
     fInfo.ops[pOp.id().id()] = op;
   }
+  // entry blocks contain function's arguments upon their construction
+  if (isEntryBlock) {
+    assert(bb->getArguments().size() == pBlock.argument_types_size());
+    return;
+  }
   for (const auto &arg : pBlock.argument_types()) {
+    llvm::errs() << "arg present: " << arg.id() << "\n\n";
     auto argType = getType(fInfo.owner, arg);
-    fInfo.blocks[pBlock.id().id()]->addArgument(
-        argType, fInfo.owner.builder.getUnknownLoc());
+    bb->addArgument(argType, fInfo.owner.builder.getUnknownLoc());
   }
 }
 
@@ -348,14 +378,15 @@ void Deserializer::deserializeFunc(ModuleInfo &mInfo,
   if (pFunc.blocks().block_size() > 0) {
     auto bb = pFunc.blocks().block(0);
     funcInfo.blocks[bb.id().id()] = funcOp.addEntryBlock();
-    deserializeBlock(funcInfo, bb);
+    deserializeBlock(funcInfo, bb, /*isEntryBlock=*/true);
   }
   for (int bbId = 1; bbId < pFunc.blocks().block_size(); ++bbId) {
     auto bb = pFunc.blocks().block(bbId);
     funcInfo.blocks[bb.id().id()] = funcOp.addBlock();
-    deserializeBlock(funcInfo, bb);
+    deserializeBlock(funcInfo, bb, /*isEntryBlock=*/false);
   }
   mInfo.module.push_back(funcOp);
+  llvm::errs() << "entry block size: " << funcOp.getBlocks().front().getArguments().size() << "\n\n";
   mInfo.funcs[pFunc.id().id()] = &funcOp;
 }
 
@@ -398,6 +429,8 @@ void Deserializer::deserializeGlobal(ModuleInfo &mInfo,
   auto op = OpDeserializer::deserializeCIRGlobalOp(emptyFuncInfo, mInfo,
                                                    pGlobal.info());
   mInfo.globals[pGlobal.id().id()] = op.getOperation();
+
+  llvm::errs() << "global sym name: " << op.getName() << "\n\n";
 }
 
 mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
