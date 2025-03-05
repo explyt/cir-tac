@@ -18,9 +18,10 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-latest]
+        os: [ubuntu-latest, macos-latest, [ self-hosted, ex44 ]]
 
     runs-on: ${{ matrix.os }}
+    container: ${{ (matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest') && null || 'ubuntu:latest' }}
 
     steps:
     - name: Checkout clangir repo
