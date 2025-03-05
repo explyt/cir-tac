@@ -62,6 +62,7 @@ jobs:
           ninja
           sudo ninja install
         fi
+        sudo cp -r $GITHUB_WORKSPACE/protobuf-install/* /usr/local
 
     - name: Install Packages (macOS)
       if: startsWith(runner.os, 'macOS')
@@ -93,11 +94,7 @@ jobs:
       run: |
         mkdir build && cd build
         PROTOBUF_INSTALL_DIR=$GITHUB_WORKSPACE/protobuf-install
-        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build \
-              -DProtobuf_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/protobuf \
-              -Dutf8_range_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/utf8_range \
-              -Dabsl_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/absl \
-              .. && make
+        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
 
     - name: Upload cir-tac build artifact
       uses: actions/upload-artifact@v4
@@ -120,8 +117,8 @@ jobs:
 
     - name: Install Packages
       run: |
-        sudo apt-get update
-        sudo apt-get install -y -q --no-install-recommends \
+        apt-get update
+        apt-get install -y -q --no-install-recommends \
            git python3 g++ cmake make ninja-build zlib1g-dev
 
     - name: Cache Protobuf install
@@ -145,7 +142,7 @@ jobs:
                 -D CMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/protobuf-install \
                 -G Ninja ..
           ninja
-          sudo ninja install
+          ninja install
         fi
 
     - name: Cache clangir build
