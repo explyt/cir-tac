@@ -119,6 +119,8 @@ jobs:
       run: |
         apt-get update
         DEBIAN_FRONTEND=noninteractive apt-get install -yqq --no-install-recommends \
+          ca-certificates \
+          git-core \
           git python3 g++ cmake make ninja-build zlib1g-dev
 
     - name: Cache Protobuf install
