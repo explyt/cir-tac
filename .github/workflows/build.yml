@@ -106,7 +106,7 @@ jobs:
         path: main/build/tools/cir-ser-proto/cir-ser-proto
         retention-days: 1
 
-  build-ubuntu-20.04:
+  build-ubuntu-self-hosted:
     runs-on: [ self-hosted, ex44 ]
     container: ubuntu:20.04
 
