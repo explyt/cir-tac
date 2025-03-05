@@ -93,7 +93,6 @@ jobs:
       working-directory: main
       run: |
         mkdir build && cd build
-        PROTOBUF_INSTALL_DIR=$GITHUB_WORKSPACE/protobuf-install
         cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build .. && make
 
     - name: Upload cir-tac build artifact
