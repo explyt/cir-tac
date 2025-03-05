@@ -15,10 +15,10 @@ env:
   CLANGIR_VERSION: "27.11.2024"
 
 jobs:
-  build:
+  build-ubuntu-20.04:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os20.04 [ubuntu-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -101,9 +101,9 @@ jobs:
         path: main/build/tools/cir-ser-proto/cir-ser-proto
         retention-days: 1
 
-  build:
+  build-ubuntu-20.04:
     runs-on: [ self-hosted, ex44 ]
-    container: ubuntu:latest
+    container: ubuntu:20.04
 
     steps:
     - name: Checkout clangir repo
