@@ -21,7 +21,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, [ self-hosted, ex44 ]]
 
     runs-on: ${{ matrix.os }}
-    container: ${{ (matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest') && null || 'ubuntu:latest' }}
+    # container: ${{ (matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest') && null || 'ubuntu:latest' }}
+    container: ${{ matrix.os == 'ubuntu-latest' && null ||  matrix.os == 'macos-latest' && null || 'ubuntu:latest' }}
 
     steps:
     - name: Checkout clangir repo
