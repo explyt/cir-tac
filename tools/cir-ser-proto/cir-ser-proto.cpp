@@ -19,6 +19,7 @@
 #include <mlir/IR/Types.h>
 #include <mlir/IR/Visitors.h>
 #include <mlir/Parser/Parser.h>
+#include <stdexcept>
 
 using namespace protocir;
 
@@ -29,6 +30,10 @@ int main(int argc, char *argv[]) {
 
   context.appendDialectRegistry(registry);
   context.allowUnregisteredDialects();
+
+  if (argc < 2) {
+    throw std::runtime_error("no clangir source file path was given");
+  }
 
   std::filesystem::path relPath = argv[1];
 
