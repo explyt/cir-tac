@@ -35,7 +35,8 @@ private:
                                 const CIRGlobal &pGlobal);
 
   static void deserializeBlock(FunctionInfo &fInfo,
-                               const MLIRBlock &pBlock);
+                               const MLIRBlock &pBlock,
+                               bool isEntryBlock);
 public:
   static mlir::Type getType(ModuleInfo &mInfo,
                             const MLIRTypeID &typeId);
