@@ -120,6 +120,7 @@ jobs:
         DEBIAN_FRONTEND=noninteractive apt-get install -yqq --no-install-recommends \
           ca-certificates \
           git-core \
+          wget \
           git python3 g++ make ninja-build zlib1g-dev
 
     - name: Install Cmake
