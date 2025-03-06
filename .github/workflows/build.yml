@@ -117,11 +117,13 @@ jobs:
     - name: Install Packages
       run: |
         apt-get update
-        DEBIAN_FRONTEND=noninteractive apt-get install -yqq --no-install-recommends \
+        apt-get install -yqq --no-install-recommends \
           ca-certificates \
           git-core \
           wget \
           git python3 g++ make ninja-build zlib1g-dev
+          rm /bin/sh
+          ln -s /bin/bash /bin/sh
 
     - name: Install Cmake
       run: |
