@@ -120,7 +120,13 @@ jobs:
         DEBIAN_FRONTEND=noninteractive apt-get install -yqq --no-install-recommends \
           ca-certificates \
           git-core \
-          git python3 g++ cmake make ninja-build zlib1g-dev
+          git python3 g++ make ninja-build zlib1g-dev
+
+    - name: Install Cmake
+      run: |
+        wget https://github.com/Kitware/CMake/releases/download/v3.27.0/cmake-3.27.0-linux-x86_64.sh
+        chmod +x cmake-3.27.0-linux-x86_64.sh
+        ./cmake-3.27.0-linux-x86_64.sh --prefix=/usr/local --skip-license
 
     - name: Cache Protobuf install
       id: cache-protobuf-install
