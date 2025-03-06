@@ -98,7 +98,7 @@ jobs:
     - name: Upload cir-tac build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: cir-tac-${{ runner.os }}-${{ runner.arch }}
+        name: cir-tac-${{ matrix.os }}-${{ runner.arch }}
         path: main/build/tools/cir-ser-proto/cir-ser-proto
         retention-days: 1
 
@@ -136,7 +136,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: protobuf-install
-        key: ${{ matrix.os }}-protobuf-install
+        key: ubuntu-20.04-protobuf-install
 
     - name: Install Protobuf
       run: |
@@ -160,7 +160,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ${{ matrix.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ubuntu-20.04-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |
@@ -189,6 +189,6 @@ jobs:
     - name: Upload cir-tac build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: cir-tac-${{ runner.os }}-${{ runner.arch }}
+        name: cir-tac-ubuntu-20.04-${{ runner.arch }}
         path: main/build/tools/cir-ser-proto/cir-ser-proto
         retention-days: 1
