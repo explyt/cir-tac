@@ -3,6 +3,7 @@
 #include "cir-tac/TypeSerializer.h"
 #include "cir-tac/Util.h"
 #include "proto/model.pb.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <clang/CIR/Passes.h>
@@ -50,15 +51,6 @@ int main(int argc, char *argv[]) {
   TypeCache typeCache(pModuleID);
   AttributeSerializer attributeSerializer(pModuleID, typeCache);
 
-  *pModule.mutable_loc() = attributeSerializer.serializeMLIRLocation(module->getLoc());
-
-  for (auto &attr : module->getOperation()->getAttrs()) {
-    if (attr.getName().str().starts_with("cir")) {
-      pModule.mutable_attributes()->Add(
-          attributeSerializer.serializeMLIRNamedAttr(attr));
-    }
-  }
-
   auto &bodyRegion = (*module).getBodyRegion();
 
   for (auto &bodyBlock : bodyRegion) {
@@ -95,7 +87,19 @@ int main(int argc, char *argv[]) {
             auto pInst = opSerializer.serializeOperation(inst);
             *pBlock->add_operations() = pInst;
           }
+          MLIRArgLocList pLocList;
+          for (auto &arg : block.getArguments()) {
+            *pLocList.add_list() = attributeSerializer.serializeMLIRLocation(arg.getLoc());
+          }
+          *pBlock->mutable_arg_locs() = pLocList;
         }
+
+        MLIRArgLocList pLocList;
+        for (auto &arg : cirFunc.getArguments()) {
+          *pLocList.add_list() = attributeSerializer.serializeMLIRLocation(arg.getLoc());
+        }
+        *pFunction->mutable_arg_locs() = pLocList;
+
         auto pInfo = opSerializer.serializeOperation(topOp);
         *pFunction->mutable_info() = pInfo.func_op();
         *pFunction->mutable_loc() = attributeSerializer.serializeMLIRLocation(cirFunc->getLoc());
@@ -128,6 +132,26 @@ int main(int argc, char *argv[]) {
   for (auto &type : typeCache.map()) {
     auto pType = typeSerializer.serializeMLIRType(type.getFirst());
     *pModule.add_types() = pType;
+  }
+
+  *pModule.mutable_loc() = attributeSerializer.serializeMLIRLocation(module->getLoc());
+
+  for (auto &attr : module->getOperation()->getAttrs()) {
+    if (attr.getValue().getDialect().getNamespace() == "cir") {
+      pModule.mutable_attributes()->Add(
+          attributeSerializer.serializeMLIRNamedAttr(attr));
+    }
+    // we do not generate serializers/deserializers for other attribute types
+    // saving them in their printed form to preserve all information
+    else {
+      std::string strValue;
+      llvm::raw_string_ostream os(strValue);
+      attr.getValue().print(os);
+      MLIRRawNamedAttr pRawAttr;
+      *pRawAttr.mutable_name() = attributeSerializer.serializeMLIRStringAttr(attr.getName());
+      *pRawAttr.mutable_raw_value() = strValue;
+      *pModule.add_raw_attrs() = pRawAttr;
+    }
   }
 
   std::string binary;
