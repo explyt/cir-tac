@@ -23,6 +23,7 @@ message CIRFunction {
   CIRFunctionID id = 1;
   MLIRBlockList blocks = 2;
   CIRFuncOp info = 3;
+  MLIRLocation loc = 4;
 }
 
 message CIRGlobal {
@@ -36,5 +37,6 @@ message MLIRModule {
   repeated CIRFunction functions = 3;
   repeated CIRGlobal globals = 4;
   repeated MLIRType types = 5;
+  MLIRLocation loc = 6;
 }
 // clang-format on

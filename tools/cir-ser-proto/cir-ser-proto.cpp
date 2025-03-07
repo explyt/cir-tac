@@ -50,6 +50,8 @@ int main(int argc, char *argv[]) {
   TypeCache typeCache(pModuleID);
   AttributeSerializer attributeSerializer(pModuleID, typeCache);
 
+  *pModule.mutable_loc() = attributeSerializer.serializeMLIRLocation(module->getLoc());
+
   for (auto &attr : module->getOperation()->getAttrs()) {
     if (attr.getName().str().starts_with("cir")) {
       pModule.mutable_attributes()->Add(
@@ -96,6 +98,7 @@ int main(int argc, char *argv[]) {
         }
         auto pInfo = opSerializer.serializeOperation(topOp);
         *pFunction->mutable_info() = pInfo.func_op();
+        *pFunction->mutable_loc() = attributeSerializer.serializeMLIRLocation(cirFunc->getLoc());
       } else if (auto cirGlobal = llvm::dyn_cast<cir::GlobalOp>(topOp)) {
         CIRGlobal *pGlobal = pModule.add_globals();
         CIRGlobalID pGlobalID;
