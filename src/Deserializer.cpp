@@ -24,7 +24,6 @@ using namespace protocir;
 
 mlir::Type Deserializer::getType(ModuleInfo &mInfo, const MLIRTypeID &typeId) {
   auto typeIdStr = typeId.id();
-  llvm::errs() << "getting type " << typeIdStr << "\n\n";
   if (mInfo.types.find(typeIdStr) == mInfo.types.end()) {
     defineType(mInfo, mInfo.serTypes.at(typeIdStr));
   }
@@ -33,16 +32,13 @@ mlir::Type Deserializer::getType(ModuleInfo &mInfo, const MLIRTypeID &typeId) {
 }
 
 void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
-  llvm::errs() << "defining " << pTy.type_case() << "\n\n";
   auto ctx = &mInfo.ctx;
   mlir::Type rTy;
   switch (pTy.type_case()) {
   case MLIRType::TypeCase::kCirIntType: {
     auto *nctx = new mlir::MLIRContext();
     auto ty = pTy.cir_int_type();
-    llvm::errs() << "width: " << ty.width() << " sign: " << ty.is_signed() << " ctx: " << ctx << "\n\n";
     rTy = cir::IntType::get(ctx, ty.width(), ty.is_signed());
-    llvm::errs() << "huh";
   } break;
   case MLIRType::TypeCase::kMlirIntegerType: {
     auto ty = pTy.mlir_integer_type();
@@ -110,12 +106,14 @@ void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
     bool *scalable_dims = new bool[1024]();
     auto dims_size = pTy.mlir_vector_type().scalable_dims_size();
     if (dims_size >= 1024) {
-      throw std::runtime_error("Scalable dims of mlir::VectorType is too large!");
+      throw std::runtime_error(
+          "Scalable dims of mlir::VectorType is too large!");
     }
     for (int i = 0; i < dims_size; i++) {
       scalable_dims[i] = pTy.mlir_vector_type().scalable_dims(i);
     }
-    rTy = mlir::VectorType::get(shape_sizes, elTy, llvm::ArrayRef<bool>(scalable_dims, dims_size));
+    rTy = mlir::VectorType::get(shape_sizes, elTy,
+                                llvm::ArrayRef<bool>(scalable_dims, dims_size));
     delete[] scalable_dims;
   } break;
   case MLIRType::TypeCase::kCirVectorType: {
@@ -275,7 +273,6 @@ void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
   }
   auto typeId = pTy.id().id();
   mInfo.types[typeId] = rTy;
-  llvm::errs() << "defined and saved " << "typeId" << "\n\n";
 }
 
 void Deserializer::defineIncompleteStruct(ModuleInfo &mInfo,
@@ -339,23 +336,13 @@ void Deserializer::deserializeBlock(FunctionInfo &fInfo,
                                     const MLIRBlock &pBlock,
                                     bool isEntryBlock) {
   auto *bb = fInfo.blocks[pBlock.id().id()];
-  fInfo.owner.builder.setInsertionPointToStart(bb);
+  auto &builder = fInfo.owner.builder;
+  builder.setInsertionPointToStart(bb);
   for (const auto &pOp : pBlock.operations()) {
     mlir::Operation *op;
-    if (pOp.has_get_global_op()) {
-      auto symName = pOp.get_global_op().name().root_reference().value();
-      assert(fInfo.owner.globals.count(symName));
-      op = fInfo.owner.builder.createGetGlobal(mlir::dyn_cast<cir::GlobalOp>(fInfo.owner.globals.at(symName))).getDefiningOp();
-    }
-    else {
-      op = OpDeserializer::deserializeMLIROp(fInfo, fInfo.owner, pOp);
-
-      op->setLoc(
-          AttrDeserializer::deserializeMLIRLocation(fInfo.owner, pOp.location()));
-      llvm::errs() << "loc: ";
-      op->getLoc().print(llvm::errs());
-      llvm::errs() << "\n\n";
-    }
+    op = OpDeserializer::deserializeMLIROp(fInfo, fInfo.owner, pOp);
+    op->setLoc(AttrDeserializer::deserializeMLIRLocation(fInfo.owner,
+                                                          pOp.location()));
     fInfo.ops[pOp.id().id()] = op;
   }
   // entry blocks contain function's arguments upon their construction
@@ -364,9 +351,8 @@ void Deserializer::deserializeBlock(FunctionInfo &fInfo,
     return;
   }
   for (const auto &arg : pBlock.argument_types()) {
-    llvm::errs() << "arg present: " << arg.id() << "\n\n";
     auto argType = getType(fInfo.owner, arg);
-    bb->addArgument(argType, fInfo.owner.builder.getUnknownLoc());
+    bb->addArgument(argType, builder.getUnknownLoc());
   }
 }
 
@@ -375,18 +361,26 @@ void Deserializer::deserializeFunc(ModuleInfo &mInfo,
   auto funcInfo = FunctionInfo(mInfo);
   auto funcOp =
       OpDeserializer::deserializeCIRFuncOp(funcInfo, mInfo, pFunc.info());
+  // creating enough blocks before deserialization
+  // so they can cross-reference each other
   if (pFunc.blocks().block_size() > 0) {
     auto bb = pFunc.blocks().block(0);
     funcInfo.blocks[bb.id().id()] = funcOp.addEntryBlock();
-    deserializeBlock(funcInfo, bb, /*isEntryBlock=*/true);
   }
   for (int bbId = 1; bbId < pFunc.blocks().block_size(); ++bbId) {
     auto bb = pFunc.blocks().block(bbId);
     funcInfo.blocks[bb.id().id()] = funcOp.addBlock();
+  }
+  // finally deserializing them
+  if (pFunc.blocks().block_size() > 0) {
+    auto bb = pFunc.blocks().block(0);
+    deserializeBlock(funcInfo, bb, /*isEntryBlock=*/true);
+  }
+  for (int bbId = 1; bbId < pFunc.blocks().block_size(); ++bbId) {
+    auto bb = pFunc.blocks().block(bbId);
     deserializeBlock(funcInfo, bb, /*isEntryBlock=*/false);
   }
   mInfo.module.push_back(funcOp);
-  llvm::errs() << "entry block size: " << funcOp.getBlocks().front().getArguments().size() << "\n\n";
   mInfo.funcs[pFunc.id().id()] = &funcOp;
 }
 
@@ -408,11 +402,8 @@ mlir::Value Deserializer::deserializeValue(FunctionInfo &fInfo,
     return fInfo.ops.at(opId)->getOpResult(resultId);
   } break;
   case MLIRValue::kBlockArgument: {
-    auto blockId = pValue.block_argument().owner().id();
     auto argId = pValue.block_argument().arg_number();
-    assert(fInfo.blocks.count(blockId) &&
-           "blockId is not present in Block cache!");
-    return fInfo.blocks.at(blockId)->getArgument(argId);
+    return getBlock(fInfo, pValue.block_argument().owner())->getArgument(argId);
   } break;
   case MLIRValue::VALUE_NOT_SET:
     llvm_unreachable("Unexpected value case for MLIRValue!");
@@ -429,8 +420,7 @@ void Deserializer::deserializeGlobal(ModuleInfo &mInfo,
   auto op = OpDeserializer::deserializeCIRGlobalOp(emptyFuncInfo, mInfo,
                                                    pGlobal.info());
   mInfo.globals[pGlobal.id().id()] = op.getOperation();
-
-  llvm::errs() << "global sym name: " << op.getName() << "\n\n";
+  mInfo.module.push_back(op);
 }
 
 mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
@@ -442,24 +432,19 @@ mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
 
   auto mInfo = ModuleInfo(ctx, builder, dataLayout, newModule);
 
-  llvm::errs() << "aggregating types\n\n";
   aggregateTypes(mInfo, pModule);
 
-  llvm::errs() << "deserializing globals\n\n";
   for (const auto &pGlobal : pModule.globals()) {
     deserializeGlobal(mInfo, pGlobal);
   }
-  llvm::errs() << "setting attributes\n\n";
   for (const auto &pAttr : pModule.attributes()) {
     auto namedAttr = AttrDeserializer::deserializeMLIRNamedAttr(mInfo, pAttr);
     newModule->setAttr(namedAttr.getName(), namedAttr.getValue());
   }
-  llvm::errs() << "deserializing funcs\n\n";
   for (const auto &pFunc : pModule.functions()) {
     deserializeFunc(mInfo, pFunc);
   }
 
-  llvm::errs() << "verifying the final result\n\n";
   assert(mlir::verify(newModule).succeeded());
 
   return newModule;

@@ -42,7 +42,9 @@ int main(int argc, char *argv[]) {
   ctx.allowUnregisteredDialects();
   ctx.loadDialect<cir::CIRDialect>();
   auto module = Deserializer::deserializeModule(ctx, pModule);
-  module.print(llvm::outs());
+  auto flags = mlir::OpPrintingFlags();
+  flags.enableDebugInfo(true);
+  module.print(llvm::outs(), flags);
 
   google::protobuf::ShutdownProtobufLibrary();
 }
