@@ -341,8 +341,8 @@ void Deserializer::deserializeBlock(FunctionInfo &fInfo,
   for (const auto &pOp : pBlock.operations()) {
     mlir::Operation *op;
     op = OpDeserializer::deserializeMLIROp(fInfo, fInfo.owner, pOp);
-    op->setLoc(AttrDeserializer::deserializeMLIRLocation(fInfo.owner,
-                                                          pOp.location()));
+    op->setLoc(
+        AttrDeserializer::deserializeMLIRLocation(fInfo.owner, pOp.location()));
     fInfo.ops[pOp.id().id()] = op;
   }
   // entry blocks contain function's arguments upon their construction

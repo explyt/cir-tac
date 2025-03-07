@@ -30,7 +30,8 @@ int main(int argc, char *argv[]) {
   {
     std::fstream input(argv[1], std::ios::in | std::ios::binary);
     if (!pModule.ParseFromIstream(&input)) {
-      std::cerr << "Failed to parse [" << argv[1] << "] proto file" << std::endl;
+      std::cerr << "Failed to parse [" << argv[1] << "] proto file"
+                << std::endl;
       return -1;
     }
   }

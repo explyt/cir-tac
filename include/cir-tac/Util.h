@@ -99,12 +99,9 @@ struct ModuleInfo {
   cir::CIRDataLayout &dataLayout;
   mlir::ModuleOp &module;
 
-  ModuleInfo(mlir::MLIRContext &ctx,
-             cir::CIRBaseBuilderTy &builder,
-             cir::CIRDataLayout &dataLayout,
-             mlir::ModuleOp &module) :
-             ctx(ctx), builder(builder), dataLayout(dataLayout),
-             module(module) {}
+  ModuleInfo(mlir::MLIRContext &ctx, cir::CIRBaseBuilderTy &builder,
+             cir::CIRDataLayout &dataLayout, mlir::ModuleOp &module)
+      : ctx(ctx), builder(builder), dataLayout(dataLayout), module(module) {}
 };
 
 struct FunctionInfo {
@@ -140,7 +137,7 @@ inline MLIRAPFloat serializeAPFloat(llvm::APFloat f) {
 inline llvm::APFloat deserializeAPFloat(MLIRAPFloat pF) {
   std::string value = pF.value();
   auto semanticsEnum =
-    static_cast<llvm::APFloatBase::Semantics>(pF.semantics());
+      static_cast<llvm::APFloatBase::Semantics>(pF.semantics());
   auto &semantics = llvm::APFloatBase::EnumToSemantics(semanticsEnum);
   return llvm::APFloat(semantics, value);
 }
