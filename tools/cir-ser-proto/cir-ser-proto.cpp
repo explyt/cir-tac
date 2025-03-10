@@ -58,9 +58,10 @@ int main(int argc, char *argv[]) {
       if (auto cirFunc = llvm::dyn_cast<cir::FuncOp>(topOp)) {
         CIRFunction *pFunction = pModule.add_functions();
         CIRFunctionID pFunctionID;
-        pFunction->mutable_id()->mutable_module_id()->CopyFrom(pModuleID);
+        *pFunctionID.mutable_module_id() = pModuleID;
         std::string funcId = cirFunc.getSymName().str();
-        pFunction->mutable_id()->set_id(funcId);
+        *pFunctionID.mutable_id() = funcId;
+        *pFunction->mutable_id() = pFunctionID;
 
         BlockCache blockCache;
         OpCache opCache;
@@ -99,21 +100,31 @@ int main(int argc, char *argv[]) {
           *pLocList.add_list() = attributeSerializer.serializeMLIRLocation(arg.getLoc());
         }
         *pFunction->mutable_arg_locs() = pLocList;
+        *pFunction->mutable_loc() = attributeSerializer.serializeMLIRLocation(cirFunc->getLoc());
 
         auto pInfo = opSerializer.serializeOperation(topOp);
         *pFunction->mutable_info() = pInfo.func_op();
-        *pFunction->mutable_loc() = attributeSerializer.serializeMLIRLocation(cirFunc->getLoc());
+
+        MLIRModuleOp pModuleOp;
+        *pModuleOp.mutable_function() = pFunctionID;
+        *pModule.add_op_order() = pModuleOp;
       } else if (auto cirGlobal = llvm::dyn_cast<cir::GlobalOp>(topOp)) {
         CIRGlobal *pGlobal = pModule.add_globals();
         CIRGlobalID pGlobalID;
-        *pGlobal->mutable_id()->mutable_module_id() = pModuleID;
+        *pGlobalID.mutable_module_id() = pModuleID;
         std::string globalId = cirGlobal.getSymName().str();
-        pGlobal->mutable_id()->set_id(globalId);
+        *pGlobalID.mutable_id() = globalId;
+        *pGlobal->mutable_id() = pGlobalID;
         OpCache opCache;
         BlockCache blockCache;
         OpSerializer opSerializer(pModuleID, typeCache, opCache, blockCache);
         auto pInfo = opSerializer.serializeOperation(topOp);
         *pGlobal->mutable_info() = pInfo.global_op();
+        *pGlobal->mutable_loc() = attributeSerializer.serializeMLIRLocation(cirGlobal->getLoc());
+
+        MLIRModuleOp pModuleOp;
+        *pModuleOp.mutable_global() = pGlobalID;
+        *pModule.add_op_order() = pModuleOp;
       }
     }
   }

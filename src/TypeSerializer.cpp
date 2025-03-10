@@ -4,6 +4,7 @@
 #include "cir-tac/TypeSerializer.h"
 #include "cir-tac/EnumSerializer.h"
 #include "proto/type.pb.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include <llvm/ADT/TypeSwitch.h>
 #include <mlir/IR/BuiltinTypes.h>
@@ -525,6 +526,10 @@ CIRStructType TypeSerializer::serializeCIRStructType(cir::StructType type) {
   serialized.set_incomplete(type.getIncomplete());
   serialized.set_packed(type.getPacked());
   serialized.set_kind(serializeCIRRecordKind(type.getKind()));
+  if (type.getAst()) {
+    llvm::raw_string_ostream os(*serialized.mutable_raw_ast());
+    type.getAst().print(os);
+  }
   return serialized;
 }
 
