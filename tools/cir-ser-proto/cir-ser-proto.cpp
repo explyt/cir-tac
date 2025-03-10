@@ -90,17 +90,20 @@ int main(int argc, char *argv[]) {
           }
           MLIRArgLocList pLocList;
           for (auto &arg : block.getArguments()) {
-            *pLocList.add_list() = attributeSerializer.serializeMLIRLocation(arg.getLoc());
+            *pLocList.add_list() =
+                attributeSerializer.serializeMLIRLocation(arg.getLoc());
           }
           *pBlock->mutable_arg_locs() = pLocList;
         }
 
         MLIRArgLocList pLocList;
         for (auto &arg : cirFunc.getArguments()) {
-          *pLocList.add_list() = attributeSerializer.serializeMLIRLocation(arg.getLoc());
+          *pLocList.add_list() =
+              attributeSerializer.serializeMLIRLocation(arg.getLoc());
         }
         *pFunction->mutable_arg_locs() = pLocList;
-        *pFunction->mutable_loc() = attributeSerializer.serializeMLIRLocation(cirFunc->getLoc());
+        *pFunction->mutable_loc() =
+            attributeSerializer.serializeMLIRLocation(cirFunc->getLoc());
 
         auto pInfo = opSerializer.serializeOperation(topOp);
         *pFunction->mutable_info() = pInfo.func_op();
@@ -120,7 +123,8 @@ int main(int argc, char *argv[]) {
         OpSerializer opSerializer(pModuleID, typeCache, opCache, blockCache);
         auto pInfo = opSerializer.serializeOperation(topOp);
         *pGlobal->mutable_info() = pInfo.global_op();
-        *pGlobal->mutable_loc() = attributeSerializer.serializeMLIRLocation(cirGlobal->getLoc());
+        *pGlobal->mutable_loc() =
+            attributeSerializer.serializeMLIRLocation(cirGlobal->getLoc());
 
         MLIRModuleOp pModuleOp;
         *pModuleOp.mutable_global() = pGlobalID;
@@ -145,7 +149,8 @@ int main(int argc, char *argv[]) {
     *pModule.add_types() = pType;
   }
 
-  *pModule.mutable_loc() = attributeSerializer.serializeMLIRLocation(module->getLoc());
+  *pModule.mutable_loc() =
+      attributeSerializer.serializeMLIRLocation(module->getLoc());
 
   for (auto &attr : module->getOperation()->getAttrs()) {
     if (attr.getValue().getDialect().getNamespace() == "cir") {
@@ -159,7 +164,8 @@ int main(int argc, char *argv[]) {
       llvm::raw_string_ostream os(strValue);
       attr.getValue().print(os);
       MLIRRawNamedAttr pRawAttr;
-      *pRawAttr.mutable_name() = attributeSerializer.serializeMLIRStringAttr(attr.getName());
+      *pRawAttr.mutable_name() =
+          attributeSerializer.serializeMLIRStringAttr(attr.getName());
       *pRawAttr.mutable_raw_value() = strValue;
       *pModule.add_raw_attrs() = pRawAttr;
     }
