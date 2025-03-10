@@ -1,5 +1,7 @@
 #include "cir-tac/Deserializer.h"
 #include "cir-tac/Util.h"
+#include "mlir/IR/Value.h"
+#include "mlir/IR/Verifier.h"
 #include "proto/model.pb.h"
 
 #include <fstream>
@@ -30,8 +32,7 @@ int main(int argc, char *argv[]) {
   {
     std::fstream input(argv[1], std::ios::in | std::ios::binary);
     if (!pModule.ParseFromIstream(&input)) {
-      std::cerr << "Failed to parse [" << argv[1] << "] proto file"
-                << std::endl;
+      llvm::errs() << "Failed to parse [" << argv[1] << "] proto file\n\n";
       return -1;
     }
   }

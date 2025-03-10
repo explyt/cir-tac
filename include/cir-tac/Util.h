@@ -86,7 +86,7 @@ using GlobalOPIDCache = std::unordered_map<std::string, mlir::Operation *>;
 
 using OperationIDCache = std::unordered_map<uint64_t, mlir::Operation *>;
 
-using FunctionIDCache = std::unordered_map<std::string, cir::FuncOp *>;
+using FunctionIDCache = std::unordered_map<std::string, cir::FuncOp>;
 
 struct ModuleInfo {
   SerializedTypeCache serTypes;

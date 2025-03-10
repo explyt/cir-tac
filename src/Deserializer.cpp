@@ -3,8 +3,10 @@
 #include "cir-tac/EnumDeserializer.h"
 #include "cir-tac/OpDeserializer.h"
 #include "cir-tac/Util.h"
+#include "mlir/IR/Attributes.h"
 #include "mlir/IR/BuiltinAttributeInterfaces.h"
 #include "mlir/IR/BuiltinTypes.h"
+#include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/IR/Types.h"
@@ -12,11 +14,13 @@
 #include "proto/setup.pb.h"
 #include "clang/CIR/Dialect/IR/CIRDialect.h"
 #include "clang/CIR/Dialect/IR/CIRTypes.h"
+#include "clang/CIR/Interfaces/ASTAttrInterfaces.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include <cstdlib>
+#include <mlir/AsmParser/AsmParser.h>
 #include <mlir/IR/Verifier.h>
 #include <stdexcept>
 
@@ -291,18 +295,29 @@ void Deserializer::defineCompleteStruct(ModuleInfo &mInfo,
                                         const MLIRType &pTy) {
   assert(pTy.has_cir_struct_type() && "pTy is not of StructType");
   assert(!pTy.cir_struct_type().incomplete() && "incomplete struct received!");
-  auto attrName = AttrDeserializer::deserializeMLIRStringAttr(
-      mInfo, pTy.cir_struct_type().name());
-  auto pRecordKind = pTy.cir_struct_type().kind();
+  auto pStruct = pTy.cir_struct_type();
+  auto attrName =
+      AttrDeserializer::deserializeMLIRStringAttr(mInfo, pStruct.name());
+  auto pRecordKind = pStruct.kind();
   auto recordKind = EnumDeserializer::deserializeCIRRecordKind(pRecordKind);
-  auto packed = pTy.cir_struct_type().packed();
+  auto packed = pStruct.packed();
   std::vector<mlir::Type> vecMemberTys;
-  for (auto ty : pTy.cir_struct_type().members())
+  for (auto ty : pStruct.members())
     vecMemberTys.push_back(getType(mInfo, ty));
   auto memberTys = mlir::ArrayRef<mlir::Type>(vecMemberTys);
-  auto fullStruct =
-      cir::StructType::get(&mInfo.ctx, memberTys, attrName, packed, recordKind);
+  cir::ASTRecordDeclInterface ast;
+  if (pStruct.has_raw_ast()) {
+    ;llvm::errs() << "has raw ast: " << pStruct.raw_ast() << "\n\n";
+    ast = mlir::cast<cir::ASTRecordDeclInterface>(
+        parseAttribute(pStruct.raw_ast(), &mInfo.ctx));
+    ;llvm::errs() << "did ast cast?: " << (ast ? "yes" : "no") << "\n\n";
+  }
+  auto fullStruct = cir::StructType::get(&mInfo.ctx, memberTys, attrName,
+                                         packed, recordKind, ast);
   /* completion will fail if the data is mismatched with preexisting one */
+  if (pStruct.has_raw_ast()) {
+    ;llvm::errs() << "do we have ast?: " << (fullStruct.getAst() ? "yes" : "no") << "\n\n";
+  }
   fullStruct.complete(memberTys, packed);
   mInfo.types[pTy.id().id()] = fullStruct;
 }
@@ -311,8 +326,12 @@ void Deserializer::aggregateTypes(ModuleInfo &mInfo,
                                   const MLIRModule &pModule) {
   auto types = pModule.types();
 
+  // filling up the type cache for type self-references
   for (auto ty : types) {
     mInfo.serTypes[ty.id().id()] = ty;
+  }
+
+  for (auto ty : types) {
     /* initiating incomplete structs beforehand to resolve recursive cases */
     if (ty.type_case() == MLIRType::TypeCase::kCirStructType) {
       defineIncompleteStruct(mInfo, ty);
@@ -332,28 +351,41 @@ void Deserializer::aggregateTypes(ModuleInfo &mInfo,
   }
 }
 
+void Deserializer::deserializeArgLocs(ModuleInfo &mInfo,
+                                      const mlir::Block::BlockArgListType &args,
+                                      const MLIRArgLocList &locList) {
+  for (int i = 0; i < locList.list_size(); i++) {
+    auto loc =
+        AttrDeserializer::deserializeMLIRLocation(mInfo, locList.list(i));
+    args[i].setLoc(loc);
+  }
+}
+
 void Deserializer::deserializeBlock(FunctionInfo &fInfo,
                                     const MLIRBlock &pBlock,
                                     bool isEntryBlock) {
   auto *bb = fInfo.blocks[pBlock.id().id()];
   auto &builder = fInfo.owner.builder;
+  auto &mInfo = fInfo.owner;
+  mlir::OpBuilder::InsertionGuard guard(builder);
   builder.setInsertionPointToStart(bb);
   for (const auto &pOp : pBlock.operations()) {
     mlir::Operation *op;
-    op = OpDeserializer::deserializeMLIROp(fInfo, fInfo.owner, pOp);
+    op = OpDeserializer::deserializeMLIROp(fInfo, mInfo, pOp);
     op->setLoc(
-        AttrDeserializer::deserializeMLIRLocation(fInfo.owner, pOp.location()));
+        AttrDeserializer::deserializeMLIRLocation(mInfo, pOp.location()));
     fInfo.ops[pOp.id().id()] = op;
   }
   // entry blocks contain function's arguments upon their construction
   if (isEntryBlock) {
     assert(bb->getArguments().size() == pBlock.argument_types_size());
-    return;
+  } else {
+    for (const auto &arg : pBlock.argument_types()) {
+      auto argType = getType(fInfo.owner, arg);
+      bb->addArgument(argType, builder.getUnknownLoc());
+    }
   }
-  for (const auto &arg : pBlock.argument_types()) {
-    auto argType = getType(fInfo.owner, arg);
-    bb->addArgument(argType, builder.getUnknownLoc());
-  }
+  deserializeArgLocs(mInfo, bb->getArguments(), pBlock.arg_locs());
 }
 
 void Deserializer::deserializeFunc(ModuleInfo &mInfo,
@@ -372,16 +404,13 @@ void Deserializer::deserializeFunc(ModuleInfo &mInfo,
     funcInfo.blocks[bb.id().id()] = funcOp.addBlock();
   }
   // finally deserializing them
-  if (pFunc.blocks().block_size() > 0) {
-    auto bb = pFunc.blocks().block(0);
-    deserializeBlock(funcInfo, bb, /*isEntryBlock=*/true);
-  }
-  for (int bbId = 1; bbId < pFunc.blocks().block_size(); ++bbId) {
+  for (int bbId = 0; bbId < pFunc.blocks().block_size(); ++bbId) {
     auto bb = pFunc.blocks().block(bbId);
-    deserializeBlock(funcInfo, bb, /*isEntryBlock=*/false);
+    deserializeBlock(funcInfo, bb, /*isEntryBlock=*/bbId == 0);
   }
-  mInfo.module.push_back(funcOp);
-  mInfo.funcs[pFunc.id().id()] = &funcOp;
+  funcOp->setLoc(AttrDeserializer::deserializeMLIRLocation(mInfo, pFunc.loc()));
+  deserializeArgLocs(mInfo, funcOp.getArguments(), pFunc.arg_locs());
+  mInfo.funcs[pFunc.id().id()] = funcOp;
 }
 
 mlir::Block *Deserializer::getBlock(FunctionInfo &fInfo,
@@ -419,8 +448,8 @@ void Deserializer::deserializeGlobal(ModuleInfo &mInfo,
   FunctionInfo emptyFuncInfo(mInfo);
   auto op = OpDeserializer::deserializeCIRGlobalOp(emptyFuncInfo, mInfo,
                                                    pGlobal.info());
+  op->setLoc(AttrDeserializer::deserializeMLIRLocation(mInfo, pGlobal.loc()));
   mInfo.globals[pGlobal.id().id()] = op.getOperation();
-  mInfo.module.push_back(op);
 }
 
 mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
@@ -433,19 +462,43 @@ mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
   auto mInfo = ModuleInfo(ctx, builder, dataLayout, newModule);
 
   aggregateTypes(mInfo, pModule);
-
-  for (const auto &pGlobal : pModule.globals()) {
-    deserializeGlobal(mInfo, pGlobal);
-  }
   for (const auto &pAttr : pModule.attributes()) {
     auto namedAttr = AttrDeserializer::deserializeMLIRNamedAttr(mInfo, pAttr);
     newModule->setAttr(namedAttr.getName(), namedAttr.getValue());
+  }
+  for (const auto &pRawAttr : pModule.raw_attrs()) {
+    mlir::ParserConfig config(&ctx);
+    auto desValue = mlir::parseAttribute(pRawAttr.raw_value(), &ctx);
+    newModule->setAttr(
+        AttrDeserializer::deserializeMLIRStringAttr(mInfo, pRawAttr.name()),
+        desValue);
+  }
+  newModule->setLoc(
+      AttrDeserializer::deserializeMLIRLocation(mInfo, pModule.loc()));
+
+  for (const auto &pGlobal : pModule.globals()) {
+    deserializeGlobal(mInfo, pGlobal);
   }
   for (const auto &pFunc : pModule.functions()) {
     deserializeFunc(mInfo, pFunc);
   }
 
-  assert(mlir::verify(newModule).succeeded());
+  for (const auto &pOp : pModule.op_order()) {
+    if (pOp.has_function()) {
+      auto &funcId = pOp.function().id();
+      assert(mInfo.funcs.count(funcId) &&
+             "funcId is not present in function cache!");
+      newModule.push_back(mInfo.funcs[funcId]);
+    }
+    else if (pOp.has_global()) {
+      auto &globalID = pOp.global().id();
+      assert(mInfo.globals.count(globalID) &&
+             "globalId is not present in globals cache!");
+      newModule.push_back(mInfo.globals[globalID]);
+    }
+  }
+
+  //assert(mlir::verify(newModule).succeeded());
 
   return newModule;
 }

@@ -2,6 +2,7 @@
 
 #include "Util.h"
 
+#include "mlir/IR/Block.h"
 #include "proto/model.pb.h"
 #include "proto/op.pb.h"
 #include "proto/setup.pb.h"
@@ -30,6 +31,10 @@ private:
 
   static void deserializeBlock(FunctionInfo &fInfo, const MLIRBlock &pBlock,
                                bool isEntryBlock);
+
+  static void deserializeArgLocs(ModuleInfo &mInfo,
+                                 const mlir::Block::BlockArgListType &args,
+                                 const MLIRArgLocList &locList);
 
 public:
   static mlir::Type getType(ModuleInfo &mInfo, const MLIRTypeID &typeId);
