@@ -53,10 +53,12 @@ jobs:
       - name: Compress release files
         working-directory: ${{ github.workspace }}/artifacts
         run: |
-          chmod +x cir-tac-macOS-ARM64/cir-ser-proto
-          chmod +x cir-tac-Linux-X64/cir-ser-proto
-          tar -czvf cir-tac-macOS-ARM64.tar.gz -C cir-tac-macOS-ARM64 cir-ser-proto
-          tar -czvf cir-tac-Linux-X64.tar.gz -C cir-tac-Linux-X64 cir-ser-proto
+          chmod +x cir-tac-macos-latest-ARM64/cir-ser-proto
+          chmod +x cir-tac-ubuntu-latest-X64/cir-ser-proto
+          chmod +x cir-tac-ubuntu-20.04-X64/cir-ser-proto
+          tar -czvf cir-tac-macos-latest-ARM64.tar.gz -C cir-tac-macos-latest-ARM64 cir-ser-proto
+          tar -czvf cir-tac-ubuntu-latest-X64.tar.gz -C cir-tac-ubuntu-latest-X64 cir-ser-proto
+          tar -czvf cir-tac-ubuntu-20.04-X64.tar.gz -C cir-tac-ubuntu-20.04-X64 cir-ser-proto
 
       - name: 'Release'
         if: ${{ github.event_name == 'push' }}

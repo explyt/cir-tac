@@ -35,7 +35,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y -q --no-install-recommends \
-          ninja-build libabsl-dev
+          ninja-build
 
     - name: Cache Protobuf install (Linux)
       if: startsWith(runner.os, 'Linux')
@@ -43,7 +43,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: protobuf-install
-        key: ${{ runner.os }}-protobuf-install
+        key: ${{ matrix.os }}-protobuf-install
 
     - name: Install Protobuf (Linux)
       if: startsWith(runner.os, 'Linux')
@@ -74,7 +74,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ${{ runner.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ${{ matrix.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |
@@ -98,6 +98,97 @@ jobs:
     - name: Upload cir-tac build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: cir-tac-${{ runner.os }}-${{ runner.arch }}
+        name: cir-tac-${{ matrix.os }}-${{ runner.arch }}
+        path: main/build/tools/cir-ser-proto/cir-ser-proto
+        retention-days: 1
+
+  build-ubuntu-legacy:
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04
+
+    steps:
+    - name: Checkout clangir repo
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.CLANGIR_VERSION }}
+        repository: ${{ env.CLANGIR_REPOSITORY }}
+        path: clangir
+
+    - name: Install Packages
+      run: |
+        apt-get update
+        apt-get install -yqq --no-install-recommends \
+          ca-certificates \
+          git-core \
+          wget \
+          git python3 g++ make ninja-build zlib1g-dev
+          rm /bin/sh
+          ln -s /bin/bash /bin/sh
+
+    - name: Install Cmake
+      run: |
+        wget https://github.com/Kitware/CMake/releases/download/v3.27.0/cmake-3.27.0-linux-x86_64.sh
+        chmod +x cmake-3.27.0-linux-x86_64.sh
+        ./cmake-3.27.0-linux-x86_64.sh --prefix=/usr/local --skip-license
+
+    - name: Cache Protobuf install
+      id: cache-protobuf-install
+      uses: actions/cache@v4
+      with:
+        path: protobuf-install
+        key: ubuntu-20.04-protobuf-install
+
+    - name: Install Protobuf
+      run: |
+        if [[ ! -d protobuf-install ]]
+        then
+          git clone --recursive https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git checkout v29.3
+          git submodule update --init --recursive
+          mkdir build && cd build
+          cmake -D CMAKE_BUILD_TYPE=Release \
+                -D protobuf_BUILD_TESTS=OFF \
+                -D CMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/protobuf-install \
+                -G Ninja ..
+          ninja
+          ninja install
+        fi
+
+    - name: Cache clangir build
+      id: cache-clangir-build
+      uses: actions/cache@v4
+      with:
+        path: clangir/llvm/build
+        key: ubuntu-20.04-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+
+    - name: Build clangir
+      run: |
+        if [[ ! -d clangir/llvm/build ]]
+        then
+          cd clangir/llvm && mkdir -p build && cd build
+          cmake -GNinja -DLLVM_ENABLE_PROJECTS="clang;mlir" -DCLANG_ENABLE_CIR=ON -DCMAKE_BUILD_TYPE=Release ..
+          ninja
+        fi
+
+    - uses: actions/checkout@v4
+      with:
+        path: main
+
+    - name: Build cir-tac
+      working-directory: main
+      run: |
+        mkdir build && cd build
+        PROTOBUF_INSTALL_DIR=$GITHUB_WORKSPACE/protobuf-install
+        cmake -DCLANGIR_BUILD_DIR=$GITHUB_WORKSPACE/clangir/llvm/build \
+              -DProtobuf_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/protobuf \
+              -Dutf8_range_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/utf8_range \
+              -Dabsl_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/absl \
+              .. && make
+
+    - name: Upload cir-tac build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cir-tac-ubuntu-20.04-${{ runner.arch }}
         path: main/build/tools/cir-ser-proto/cir-ser-proto
         retention-days: 1
