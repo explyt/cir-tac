@@ -103,7 +103,7 @@ void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
   } break;
   case MLIRType::TypeCase::kMlirVectorType: {
     auto elTy = getType(mInfo, pTy.mlir_vector_type().element_type());
-    std::vector<long long> shape_sizes;
+    std::vector<int64_t> shape_sizes;
     for (int i = 0; i < pTy.mlir_vector_type().shape_size(); i++) {
       shape_sizes.emplace_back(pTy.mlir_vector_type().shape(i));
     }
