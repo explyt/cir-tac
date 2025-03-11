@@ -1,0 +1,53 @@
+name: GSAC Test Suite
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  GSAC_REPOSITORY: "GSACTech/contest"
+  GSAC_COMMIT: "69dd96b6c0bf91cdcafd49f5684646c11ed59cbe"
+  GSAC_DIRECTORY: "gsac"
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  test:
+    name: Run GSAC Tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Checkout GSAC
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.GSAC_COMMIT }}
+        repository: ${{ env.GSAC_REPOSITORY }}
+        path: ${{ env.GSAC_DIRECTORY }}
+
+    - name: Run GSAC Test Suite
+      run: ./.github/workflows/run_gsac_tests.py "." ${{ env.GSAC_DIRECTORY }}
+
+    - name: Upload first failed test to GitHub artifacts
+      uses: actions/upload_artifact@v4
+      if: failure()
+      with:
+        name: failed-test-original
+        with: test.s
+
+    - name: Upload failed deserialization to GitHub artifacts
+      uses: actions/upload_artifact@v4
+      if: failure()
+      with:
+        name: failed-test-deserialized
+        with: test.cir
+
+    - name: Upload failed test's diff to GitHub artifacts
+      uses: actions/upload_artifact@v4
+      if: failure()
+      with:
+        name: failed-test-diff
+        with: test.out
