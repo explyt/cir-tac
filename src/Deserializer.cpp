@@ -307,17 +307,12 @@ void Deserializer::defineCompleteStruct(ModuleInfo &mInfo,
   auto memberTys = mlir::ArrayRef<mlir::Type>(vecMemberTys);
   cir::ASTRecordDeclInterface ast;
   if (pStruct.has_raw_ast()) {
-    ;llvm::errs() << "has raw ast: " << pStruct.raw_ast() << "\n\n";
     ast = mlir::cast<cir::ASTRecordDeclInterface>(
         parseAttribute(pStruct.raw_ast(), &mInfo.ctx));
-    ;llvm::errs() << "did ast cast?: " << (ast ? "yes" : "no") << "\n\n";
   }
   auto fullStruct = cir::StructType::get(&mInfo.ctx, memberTys, attrName,
                                          packed, recordKind, ast);
   /* completion will fail if the data is mismatched with preexisting one */
-  if (pStruct.has_raw_ast()) {
-    ;llvm::errs() << "do we have ast?: " << (fullStruct.getAst() ? "yes" : "no") << "\n\n";
-  }
   fullStruct.complete(memberTys, packed);
   mInfo.types[pTy.id().id()] = fullStruct;
 }
@@ -498,7 +493,7 @@ mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
     }
   }
 
-  //assert(mlir::verify(newModule).succeeded());
+  assert(mlir::verify(newModule).succeeded());
 
   return newModule;
 }

@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 
 from enum import Enum
 
@@ -76,7 +77,7 @@ def main():
     clangir = sys.argv[1]
     cir_tac = sys.argv[2]
 
-    os.chdir(cir_tac)
+    os.chdir(os.path.expanduser(cir_tac))
 
     gen_file(clangir, "gen-enum-proto-deserializer-header", "CIROps.td",
              "EnumDeserializer.h", CodeType.Decl)

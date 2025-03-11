@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
   auto module =
       mlir::parseSourceFile<mlir::ModuleOp>(relPath.c_str(), parseConfig);
   MLIRModule pModule;
+  module->print(llvm::errs());
   MLIRModuleID pModuleID;
   std::string moduleId = (*module).getName().value_or("").str();
   *pModuleID.mutable_id() = moduleId;
