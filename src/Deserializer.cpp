@@ -217,7 +217,7 @@ void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
     rTy = mlir::IndexType::get(ctx);
     break;
   case MLIRType::TypeCase::kMlirMemRefType: {
-    std::vector<long long> shapes;
+    std::vector<int64_t> shapes;
     for (int i = 0; i < pTy.mlir_mem_ref_type().shape_size(); i++) {
       shapes.emplace_back(pTy.mlir_mem_ref_type().shape(i));
     }
@@ -240,7 +240,7 @@ void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
     rTy = mlir::OpaqueType::get(dialect_namespace, type_data);
   } break;
   case MLIRType::TypeCase::kMlirRankedTensorType: {
-    std::vector<long long> shapes;
+    std::vector<int64_t> shapes;
     for (int i = 0; i < pTy.mlir_ranked_tensor_type().shape_size(); i++) {
       shapes.emplace_back(pTy.mlir_ranked_tensor_type().shape(i));
     }
@@ -341,6 +341,9 @@ void Deserializer::aggregateTypes(ModuleInfo &mInfo,
   for (auto ty : types) {
     /* completing the definition of structs */
     if (ty.type_case() == MLIRType::TypeCase::kCirStructType) {
+      // skipping explicitly stated incomplete structs
+      if (ty.cir_struct_type().incomplete())
+        continue;
       defineCompleteStruct(mInfo, ty);
     }
   }
