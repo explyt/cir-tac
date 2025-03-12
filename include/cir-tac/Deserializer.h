@@ -2,6 +2,7 @@
 
 #include "Util.h"
 
+#include "mlir/IR/Attributes.h"
 #include "mlir/IR/Block.h"
 #include "proto/model.pb.h"
 #include "proto/op.pb.h"
@@ -37,6 +38,10 @@ private:
                                  const MLIRArgLocList &locList);
 
 public:
+  static mlir::NamedAttribute createNamedAttribute(ModuleInfo &mInfo,
+                                                   std::string name,
+                                                   mlir::Attribute attr);
+
   static mlir::Type getType(ModuleInfo &mInfo, const MLIRTypeID &typeId);
 
   static mlir::Block *getBlock(FunctionInfo &fInfo, const MLIRBlockID &pBlock);

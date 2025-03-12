@@ -5,6 +5,7 @@
 #include "cir-tac/Util.h"
 #include "mlir/IR/Attributes.h"
 #include "mlir/IR/BuiltinAttributeInterfaces.h"
+#include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
@@ -409,6 +410,13 @@ void Deserializer::deserializeFunc(ModuleInfo &mInfo,
   funcOp->setLoc(AttrDeserializer::deserializeMLIRLocation(mInfo, pFunc.loc()));
   deserializeArgLocs(mInfo, funcOp.getArguments(), pFunc.arg_locs());
   mInfo.funcs[pFunc.id().id()] = funcOp;
+}
+
+mlir::NamedAttribute Deserializer::createNamedAttribute(ModuleInfo &mInfo,
+                                                        std::string name,
+                                                        mlir::Attribute attr) {
+  auto nameAttr = mlir::StringAttr::get(&mInfo.ctx, name);
+  return mlir::NamedAttribute(nameAttr, attr);
 }
 
 mlir::Block *Deserializer::getBlock(FunctionInfo &fInfo,
