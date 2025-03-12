@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 env:
-  GSAC_REPOSITORY: "GSACTech/contest"
-  GSAC_COMMIT: "69dd96b6c0bf91cdcafd49f5684646c11ed59cbe"
+  GSAC_REPOSITORY: "explyt/GSAC"
+  GSAC_COMMIT: "DanielELog/fix_macos_build"
   GSAC_DIRECTORY: "gsac"
 
 jobs:
@@ -16,8 +16,12 @@ jobs:
     uses: ./.github/workflows/build.yml
 
   test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
     name: Run GSAC Tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     needs: build
 
     steps:
@@ -27,6 +31,10 @@ jobs:
         ref: ${{ env.GSAC_COMMIT }}
         repository: ${{ env.GSAC_REPOSITORY }}
         path: ${{ env.GSAC_DIRECTORY }}
+
+    - name: Export stdlib for MacOS
+      if: startsWith(runner.os, 'macOS')
+      run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 
     - name: Run GSAC Test Suite
       run: ./.github/workflows/run_gsac_tests.py "." ${{ env.GSAC_DIRECTORY }}
