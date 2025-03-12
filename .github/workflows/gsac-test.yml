@@ -40,21 +40,21 @@ jobs:
       run: ./.github/workflows/run_gsac_tests.py "." ${{ env.GSAC_DIRECTORY }}
 
     - name: Upload first failed test to GitHub artifacts
-      uses: actions/upload_artifact@v4
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: failed-test-original
         with: test.s
 
     - name: Upload failed deserialization to GitHub artifacts
-      uses: actions/upload_artifact@v4
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: failed-test-deserialized
         with: test.cir
 
     - name: Upload failed test's diff to GitHub artifacts
-      uses: actions/upload_artifact@v4
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: failed-test-diff
