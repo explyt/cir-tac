@@ -530,5 +530,4 @@ CIRStructType TypeSerializer::serializeCIRStructType(cir::StructType type) {
   return serialized;
 }
 
-
 // clang-format on

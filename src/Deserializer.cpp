@@ -487,8 +487,7 @@ mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
       assert(mInfo.funcs.count(funcId) &&
              "funcId is not present in function cache!");
       newModule.push_back(mInfo.funcs[funcId]);
-    }
-    else if (pOp.has_global()) {
+    } else if (pOp.has_global()) {
       auto &globalID = pOp.global().id();
       assert(mInfo.globals.count(globalID) &&
              "globalId is not present in globals cache!");

@@ -160,5 +160,4 @@ public:
 };
 
 } // namespace protocir
-
 // clang-format on

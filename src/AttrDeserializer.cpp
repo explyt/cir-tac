@@ -832,5 +832,4 @@ cir::VisibilityKindAttr AttrDeserializer::deserializeCIRVisibilityKindAttr(Modul
   return cir::VisibilityKindAttr::get(&mInfo.ctx, enumDeser);
 }
 
-
 // clang-format on

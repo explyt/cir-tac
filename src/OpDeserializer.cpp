@@ -1972,5 +1972,4 @@ cir::YieldOp OpDeserializer::deserializeCIRYieldOp(FunctionInfo &fInfo, ModuleIn
   return mInfo.builder.create<cir::YieldOp>(mInfo.builder.getUnknownLoc(), argsDeser);
 }
 
-
 // clang-format on
