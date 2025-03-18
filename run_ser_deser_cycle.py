@@ -22,8 +22,9 @@ def filter_ast_attrs(file_path):
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Expected paths to cir-tac directory and ClangIR file!")
+    argc = len(sys.argv)
+    if argc < 3 or argc > 4:
+        print("Expected paths to cir-tac directory and ClangIR file, optionally to clang binary!")
         return -1
 
     ser_tool_path = os.path.join(os.path.expanduser(sys.argv[1]),
@@ -31,13 +32,15 @@ def main():
     des_tool_path = os.path.join(os.path.expanduser(sys.argv[1]),
                                  "build", "tools", "cir-deser-proto", "cir-deser-proto")
 
-    test_src = sys.argv[2]
+    test_src = os.path.expanduser(sys.argv[2])
     test_name = "test"
     test_cir = create_file_name(test_name, "s")
     test_ser = create_file_name(test_name, "proto")
     test_deser = create_file_name(test_name, "cir")
 
-    compile_cmd = "clang -S -Xclang -emit-cir-flat -o {1} {0}".format(test_src, test_cir)
+    clang_path = "clang" if argc == 3 else os.path.expanduser(sys.argv[3])
+
+    compile_cmd = "{2} -S -Xclang -emit-cir-flat -o {1} {0}".format(test_src, test_cir, clang_path)
     if subprocess.run(compile_cmd, shell=True).returncode != 0:
         print("Compile error!")
         return 1
