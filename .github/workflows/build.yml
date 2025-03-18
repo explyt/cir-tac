@@ -120,6 +120,7 @@ jobs:
         apt-get install -yqq --no-install-recommends \
           ca-certificates \
           git-core \
+          zstd \
           wget \
           git python3 g++ make ninja-build zlib1g-dev
           rm /bin/sh
