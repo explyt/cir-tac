@@ -3,7 +3,6 @@
 #include "cir-tac/TypeSerializer.h"
 #include "cir-tac/Util.h"
 #include "proto/model.pb.h"
-#include "llvm/Support/raw_ostream.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <clang/CIR/Passes.h>
@@ -11,6 +10,7 @@
 #include <llvm/ADT/TypeSwitch.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
+#include <llvm/Support/raw_ostream.h>
 #include <mlir/Dialect/LLVMIR/LLVMDialect.h>
 #include <mlir/IR/BuiltinOps.h>
 #include <mlir/IR/Dialect.h>
