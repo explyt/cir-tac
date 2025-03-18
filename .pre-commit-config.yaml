@@ -3,7 +3,6 @@ repos:
     rev: 'v19.1.4'
     hooks:
     -   id: clang-format
-    -   id: clang-tidy
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -31,3 +30,8 @@ repos:
     hooks:
     - id: isort
       args: [ "--profile", "black" ]
+
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+    - id: clang-tidy
