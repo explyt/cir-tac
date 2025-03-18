@@ -63,6 +63,11 @@ jobs:
         SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
         echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
 
+    - name: Install Packages (macOS)
+      if: startsWith(runner.os, 'macOS')
+      run: |
+        brew install protobuf ninja
+
     - name: Run GSAC Test Suite
       run: ./.github/workflows/run_gsac_tests.py "." ${{ env.GSAC_DIRECTORY }} ${{ env.CUSTOM_CLANG_PATH }}
 
