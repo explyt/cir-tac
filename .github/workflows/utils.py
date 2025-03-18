@@ -21,7 +21,7 @@ def get_test_paths(root):
 
 def run_test(cir_tac_path, test_path, enable_output=False, custom_clang=None):
     cir_tac_path = os.path.expanduser(cir_tac_path)
-    script_path = os.path.join(cir_tac_path, "run_ser_deser_cycle.py")
+    script_path = os.path.join(cir_tac_path, "scripts", "run_ser_deser_cycle.py")
 
     clang = "" if custom_clang is None else "\"{0}\" ".format(custom_clang)
 

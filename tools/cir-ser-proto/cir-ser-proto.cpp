@@ -20,6 +20,7 @@
 #include <mlir/IR/Types.h>
 #include <mlir/IR/Visitors.h>
 #include <mlir/Parser/Parser.h>
+
 #include <stdexcept>
 
 using namespace protocir;
