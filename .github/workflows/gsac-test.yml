@@ -1,10 +1,16 @@
 name: GSAC Test Suite
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_call:
+    inputs:
+      clangir_repository:
+        description: "Name of ClangIR repository"
+        required: true
+        type: string
+      clangir_version:
+        description: "ClangIR version to use"
+        required: true
+        type: string
 
 env:
   GSAC_REPOSITORY: "explyt/GSAC"
@@ -12,9 +18,6 @@ env:
   GSAC_DIRECTORY: "gsac"
 
   CUSTOM_CLANG_PATH: "./clangir/llvm/build/bin/clang"
-
-  CLANGIR_REPOSITORY: "explyt/clangir"
-  CLANGIR_VERSION: "20.03.2025-rc"
 
 jobs:
   build:
@@ -44,7 +47,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: clangir/llvm/build
-        key: ${{ matrix.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ${{ matrix.os }}-${{ github.event.inputs.CLANGIR_REPOSITORY }}-${{ github.event.inputs.CLANGIR_VERSION }}-clangir-build
 
     - name: Download cir-tac precompiled tools
       uses: actions/download-artifact@v4

@@ -1,18 +1,16 @@
 name: Build
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-  schedule:
-    - cron: '0 12 * * 1,4'
   workflow_call:
-
-env:
-  CLANGIR_REPOSITORY: "explyt/clangir"
-  CLANGIR_VERSION: "20.03.2025-rc"
+    inputs:
+      clangir_repository:
+        description: "Name of ClangIR repository"
+        required: true
+        type: string
+      clangir_version:
+        description: "ClangIR version to use"
+        required: true
+        type: string
 
 jobs:
   build:
@@ -26,8 +24,8 @@ jobs:
     - name: Checkout clangir repo
       uses: actions/checkout@v4
       with:
-        ref: ${{ env.CLANGIR_VERSION }}
-        repository: ${{ env.CLANGIR_REPOSITORY }}
+        ref: ${{ github.event.inputs.CLANGIR_VERSION }}
+        repository: ${{ github.event.inputs.CLANGIR_REPOSITORY }}
         path: clangir
 
     - name: Install Packages (Linux)
@@ -74,7 +72,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ${{ matrix.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ${{ matrix.os }}-${{ github.event.inputs.CLANGIR_REPOSITORY }}-${{ github.event.inputs.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |
@@ -112,8 +110,8 @@ jobs:
     - name: Checkout clangir repo
       uses: actions/checkout@v4
       with:
-        ref: ${{ env.CLANGIR_VERSION }}
-        repository: ${{ env.CLANGIR_REPOSITORY }}
+        ref: ${{ github.event.inputs.CLANGIR_VERSION }}
+        repository: ${{ github.event.inputs.CLANGIR_REPOSITORY }}
         path: clangir
 
     - name: Install Packages
@@ -162,7 +160,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ubuntu-20.04-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ubuntu-20.04-${{ github.event.inputs.CLANGIR_REPOSITORY }}-${{ github.event.inputs.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |

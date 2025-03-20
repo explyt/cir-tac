@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 1,4'
+  workflow_call:
+
+env:
+  CLANGIR_REPOSITORY: "explyt/clangir"
+  CLANGIR_VERSION: "20.03.2025-rc"
+
+jobs:
+  ci:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    name: Build and run tests
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Build ClangIR
+      uses: ./.github/workflows/build.yml
+      with:
+        clangir_repository: ${{ env.CLANGIR_REPOSITORY }}
+        clangir_version: ${{ env.CLANGIR_VERSION }}
+
+    - name: Run tests
+      uses: ./.github/workflows/gsac-test.yml
+      with:
+        clangir_repository: ${{ env.CLANGIR_REPOSITORY }}
+        clangir_version: ${{ env.CLANGIR_VERSION }}
