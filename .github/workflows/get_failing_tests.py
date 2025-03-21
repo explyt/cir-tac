@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
 import sys
-
-from utils import *
+import utils
 
 
 def main():
@@ -13,10 +12,10 @@ def main():
     gsac_path = sys.argv[2]
     output_file = sys.argv[3]
     with open(output_file, "w") as output:
-        for test in get_test_paths(gsac_path):
-            res = run_test(cir_tac_path, test)
+        for test in utils.get_test_paths(gsac_path):
+            res = utils.run_test(cir_tac_path, test)
             print("Test [{0}] ran with the result {1}".format(test, res))
-            if res == TestResult.BuildError:
+            if res == utils.TestResult.BuildError:
                 print(test, file=output)
 
 

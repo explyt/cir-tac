@@ -2,9 +2,8 @@
 
 import os
 import subprocess
-
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
 
 
 class TestResult(Enum):
@@ -23,14 +22,16 @@ def run_test(cir_tac_path, test_path, enable_output=False, custom_clang=None):
     cir_tac_path = os.path.expanduser(cir_tac_path)
     script_path = os.path.join(cir_tac_path, "scripts", "run_ser_deser_cycle.py")
 
-    clang = "" if custom_clang is None else "\"{0}\" ".format(custom_clang)
+    clang = "" if custom_clang is None else '"{0}" '.format(custom_clang)
 
-    test_cmd = "{2} \"{0}\" \"{1}\" {3}> test.out".format(cir_tac_path, test_path, script_path, clang)
+    test_cmd = '{2} "{0}" "{1}" {3}> test.out'.format(
+        cir_tac_path, test_path, script_path, clang
+    )
     kwargs = {}
-    kwargs['shell'] = True
+    kwargs["shell"] = True
     if not enable_output:
-        kwargs['stdin'] = subprocess.DEVNULL
-        kwargs['stdout'] = subprocess.DEVNULL
+        kwargs["stdin"] = subprocess.DEVNULL
+        kwargs["stdout"] = subprocess.DEVNULL
     res = subprocess.run(test_cmd, **kwargs).returncode
     return TestResult(res)
 

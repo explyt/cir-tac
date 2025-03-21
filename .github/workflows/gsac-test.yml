@@ -20,9 +20,6 @@ env:
   CUSTOM_CLANG_PATH: "./clangir/llvm/build/bin/clang"
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-
   gsac-test:
     strategy:
       matrix:
@@ -30,7 +27,6 @@ jobs:
 
     name: Run GSAC Tests
     runs-on: ${{ matrix.os }}
-    needs: build
 
     steps:
     - name: Checkout cir-tac

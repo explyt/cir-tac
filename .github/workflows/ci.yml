@@ -24,6 +24,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Checkout cir-tac
+      uses: actions/checkout@v4
+
     - name: Build ClangIR
       uses: ./.github/workflows/build.yml
       with:

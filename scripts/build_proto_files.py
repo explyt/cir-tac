@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-
 from enum import Enum
 
 
@@ -14,14 +13,21 @@ def get_include_args(clangir_path):
 
 
 def get_td_path(clangir_path, td_file):
-    td_path = os.path.join(clangir_path, "clang", "include", "clang", "CIR", "Dialect", "IR")
+    td_path = os.path.join(
+        clangir_path, "clang", "include", "clang", "CIR", "Dialect", "IR"
+    )
     return os.path.join(td_path, td_file)
 
 
 def run_tblgen_command(clangir_path, subcmd, td_file, result_path):
     tblgen_path = os.path.join(clangir_path, "llvm", "build", "bin", "mlir-tblgen")
-    cmd = "{0} {1} --{2} {3} > {4}".format(tblgen_path, get_include_args(clangir_path),
-                                           subcmd, get_td_path(clangir_path, td_file), result_path)
+    cmd = "{0} {1} --{2} {3} > {4}".format(
+        tblgen_path,
+        get_include_args(clangir_path),
+        subcmd,
+        get_td_path(clangir_path, td_file),
+        result_path,
+    )
 
     subprocess.run(cmd, check=True, shell=True)
 
@@ -59,11 +65,27 @@ def gen_file(clangir_path, subcmd, td_file, file_name, file_type):
 
 def gen_all(clangir_path, subcmd, td_file, name):
     cpp_name = str.capitalize(name)
-    gen_file(clangir_path, subcmd, td_file, "{0}.proto".format(name), CodeType.Proto)
-    gen_file(clangir_path, "{0}-serializer-header".format(subcmd), td_file,
-             "{0}Serializer.h".format(cpp_name), CodeType.Decl)
-    gen_file(clangir_path, "{0}-serializer-source".format(subcmd), td_file,
-             "{0}Serializer.cpp".format(cpp_name), CodeType.Src)
+    gen_file(
+        clangir_path,
+        subcmd,
+        td_file,
+        "{0}.proto".format(name),
+        CodeType.Proto,
+    )
+    gen_file(
+        clangir_path,
+        "{0}-serializer-header".format(subcmd),
+        td_file,
+        "{0}Serializer.h".format(cpp_name),
+        CodeType.Decl,
+    )
+    gen_file(
+        clangir_path,
+        "{0}-serializer-source".format(subcmd),
+        td_file,
+        "{0}Serializer.cpp".format(cpp_name),
+        CodeType.Src,
+    )
     # gen_file(clangir_path, "{0}-deserializer-header", td_file,
     #          "EnumDeserializer.h", CodeType.Decl)
     # gen_file(clangir_path, "{0}-deserializer-source", td_file,
@@ -79,20 +101,50 @@ def main():
 
     os.chdir(os.path.expanduser(cir_tac))
 
-    gen_file(clangir, "gen-enum-proto-deserializer-header", "CIROps.td",
-             "EnumDeserializer.h", CodeType.Decl)
-    gen_file(clangir, "gen-enum-proto-deserializer-source", "CIROps.td",
-             "EnumDeserializer.cpp", CodeType.Src)
+    gen_file(
+        clangir,
+        "gen-enum-proto-deserializer-header",
+        "CIROps.td",
+        "EnumDeserializer.h",
+        CodeType.Decl,
+    )
+    gen_file(
+        clangir,
+        "gen-enum-proto-deserializer-source",
+        "CIROps.td",
+        "EnumDeserializer.cpp",
+        CodeType.Src,
+    )
 
-    gen_file(clangir, "gen-op-proto-deserializer-header", "CIROps.td",
-             "OpDeserializer.h", CodeType.Decl)
-    gen_file(clangir, "gen-op-proto-deserializer-source", "CIROps.td",
-             "OpDeserializer.cpp", CodeType.Src)
+    gen_file(
+        clangir,
+        "gen-op-proto-deserializer-header",
+        "CIROps.td",
+        "OpDeserializer.h",
+        CodeType.Decl,
+    )
+    gen_file(
+        clangir,
+        "gen-op-proto-deserializer-source",
+        "CIROps.td",
+        "OpDeserializer.cpp",
+        CodeType.Src,
+    )
 
-    gen_file(clangir, "gen-attr-proto-deserializer-source", "MLIRCIRAttrs.td",
-             "AttrDeserializer.cpp", CodeType.Src)
-    gen_file(clangir, "gen-attr-proto-deserializer-header", "MLIRCIRAttrs.td",
-             "AttrDeserializer.h", CodeType.Decl)
+    gen_file(
+        clangir,
+        "gen-attr-proto-deserializer-source",
+        "MLIRCIRAttrs.td",
+        "AttrDeserializer.cpp",
+        CodeType.Src,
+    )
+    gen_file(
+        clangir,
+        "gen-attr-proto-deserializer-header",
+        "MLIRCIRAttrs.td",
+        "AttrDeserializer.h",
+        CodeType.Decl,
+    )
 
     gen_all(clangir, "gen-op-proto", "CIROps.td", "op")
     gen_all(clangir, "gen-enum-proto", "CIROps.td", "enum")

@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
+import filecmp
 import os
 import sys
-import filecmp
-
-from utils import *
+import utils
 
 
 CIR_ORIGINAL = "test.s"
@@ -13,13 +12,15 @@ DESERIALIZED_FILE = "test.cir"
 
 def run_and_check_test_result(test_path, cir_tac_path, clang):
     # preparing files for the test run to have a clean state
-    remove_if_exists(CIR_ORIGINAL)
-    remove_if_exists(DESERIALIZED_FILE)
-    remove_if_exists("test.out")
+    utils.remove_if_exists(CIR_ORIGINAL)
+    utils.remove_if_exists(DESERIALIZED_FILE)
+    utils.remove_if_exists("test.out")
 
-    test_res = run_test(cir_tac_path, test_path, enable_output=True, custom_clang=clang)
+    test_res = utils.run_test(
+        cir_tac_path, test_path, enable_output=True, custom_clang=clang
+    )
 
-    if test_res != TestResult.Success:
+    if test_res != utils.TestResult.Success:
         print("Failed to run test! Received result: {0}".format(test_res))
         return False
 
@@ -44,7 +45,7 @@ def main():
 
     clang = "clang" if argc == 3 else os.path.expanduser(sys.argv[3])
 
-    test_files = get_test_paths(gsac_path)
+    test_files = utils.get_test_paths(gsac_path)
 
     for test in test_files:
         print("Testing file [{0}]\n".format(test))
