@@ -12,17 +12,31 @@ on:
 
 env:
   CLANGIR_REPOSITORY: "explyt/clangir"
-  CLANGIR_VERSION: "20.03.2025-rc"
+  CLANGIR_VERSION: "21.03.2025-rc"
 
 jobs:
-    build-clangir:
-      uses: ./.github/workflows/build.yml
-      with:
-        clangir_repository: ${{ github.env.CLANGIR_REPOSITORY }}
-        clangir_version: ${{ github.env.CLANGIR_VERSION }}
+  env-setup:
+    runs-on: macos-latest
+    outputs:
+      clangir-repository: ${{ steps.set.outputs.clangir-repository }}
+      clangir-version: ${{ steps.set.outputs.clangir-version }}
+    steps:
+    - name: Set ClangIR version identification
+      id: set
+      run: |
+        echo "clangir-repository=${{ env.CLANGIR_REPOSITORY }}" >> $GITHUB_OUTPUT
+        echo "clangir-version=${{ env.CLANGIR_VERSION }}" >> $GITHUB_OUTPUT
 
-    run-tests:
-      uses: ./.github/workflows/gsac-test.yml
-      with:
-        clangir_repository: ${{ github.env.CLANGIR_REPOSITORY }}
-        clangir_version: ${{ github.env.CLANGIR_VERSION }}
+  build-clangir:
+    needs: env-setup
+    uses: ./.github/workflows/build.yml
+    with:
+      CLANGIR_REPOSITORY: ${{ needs.env-setup.outputs.clangir-repository }}
+      CLANGIR_VERSION: ${{ needs.env-setup.outputs.clangir-version }}
+
+  run-tests:
+    needs: [env-setup, build-clangir]
+    uses: ./.github/workflows/gsac-test.yml
+    with:
+      CLANGIR_REPOSITORY: ${{ needs.env-setup.outputs.clangir-repository }}
+      CLANGIR_VERSION: ${{ needs.env-setup.outputs.clangir-version }}

@@ -3,11 +3,11 @@ name: GSAC Test Suite
 on:
   workflow_call:
     inputs:
-      clangir_repository:
+      CLANGIR_REPOSITORY:
         description: "Name of ClangIR repository"
         required: true
         type: string
-      clangir_version:
+      CLANGIR_VERSION:
         description: "ClangIR version to use"
         required: true
         type: string
@@ -43,7 +43,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: clangir/llvm/build
-        key: ${{ matrix.os }}-${{ github.event.inputs.CLANGIR_REPOSITORY }}-${{ github.event.inputs.CLANGIR_VERSION }}-clangir-build
+        key: ${{ matrix.os }}-${{ inputs.CLANGIR_REPOSITORY }}-${{ inputs.CLANGIR_VERSION }}-clangir-build
 
     - name: Download cir-tac precompiled tools
       uses: actions/download-artifact@v4

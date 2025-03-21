@@ -6,7 +6,6 @@ import sys
 
 import utils
 
-
 CIR_ORIGINAL = "test.s"
 DESERIALIZED_FILE = "test.cir"
 
