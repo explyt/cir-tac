@@ -70,23 +70,9 @@ jobs:
     - name: Run GSAC Test Suite
       run: ./.github/workflows/run_gsac_tests.py "." ${{ env.GSAC_DIRECTORY }} ${{ env.CUSTOM_CLANG_PATH }}
 
-    - name: Upload first failed test to GitHub artifacts
+    - name: Upload failed test outputs to GitHub artifacts
       uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: failed-test-original
-        path: test.s
-
-    - name: Upload failed deserialization to GitHub artifacts
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: failed-test-deserialized
-        path: test.cir
-
-    - name: Upload failed test's diff to GitHub artifacts
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: failed-test-diff
-        path: test.out
+        name: failed-tests
+        path: failures
