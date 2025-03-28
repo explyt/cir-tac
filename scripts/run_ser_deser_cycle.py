@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
+import argparse
 import os
 import subprocess
-import sys
+import shutil
 
 
 def create_file_name(name, ext):
@@ -22,41 +23,48 @@ def filter_ast_attrs(file_path):
         file.write(code)
 
 
+def get_cir_code(test_src, test_cir, clang_path, skip_compile=False):
+    if skip_compile:
+        shutil.copy(test_src, test_cir)
+        return 0
+    compile_cmd = "{2} -S -Xclang -emit-cir-flat -o {1} {0}".format(
+        test_src, test_cir, clang_path
+    )
+    return subprocess.run(compile_cmd, shell=True).returncode
+
+
 def main():
-    argc = len(sys.argv)
-    if argc < 3 or argc > 4:
-        print(
-            "Expected paths to cir-tac directory and ClangIR file, optionally to clang binary!"
-        )
-        return -1
+    parser = argparse.ArgumentParser()
+    parser.add_argument("cir_tac")
+    parser.add_argument("source_file")
+    parser.add_argument("-c", "--clang", default="clang")
+    parser.add_argument("-s", "--skip-compile", action="store_true")
+    args = parser.parse_args()
 
     ser_tool_path = os.path.join(
-        os.path.expanduser(sys.argv[1]),
+        os.path.expanduser(args.cir_tac),
         "build",
         "tools",
         "cir-ser-proto",
         "cir-ser-proto",
     )
     des_tool_path = os.path.join(
-        os.path.expanduser(sys.argv[1]),
+        os.path.expanduser(args.cir_tac),
         "build",
         "tools",
         "cir-deser-proto",
         "cir-deser-proto",
     )
 
-    test_src = os.path.expanduser(sys.argv[2])
+    test_src = os.path.expanduser(args.source_file)
     test_name = "test"
     test_cir = create_file_name(test_name, "s")
     test_ser = create_file_name(test_name, "proto")
     test_deser = create_file_name(test_name, "cir")
 
-    clang_path = "clang" if argc == 3 else os.path.expanduser(sys.argv[3])
+    clang_path = os.path.expanduser(args.clang)
 
-    compile_cmd = "{2} -S -Xclang -emit-cir-flat -o {1} {0}".format(
-        test_src, test_cir, clang_path
-    )
-    if subprocess.run(compile_cmd, shell=True).returncode != 0:
+    if get_cir_code(test_src, test_cir, clang_path, args.skip_compile) != 0:
         print("Compile error!")
         return 1
     if not run_translation_cmd(ser_tool_path, test_cir, test_ser):

@@ -13,19 +13,20 @@ class TestResult(Enum):
     DeserializationError = 3
 
 
-def get_test_paths(root):
+def get_test_paths(root, ext="c"):
     root = os.path.expanduser(root)
-    return [x.absolute().as_posix() for x in Path(root).rglob("*.c")]
+    return [x.absolute().as_posix() for x in Path(root).rglob("*.{0}".format(ext))]
 
 
-def run_test(cir_tac_path, test_path, enable_output=False, custom_clang=None):
+def run_test(cir_tac_path, test_path, enable_output=False, custom_clang=None, is_cir=False):
     cir_tac_path = os.path.expanduser(cir_tac_path)
     script_path = os.path.join(cir_tac_path, "scripts", "run_ser_deser_cycle.py")
 
-    clang = "" if custom_clang is None else '"{0}" '.format(custom_clang)
+    clang = "" if custom_clang is None else '-c "{0}" '.format(custom_clang)
+    skip_compile = "" if not is_cir else "-s "
 
-    test_cmd = '{2} "{0}" "{1}" {3}> test.out'.format(
-        cir_tac_path, test_path, script_path, clang
+    test_cmd = '{2} "{0}" "{1}" {3}{4}> test.out'.format(
+        cir_tac_path, test_path, script_path, clang, skip_compile
     )
     kwargs = {}
     kwargs["shell"] = True

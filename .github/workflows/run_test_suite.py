@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
+import argparse
 import filecmp
 import os
-import sys
 import shutil
 
 import utils
@@ -12,14 +12,15 @@ DESERIALIZED_FILE = "test.cir"
 TEST_OUTPUT = "test.out"
 
 
-def run_and_check_test_result(test_path, cir_tac_path, clang):
+def run_and_check_test_result(test_path, cir_tac_path, clang, is_cir=False):
     # preparing files for the test run to have a clean state
     utils.remove_if_exists(CIR_ORIGINAL)
     utils.remove_if_exists(DESERIALIZED_FILE)
     utils.remove_if_exists(TEST_OUTPUT)
 
     test_res = utils.run_test(
-        cir_tac_path, test_path, enable_output=True, custom_clang=clang
+        cir_tac_path, test_path, enable_output=True, custom_clang=clang,
+        is_cir=is_cir
     )
 
     if test_res != utils.TestResult.Success:
@@ -40,28 +41,33 @@ def save_failed_test(test_path, gsac_path):
     test_relpath = os.path.relpath(test_path, gsac_path)
     test_name = test_relpath.replace(os.path.sep, "_")
     for test_outs in [CIR_ORIGINAL, DESERIALIZED_FILE, TEST_OUTPUT]:
+        if not os.path.exists(test_outs):
+            continue
         save_copy_name = "{0}_{1}".format(test_name, test_outs)
         save_copy_path = os.path.join("failures", save_copy_name)
         shutil.copyfile(test_outs, save_copy_path)
 
 
 def main():
-    argc = len(sys.argv)
-    if argc < 3 or argc > 4:
-        print("Expected paths to cir-tac and GSAC directories, optionally to clang!")
-        return -1
+    parser = argparse.ArgumentParser()
+    parser.add_argument("cir_tac")
+    parser.add_argument("test_suite")
+    parser.add_argument("-c", "--clang", default="clang")
+    parser.add_argument("-s", "--search-for-cir", action="store_true")
+    args = parser.parse_args()
 
-    cir_tac_path = os.path.expanduser(sys.argv[1])
-    gsac_path = os.path.expanduser(sys.argv[2])
+    cir_tac_path = os.path.expanduser(args.cir_tac)
+    gsac_path = os.path.expanduser(args.test_suite)
+    clang = os.path.expanduser(args.clang)
+    is_cir = args.search_for_cir
 
-    clang = "clang" if argc == 3 else os.path.expanduser(sys.argv[3])
-
-    test_files = utils.get_test_paths(gsac_path)
+    test_ext = "cir" if is_cir else "c"
+    test_files = utils.get_test_paths(gsac_path, ext=test_ext)
 
     res = 0
     for test in test_files:
         print("Testing file [{0}]\n".format(test))
-        if not run_and_check_test_result(test, cir_tac_path, clang):
+        if not run_and_check_test_result(test, cir_tac_path, clang, is_cir):
             print("Failure! Saving test outputs...\n")
             save_failed_test(test, gsac_path)
             res = 1

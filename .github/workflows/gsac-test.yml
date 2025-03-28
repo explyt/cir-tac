@@ -12,67 +12,11 @@ on:
         required: true
         type: string
 
-env:
-  GSAC_REPOSITORY: "explyt/GSAC"
-  GSAC_COMMIT: "DanielELog/fix_macos_build"
-  GSAC_DIRECTORY: "gsac"
-
-  CUSTOM_CLANG_PATH: "./clangir/llvm/build/bin/clang"
-
 jobs:
   gsac-test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    name: Run GSAC Tests
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - name: Checkout cir-tac
-      uses: actions/checkout@v4
-
-    - name: Checkout GSAC
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ env.GSAC_COMMIT }}
-        repository: ${{ env.GSAC_REPOSITORY }}
-        path: ${{ env.GSAC_DIRECTORY }}
-
-    - name: Restore clangir build
-      uses: actions/cache/restore@v4
-      with:
-        path: clangir/llvm/build
-        key: ${{ matrix.os }}-${{ inputs.CLANGIR_REPOSITORY }}-${{ inputs.CLANGIR_VERSION }}-clangir-build
-
-    - name: Download cir-tac precompiled tools
-      uses: actions/download-artifact@v4
-      with:
-        name: cir-tac-${{ matrix.os }}-${{ runner.arch }}
-        path: ${{ github.workspace }}/build/tools
-
-    - name: Add permissions to cir-tac tools
-      run: |
-        chmod +x ./build/tools/cir-ser-proto/cir-ser-proto
-        chmod +x ./build/tools/cir-deser-proto/cir-deser-proto
-
-    - name: Export stdlib for MacOS
-      if: startsWith(runner.os, 'macOS')
-      run: |
-        SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-        echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
-
-    - name: Install Packages (macOS)
-      if: startsWith(runner.os, 'macOS')
-      run: |
-        brew install protobuf ninja
-
-    - name: Run GSAC Test Suite
-      run: ./.github/workflows/run_gsac_tests.py "." ${{ env.GSAC_DIRECTORY }} ${{ env.CUSTOM_CLANG_PATH }}
-
-    - name: Upload failed test outputs to GitHub artifacts
-      uses: actions/upload-artifact@v4
-      if: failure()
-      with:
-        name: failed-tests
-        path: failures
+    uses: ./.github/workflows/run-test-suite.yml
+    with:
+      CLANGIR_REPOSITORY: ${{ inputs.CLANGIR_REPOSITORY }}
+      CLANGIR_VERSION: ${{ inputs.CLANGIR_VERSION }}
+      TEST_REPOSITORY: "explyt/GSAC"
+      TEST_COMMIT: "DanielELog/fix_macos_build"
