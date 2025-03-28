@@ -50,7 +50,7 @@ jobs:
       if: "${{ env.TOKEN != '' }}"
       run: |
         eval `ssh-agent -s`
-        ssh-add - <<< '${TOKEN}'
+        ssh-add - <<< '$TOKEN'
 
     - name: Checkout test repository
       uses: actions/checkout@v4
