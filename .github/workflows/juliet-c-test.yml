@@ -15,10 +15,10 @@ on:
 jobs:
   secret-test:
     runs-on: macos-latest
+    env:
+      TOKEN: ${{ secrets.JULIETC }}
     steps:
       - name: Test secret
-        env:
-          TOKEN: ${{ secrets.JULIETC }}
         if: ${{ env.TOKEN == '' }}
         run: |
           echo "no JULIETC secret present"
