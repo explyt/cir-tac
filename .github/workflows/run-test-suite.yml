@@ -23,6 +23,9 @@ on:
         description: "If set, runner searches for precompiled CIR files"
         type: boolean
         default: false
+    secrets:
+      TEST_SECRET:
+        description: "Token for accessing the test repository"
 
 env:
   TEST_DIRECTORY: "test-suite"
@@ -36,12 +39,18 @@ jobs:
 
     name: Run Tests
     runs-on: ${{ matrix.os }}
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
     - name: Checkout cir-tac
       uses: actions/checkout@v4
+
+    - name: Set test repository secrets
+      env:
+        TOKEN: ${{ secrets.TEST_SECRET }}
+      if: "${{ env.TOKEN != '' }}"
+      run: |
+        eval `ssh-agent -s`
+        ssh-add - <<< '$TOKEN'
 
     - name: Checkout test repository
       uses: actions/checkout@v4

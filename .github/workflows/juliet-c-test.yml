@@ -13,7 +13,7 @@ on:
         type: string
 
 jobs:
-  gsac-test:
+  juliet-c-test:
     uses: ./.github/workflows/run-test-suite.yml
     with:
       CLANGIR_REPOSITORY: ${{ inputs.CLANGIR_REPOSITORY }}
@@ -21,3 +21,5 @@ jobs:
       TEST_REPOSITORY: "explyt/juliet-c"
       TEST_COMMIT: "juliet-db-flat"
       SEARCH_FOR_CIR: true
+    secrets:
+      TEST_SECRET: ${{ secrets.JULIETC }}
