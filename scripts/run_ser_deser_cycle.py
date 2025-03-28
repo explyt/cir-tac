@@ -2,8 +2,8 @@
 
 import argparse
 import os
-import subprocess
 import shutil
+import subprocess
 
 
 def create_file_name(name, ext):

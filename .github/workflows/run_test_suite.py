@@ -19,8 +19,7 @@ def run_and_check_test_result(test_path, cir_tac_path, clang, is_cir=False):
     utils.remove_if_exists(TEST_OUTPUT)
 
     test_res = utils.run_test(
-        cir_tac_path, test_path, enable_output=True, custom_clang=clang,
-        is_cir=is_cir
+        cir_tac_path, test_path, enable_output=True, custom_clang=clang, is_cir=is_cir
     )
 
     if test_res != utils.TestResult.Success:
