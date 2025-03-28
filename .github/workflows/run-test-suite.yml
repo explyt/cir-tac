@@ -44,17 +44,10 @@ jobs:
     - name: Checkout cir-tac
       uses: actions/checkout@v4
 
-    - name: Set test repository secrets
-      env:
-        TOKEN: ${{ secrets.TEST_SECRET }}
-      if: "${{ env.TOKEN != '' }}"
-      run: |
-        eval `ssh-agent -s`
-        ssh-add - <<< '$TOKEN'
-
     - name: Checkout test repository
       uses: actions/checkout@v4
       with:
+        ssh-key: ${{ secrets.TEST_SECRET }}
         ref: ${{ inputs.TEST_COMMIT }}
         repository: ${{ inputs.TEST_REPOSITORY }}
         path: ${{ env.TEST_DIRECTORY }}
