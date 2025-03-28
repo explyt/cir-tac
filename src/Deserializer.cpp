@@ -258,8 +258,10 @@ void Deserializer::defineType(ModuleInfo &mInfo, const MLIRType &pTy) {
     rTy = mlir::TupleType::get(ctx, types);
   } break;
   case MLIRType::TypeCase::kMlirUnrankedMemRefType:
+    rTy = mlir::UnrankedMemRefType();
     break;
   case MLIRType::TypeCase::kMlirUnrankedTensorType:
+    rTy = mlir::UnrankedTensorType();
     break;
   case MLIRType::TypeCase::kCirExceptionType:
     rTy = cir::ExceptionInfoType::get(ctx);

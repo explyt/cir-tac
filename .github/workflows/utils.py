@@ -19,7 +19,7 @@ def get_test_paths(root, ext="c"):
 
 
 def run_test(
-        cir_tac_path, test_path, enable_output=False, custom_clang=None, is_cir=False
+    cir_tac_path, test_path, enable_output=False, custom_clang=None, is_cir=False
 ):
     cir_tac_path = os.path.expanduser(cir_tac_path)
     script_path = os.path.join(cir_tac_path, "scripts", "run_ser_deser_cycle.py")
