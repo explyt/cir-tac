@@ -525,6 +525,10 @@ CIRStructType TypeSerializer::serializeCIRStructType(cir::StructType type) {
   serialized.set_incomplete(type.getIncomplete());
   serialized.set_packed(type.getPacked());
   serialized.set_kind(serializeCIRRecordKind(type.getKind()));
+  if (type.getAst()) {
+    llvm::raw_string_ostream os(*serialized.mutable_raw_ast());
+    type.getAst().print(os);
+  }
   return serialized;
 }
 
