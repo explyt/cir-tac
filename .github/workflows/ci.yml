@@ -44,6 +44,7 @@ jobs:
   run-juliet-tests:
     needs: [env-setup, build-clangir]
     uses: ./.github/workflows/juliet-c-test.yml
+    secrets: inherit
     with:
       CLANGIR_REPOSITORY: ${{ needs.env-setup.outputs.clangir-repository }}
       CLANGIR_VERSION: ${{ needs.env-setup.outputs.clangir-version }}

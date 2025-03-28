@@ -39,14 +39,14 @@ jobs:
 
     name: Run Tests
     runs-on: ${{ matrix.os }}
-    env:
-      TOKEN: ${{ secrets.TEST_SECRET }}
 
     steps:
     - name: Checkout cir-tac
       uses: actions/checkout@v4
 
     - name: Set test repository secrets
+      env:
+        TOKEN: ${{ secrets.TEST_SECRET }}
       if: "${{ env.TOKEN != '' }}"
       run: |
         eval `ssh-agent -s`

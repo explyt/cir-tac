@@ -13,16 +13,6 @@ on:
         type: string
 
 jobs:
-  secret-test:
-    runs-on: macos-latest
-    env:
-      TOKEN: ${{ secrets.JULIETC }}
-    steps:
-      - name: Test secret
-        if: ${{ env.TOKEN == '' }}
-        run: |
-          echo "no JULIETC secret present"
-
   juliet-c-test:
     uses: ./.github/workflows/run-test-suite.yml
     with:
