@@ -38,6 +38,7 @@ def run_and_check_test_result(test_path, cir_tac_path, clang, is_cir=False):
 
 
 def save_failed_test(test_path):
+    Path("failures").mkdir(exist_ok=True)
     test_name = Path(test_path).stem
     for test_outs in [CIR_ORIGINAL, DESERIALIZED_FILE, TEST_OUTPUT]:
         if not os.path.exists(test_outs):
