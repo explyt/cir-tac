@@ -4,6 +4,7 @@ import argparse
 import filecmp
 import os
 import shutil
+from pathlib import Path
 
 import utils
 
@@ -36,9 +37,8 @@ def run_and_check_test_result(test_path, cir_tac_path, clang, is_cir=False):
     return filecmp.cmp(DESERIALIZED_FILE, CIR_ORIGINAL)
 
 
-def save_failed_test(test_path, gsac_path):
-    test_relpath = os.path.relpath(test_path, gsac_path)
-    test_name = test_relpath.replace(os.path.sep, "_")
+def save_failed_test(test_path):
+    test_name = Path(test_path).stem
     for test_outs in [CIR_ORIGINAL, DESERIALIZED_FILE, TEST_OUTPUT]:
         if not os.path.exists(test_outs):
             continue
@@ -68,7 +68,7 @@ def main():
         print("Testing file [{0}]\n".format(test))
         if not run_and_check_test_result(test, cir_tac_path, clang, is_cir):
             print("Failure! Saving test outputs...\n")
-            save_failed_test(test, gsac_path)
+            save_failed_test(test)
             res = 1
         print("Success!\n")
     return res

@@ -47,6 +47,9 @@ int main(int argc, char *argv[]) {
   mlir::ParserConfig parseConfig(&context);
   auto module =
       mlir::parseSourceFile<mlir::ModuleOp>(relPath.c_str(), parseConfig);
+  if (module.get() == nullptr) {
+    throw std::runtime_error("Module was parsed incorrectly! Aborting...");
+  }
   MLIRModule pModule;
   MLIRModuleID pModuleID;
   std::string moduleId = (*module).getName().value_or("").str();
