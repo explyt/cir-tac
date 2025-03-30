@@ -11,6 +11,7 @@ class TestResult(Enum):
     BuildError = 1
     SerializationError = 2
     DeserializationError = 3
+    ParseError = 4
 
 
 def get_test_paths(root, ext="c"):

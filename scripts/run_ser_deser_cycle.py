@@ -16,6 +16,10 @@ def run_translation_cmd(cmd, fr, to):
     )
 
 
+def test_parse(cmd, fr):
+    return subprocess.run("{0} {1}".format(cmd, fr), shell=True).returncode == 0
+
+
 def filter_ast_attrs(file_path):
     with open(file_path, "r") as file:
         code = file.read().replace(" #cir.record.decl.ast", "")
@@ -55,6 +59,13 @@ def main():
         "cir-deser-proto",
         "cir-deser-proto",
     )
+    parse_test_path = os.path.join(
+        os.path.expanduser(args.cir_tac),
+        "build",
+        "tools",
+        "cir-ser-proto",
+        "parse-test",
+    )
 
     test_src = os.path.expanduser(args.source_file)
     test_name = "test"
@@ -67,6 +78,9 @@ def main():
     if get_cir_code(test_src, test_cir, clang_path, args.skip_compile) != 0:
         print("Compile error!")
         return 1
+    if not test_parse(parse_test_path, test_cir):
+        print("Parse error!")
+        return 4
     if not run_translation_cmd(ser_tool_path, test_cir, test_ser):
         print("Serialization error!")
         return 2
