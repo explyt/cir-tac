@@ -376,13 +376,6 @@ void Deserializer::deserializeBlock(FunctionInfo &fInfo,
   auto &mInfo = fInfo.owner;
   mlir::OpBuilder::InsertionGuard guard(builder);
   builder.setInsertionPointToStart(bb);
-  for (const auto &pOp : pBlock.operations()) {
-    mlir::Operation *op;
-    op = OpDeserializer::deserializeMLIROp(fInfo, mInfo, pOp);
-    op->setLoc(
-        AttrDeserializer::deserializeMLIRLocation(mInfo, pOp.location()));
-    fInfo.ops[pOp.id().id()] = op;
-  }
   // entry blocks contain function's arguments upon their construction
   if (isEntryBlock) {
     assert(bb->getArguments().size() == pBlock.argument_types_size());
@@ -391,6 +384,13 @@ void Deserializer::deserializeBlock(FunctionInfo &fInfo,
       auto argType = getType(fInfo.owner, arg);
       bb->addArgument(argType, builder.getUnknownLoc());
     }
+  }
+  for (const auto &pOp : pBlock.operations()) {
+    mlir::Operation *op;
+    op = OpDeserializer::deserializeMLIROp(fInfo, mInfo, pOp);
+    op->setLoc(
+        AttrDeserializer::deserializeMLIRLocation(mInfo, pOp.location()));
+    fInfo.ops[pOp.id().id()] = op;
   }
   deserializeArgLocs(mInfo, bb->getArguments(), pBlock.arg_locs());
 }

@@ -71,6 +71,7 @@ def main():
             print("Failure! Saving test outputs...\n")
             save_failed_test(test)
             res = 1
+            continue
         print("Success!\n")
     return res
 
