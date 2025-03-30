@@ -66,8 +66,7 @@ jobs:
 
     - name: Add permissions to cir-tac tools
       run: |
-        chmod +x ./build/tools/cir-ser-proto/cir-ser-proto
-        chmod +x ./build/tools/cir-deser-proto/cir-deser-proto
+        chmod -R +x ./build/tools/
 
     - name: Export stdlib for MacOS
       if: startsWith(runner.os, 'macOS')

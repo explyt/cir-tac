@@ -24,7 +24,7 @@ def run_and_check_test_result(test_path, cir_tac_path, clang, is_cir=False):
     )
 
     if test_res == utils.TestResult.ParseError:
-        print("Could not parse CIR file! Skipping test...")
+        print("Could not parse CIR file [{0}]! Skipping test...".format(test_path))
         return True
     if test_res != utils.TestResult.Success:
         print("Failed to run test! Received result: {0}".format(test_res))
