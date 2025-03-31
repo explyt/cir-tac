@@ -24,12 +24,12 @@ def filter_ast_attrs(file_path):
     with open(file_path, "r") as file:
         code = file.read()
         code = code.replace(" #cir.record.decl.ast", "")
-          # removing CXXMethod AST from Attributes list,
-          # keeping the list structure intact
+        # removing CXXMethod AST from Attributes list,
+        # keeping the list structure intact
         code = code.replace(", ast = #cir.cxxmethod.decl.ast", "")
         code = code.replace("ast = #cir.cxxmethod.decl.ast, ", "")
         code = code.replace("ast = #cir.cxxmethod.decl.ast", "")
-          # removing the entire list if it's now empty
+        # removing the entire list if it's now empty
         code = code.replace(" attributes {}", "")
     with open(file_path, "w") as file:
         file.write(code)
