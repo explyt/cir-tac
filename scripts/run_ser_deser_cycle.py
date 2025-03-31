@@ -22,7 +22,15 @@ def test_parse(cmd, fr):
 
 def filter_ast_attrs(file_path):
     with open(file_path, "r") as file:
-        code = file.read().replace(" #cir.record.decl.ast", "")
+        code = file.read()
+        code = code.replace(" #cir.record.decl.ast", "")
+          # removing CXXMethod AST from Attributes list,
+          # keeping the list structure intact
+        code = code.replace(", ast = #cir.cxxmethod.decl.ast", "")
+        code = code.replace("ast = #cir.cxxmethod.decl.ast, ", "")
+        code = code.replace("ast = #cir.cxxmethod.decl.ast", "")
+          # removing the entire list if it's now empty
+        code = code.replace(" attributes {}", "")
     with open(file_path, "w") as file:
         file.write(code)
 
@@ -78,6 +86,10 @@ def main():
     if get_cir_code(test_src, test_cir, clang_path, args.skip_compile) != 0:
         print("Compile error!")
         return 1
+
+    # removing sometimes appearing empty ast attributes
+    filter_ast_attrs(test_cir)
+
     if not test_parse(parse_test_path, test_cir):
         print("Parse error!")
         return 4
@@ -87,9 +99,6 @@ def main():
     if not run_translation_cmd(des_tool_path, test_ser, test_deser):
         print("Deserialization error!")
         return 3
-
-    # removing sometimes appearing empty ast attributes
-    filter_ast_attrs(test_cir)
 
     print("\n\nDIFF OUTPUT:\n\n")
     subprocess.run("diff {0} {1}".format(test_cir, test_deser), shell=True)
