@@ -1,8 +1,11 @@
 #include "VespaCommon.h"
 
+#include "mlir/Support/IndentedOstream.h"
 #include "mlir/TableGen/Class.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Support/FormatVariadic.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace vespa;
 
@@ -11,6 +14,14 @@ void AbstractSwitchSource::printCodeBlock(raw_indented_ostream &os,
   os.indent(indent);
   os.printReindented(code);
   os.unindent();
+}
+
+void AbstractSwitchSource::printCodeBlock(llvm::raw_ostream &os,
+                                          llvm::StringRef code, int indent) {
+  if (code.empty()) return;
+  mlir::raw_indented_ostream indentOs(os);
+  indentOs << "\n";
+  printCodeBlock(indentOs, code, indent);
 }
 
 void CppProtoSerializer::dumpSwitchFunc(raw_indented_ostream &os) {
@@ -128,7 +139,7 @@ const char *const serializerFuncEnd = R"(
     return {0}.build()
 })";
 
-std::string KotlinProtoSerializer::getNeededTypeName(llvm::StringRef rawName) {
+std::string KotlinProtoSerializer::getTypeWithoutNamespace(llvm::StringRef rawName) {
   if (dropNamespace) {
     if (rawName.starts_with("MLIR"))
       rawName = rawName.drop_front(4);
@@ -154,7 +165,7 @@ void KotlinProtoSerializer::dumpSwitchFunc(llvm::raw_ostream &os) {
 
   os << switchStart;
   for (auto &c : cases) {
-    auto protoType = getNeededTypeName(c.protoType);
+    auto protoType = getTypeWithoutNamespace(c.protoType);
     auto snakeName = llvm::convertToSnakeFromCamelCase(protoType);
     auto casePtotoTypeAsField =
         llvm::convertToCamelFromSnakeCase(snakeName, true);
@@ -173,10 +184,7 @@ void KotlinProtoSerializer::dumpCaseFunc(llvm::raw_ostream &os,
   if (protoTyp.empty())
     protoTyp = typ;
   os << formatv(serializerFuncStart, typ, funcName, protoTyp, serName, subName);
-  if (!body.empty())
-    os << "\n";
-  mlir::raw_indented_ostream indentOs(os);
-  printCodeBlock(indentOs, body, 4);
+  printCodeBlock(os, body, 4);
   os << formatv(serializerFuncEnd, serName);
 }
 

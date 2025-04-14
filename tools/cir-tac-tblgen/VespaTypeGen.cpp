@@ -312,7 +312,7 @@ static bool emitTypeSerializerKotlin(const RecordKeeper &records,
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
 import org.jacodb.api.cir.cfg.*
-import org.jacodb.impl.cfg.serializer
+import org.jacodb.impl.cfg.serializer.*
 import org.jacodb.impl.grpc.Type)";
 
   const char *const defHedClose = R"()";
