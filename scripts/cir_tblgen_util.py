@@ -184,4 +184,12 @@ def get_tblgen_file_infos_kotlin() -> list[TblgenFileInfo]:
             CodeType.KotlinProto
         )
     )
+    file_infos.append(
+        TblgenFileInfo(
+            "gen-op-proto-serializer-kotlin",
+            "CIROps.td",
+            "OpSerializer.kt",
+            CodeType.KotlinSerializer
+        )
+    )
     return file_infos

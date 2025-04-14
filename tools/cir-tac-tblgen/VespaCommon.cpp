@@ -156,6 +156,9 @@ void KotlinProtoSerializer::dumpSwitchFunc(llvm::raw_ostream &os) {
   const char *const switchCase = R"(
         is {0} -> {1}.set{2}(this.{3}()))";
 
+  const char *const switchNoTranslatorCase = R"(
+        is {0} -> {1})";
+
   const char *const switchEnd = R"(
         else -> error("Unknown switch case for {0}!")
     })";
@@ -171,6 +174,9 @@ void KotlinProtoSerializer::dumpSwitchFunc(llvm::raw_ostream &os) {
         llvm::convertToCamelFromSnakeCase(snakeName, true);
     os << formatv(switchCase, c.langType, serName, casePtotoTypeAsField,
                   funcName);
+  }
+  for (auto &c : casesNoTranslator) {
+    os << formatv(switchNoTranslatorCase, c.langType, c.caseBody);
   }
   os << formatv(switchEnd, className);
 
@@ -189,14 +195,18 @@ void KotlinProtoSerializer::dumpCaseFunc(llvm::raw_ostream &os,
 }
 
 void KotlinProtoSerializer::genClassDef(llvm::raw_ostream &os) {
-  dumpSwitchFunc(os);
+  if (!dropSwitchFunc) {
+    dumpSwitchFunc(os);
+  }
   os << "\n";
   for (auto &m : helpers) {
     dumpCaseFunc(os, m.typ, m.body);
     os << "\n";
   }
-  for (auto &c : cases) {
-    dumpCaseFunc(os, c.langType, c.translatorBody, c.protoType);
-    os << "\n";
+  if (!dropCaseFuncs) {
+    for (auto &c : cases) {
+      dumpCaseFunc(os, c.langType, c.translatorBody, c.protoType);
+      os << "\n";
+    }
   }
 }
