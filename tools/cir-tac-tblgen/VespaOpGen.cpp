@@ -10,6 +10,7 @@
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringSet.h"
 #include "llvm/Support/CommandLine.h"
+#include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/Regex.h"
 #include "llvm/Support/raw_ostream.h"
@@ -98,6 +99,11 @@ const std::set<StringRef> expressionOps = {
     "TruncOp",       "UnaryOp",          "VTTAddrPointOp", "VTableAddrPointOp",
 };
 
+const std::set<StringRef> specialOps = {
+    "FuncOp",
+    "GlobalOp",
+};
+
 const std::set<StringRef> instructionOps = {
     "AllocExceptionOp",
     "AllocaOp",
@@ -155,6 +161,16 @@ const std::set<StringRef> instructionOps = {
     "VecSplatOp",
     "VecTernaryOp",
 };
+
+bool isExpr(const Operator &op) {
+  return expressionOps.count(op.getCppClassName());
+}
+
+bool isInst(const Operator &op) {
+  // this way ensures an easier expansion to new Operators introduced
+  return !expressionOps.count(op.getCppClassName()) &&
+         !specialOps.count(op.getCppClassName());
+}
 
 static std::string fixPrefix(const std::string &name) {
   StringRef ref(name);
@@ -244,6 +260,7 @@ static void serializeValueField(StringRef name, ValueType type,
     os << formatv("  }\n");
     return;
   }
+  case ValueType::EMPTY: llvm_unreachable("unexpected EMPTY in ValueField!");
   }
 }
 
@@ -283,6 +300,7 @@ static void serializeResultField(StringRef name, ValueType type,
     os << formatv("  }\n");
     return;
   }
+  case ValueType::EMPTY: llvm_unreachable("unexpected EMPTY in ResultField!");
   }
 }
 
@@ -847,8 +865,45 @@ static void aggregateOperationKotlin(const Operator &op,
   addTo.addSwitchCase(koltinTypName, protoTypName, serializer);
 }
 
-static bool emitOpSerializerKotlin(const std::vector<Operator> &records,
-                                   raw_ostream &os, llvm::StringRef opKind) {
+static bool emitOpSerializerKotlin(const RecordKeeper &records,
+                                   raw_ostream &os) {
+  const char *const defHedOpen = R"(
+package org.jacodb.impl.cfg.serializer.tblgenerated
+
+import org.jacodb.api.cir.cfg.*
+import org.jacodb.impl.cfg.serializer.*
+import org.jacodb.impl.grpc.Op
+import org.jacodb.impl.grpc.Setup)";
+
+  const char *const defHedClose = R"()";
+
+  llvm::StringRef serializedObj = "pOp";
+
+  auto serClass = KotlinProtoSerializer("MLIROp", "Op", serializedObj.str(),
+                                        defHedOpen, defHedClose);
+  serClass.setDropNamespace(true);
+  serClass.setDropSwitchFunc(true);
+  auto defs = getRequestedOpDefinitions(records);
+
+  for (auto &def : defs) {
+    Operator op(def);
+    llvm::StringRef opKind = "";
+    if (isExpr(op)) {
+      opKind = "Expr";
+    } else if (isInst(op)) {
+      opKind = "Inst";
+    }
+    aggregateOperationKotlin(op, serializedObj, opKind, serClass);
+  }
+
+  generateKotlinFile(serClass, os);
+
+  return false;
+}
+
+static bool emitOpSwitchSerializerKotlin(const std::vector<Operator> &records,
+                                         raw_ostream &os,
+                                         llvm::StringRef opKind) {
   const char *const defHedOpen = R"(
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
@@ -866,9 +921,13 @@ import org.jacodb.impl.grpc.Setup)";
   auto className = formatv("CIR{0}", opKind).str();
   serClass.setClassName(className);
   serClass.setDropNamespace(true);
+  serClass.setDropCaseFuncs(true);
 
   for (auto &op : records) {
     aggregateOperationKotlin(op, serializedObj, opKind, serClass);
+  }
+  if (opKind == "Inst") {
+    serClass.addNoTranslatorCase("CIRAssignInst", "this.rhv.asProtobuf()");
   }
 
   generateKotlinFile(serClass, os);
@@ -882,11 +941,11 @@ static bool emitExprSerializerKotlin(const RecordKeeper &records,
   auto defs = getRequestedOpDefinitions(records);
   for (auto *def : defs) {
     Operator op(def);
-    if (expressionOps.count(op.getCppClassName())) {
+    if (isExpr(op)) {
       exprs.push_back(op);
     }
   }
-  return emitOpSerializerKotlin(exprs, os, "Expr");
+  return emitOpSwitchSerializerKotlin(exprs, os, "Expr");
 }
 
 static bool emitInstSerializerKotlin(const RecordKeeper &records,
@@ -895,11 +954,11 @@ static bool emitInstSerializerKotlin(const RecordKeeper &records,
   auto defs = getRequestedOpDefinitions(records);
   for (auto *def : defs) {
     Operator op(def);
-    if (instructionOps.count(op.getCppClassName())) {
+    if (isInst(op)) {
       insts.push_back(op);
     }
   }
-  return emitOpSerializerKotlin(insts, os, "Inst");
+  return emitOpSwitchSerializerKotlin(insts, os, "Inst");
 }
 
 static std::string normalizeGetter(StringRef name) {
@@ -924,7 +983,7 @@ static bool emitOpKotlinExprs(const RecordKeeper &records, raw_ostream &os) {
 
   for (auto *def : defs) {
     Operator op(*def);
-    if (expressionOps.count(op.getCppClassName())) {
+    if (isExpr(op)) {
       auto name = normalizeName(op.getCppClassName());
       os << formatv("data class CIR{0}Expr(\n", name);
       for (int i = 0; i != op.getNumOperands(); ++i) {
@@ -1014,7 +1073,7 @@ static bool emitOpKotlinInst(const RecordKeeper &records, raw_ostream &os) {
 
   for (auto *def : defs) {
     Operator op(*def);
-    if (instructionOps.count(op.getCppClassName())) {
+    if (isInst(op)) {
       auto name = normalizeName(op.getCppClassName());
       os << formatv("data class CIR{0}Inst(\n", name);
       os << "    override val location: CIRInstLocation,\n";
@@ -1115,7 +1174,7 @@ static bool emitOpKotlinExprsBuilder(const RecordKeeper &records,
   os << "fun buildExpr(expr: Op.MLIROp) = when (expr.operationCase!!) {\n";
   for (auto *def : defs) {
     Operator op(*def);
-    if (expressionOps.count(op.getCppClassName())) {
+    if (isExpr(op)) {
       auto name = normalizeName(op.getCppClassName());
       auto snake = llvm::convertToSnakeFromCamelCase(name);
       auto lowerCamel = llvm::convertToCamelFromSnakeCase(snake, false);
@@ -1132,7 +1191,7 @@ static bool emitOpKotlinExprsBuilder(const RecordKeeper &records,
 
   for (auto *def : defs) {
     Operator op(*def);
-    if (expressionOps.count(op.getCppClassName())) {
+    if (isExpr(op)) {
       auto name = normalizeName(op.getCppClassName());
       os << formatv("fun buildCIR{0}Expr(expr: Op.CIR{0}) =\n", name);
       os << formatv("    CIR{0}Expr(\n", name);
@@ -1263,7 +1322,7 @@ static bool emitOpKotlinInstBuilder(const RecordKeeper &records,
 
   for (auto *def : defs) {
     Operator op(*def);
-    if (instructionOps.count(op.getCppClassName())) {
+    if (isInst(op)) {
       auto name = normalizeName(op.getCppClassName());
       auto snake = llvm::convertToSnakeFromCamelCase(name);
       auto lowerCamel = llvm::convertToCamelFromSnakeCase(snake, false);
@@ -1281,7 +1340,7 @@ static bool emitOpKotlinInstBuilder(const RecordKeeper &records,
 
   for (auto *def : defs) {
     Operator op(*def);
-    if (instructionOps.count(op.getCppClassName())) {
+    if (isInst(op)) {
       auto name = normalizeName(op.getCppClassName());
       os << formatv("fun buildCIR{0}Inst(inst: Op.CIR{0}, id: MLIROpID, "
                     "location: CIRInstLocation) =\n",
@@ -1428,3 +1487,8 @@ static mlir::GenRegistration genInstKotlinToProtoSerializer(
     "gen-inst-proto-serializer-kotlin",
     "Generate op instruction proto serializer from kotlin format",
     &emitInstSerializerKotlin);
+
+static mlir::GenRegistration genOpKotlinToProtoSerializer(
+    "gen-op-proto-serializer-kotlin",
+    "Generate proto serializers for every op from kotlin format",
+    &emitOpSerializerKotlin);

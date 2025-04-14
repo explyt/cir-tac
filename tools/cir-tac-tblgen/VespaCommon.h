@@ -275,8 +275,11 @@ protected:
   std::string subName;
 
   std::vector<KotlinHelperMethod> helpers;
+  std::vector<SwitchCase> casesNoTranslator;
 
   bool dropNamespace = false;
+  bool dropSwitchFunc = false;
+  bool dropCaseFuncs = false;
 
   void dumpSwitchFunc(llvm::raw_ostream &os);
   void dumpCaseFunc(llvm::raw_ostream &os, llvm::StringRef typ,
@@ -306,7 +309,13 @@ public:
     addCase(langTyp, protoTyp, "", "", translator);
   }
 
+  void addNoTranslatorCase(std::string langTyp, std::string caseBody) {
+    casesNoTranslator.push_back({langTyp, langTyp, "", caseBody, ""});
+  }
+
   void setDropNamespace(bool newValue) { dropNamespace = newValue; }
+  void setDropSwitchFunc(bool newValue) { dropSwitchFunc = newValue; }
+  void setDropCaseFuncs(bool newValue) { dropCaseFuncs = newValue; }
 
   void setClassName(llvm::StringRef newName) { className = newName; }
 
