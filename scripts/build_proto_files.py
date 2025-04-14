@@ -20,8 +20,10 @@ def get_td_path(clangir_path, td_file):
     return os.path.join(td_path, td_file)
 
 
-def run_tblgen_command(clangir_path, subcmd, td_file, result_path):
-    tblgen_path = os.path.join("build", "tools", "cir-tac-tblgen", "cir-tac-tblgen")
+def run_tblgen_command(clangir_path, cir_tac, subcmd, td_file, result_path):
+    tblgen_path = os.path.join(
+        cir_tac, "build", "tools", "cir-tac-tblgen", "cir-tac-tblgen"
+    )
     cmd = "{0} {1} --{2} {3} > {4}".format(
         tblgen_path,
         get_include_args(clangir_path),
@@ -33,26 +35,34 @@ def run_tblgen_command(clangir_path, subcmd, td_file, result_path):
     subprocess.run(cmd, check=True, shell=True)
 
 
-def gen_file(clangir_path, result_dir, file_info: cir_tblgen_util.TblgenFileInfo):
+def gen_file(clangir_path, cir_tac, result_dir, file_info: cir_tblgen_util.TblgenFileInfo):
     result_path = os.path.join(result_dir, file_info.path)
     subprocess.run("rm -f {0}".format(result_path), shell=True)
-    run_tblgen_command(clangir_path, file_info.subcmd, file_info.td, result_path)
+    run_tblgen_command(clangir_path, cir_tac, file_info.subcmd, file_info.td, result_path)
 
 
 def main():
     argc = len(sys.argv)
-    if not (3 <= argc <= 4):
-        print("Expected paths to clangir, cir-tac directories"
-              "and optionally resulting dir!")
+    if not (5 == argc):
+        print("Expected paths to clangir, cir-tac, repo directories"
+              "and files type to generate!")
         return -1
     clangir = os.path.expanduser(sys.argv[1])
     cir_tac = os.path.expanduser(sys.argv[2])
-    result_dir = cir_tac if argc == 3 else os.path.expanduser(sys.argv[3])
+    repo_root = os.path.expanduser(sys.argv[3])
+    gen_type = sys.argv[4]
+    if gen_type != "cpp" and gen_type != "kotlin":
+        print("Gen type can be either cpp or kotlin!")
+        return -5
 
-    os.chdir(cir_tac)
+    os.chdir(repo_root)
 
-    for file_info in cir_tblgen_util.get_tblgen_file_infos():
-        gen_file(clangir, result_dir, file_info)
+    if gen_type == "cpp":
+        file_infos = cir_tblgen_util.get_tblgen_file_infos_cpp()
+    if gen_type == "kotlin":
+        file_infos = cir_tblgen_util.get_tblgen_file_infos_kotlin()
+    for file_info in file_infos:
+        gen_file(clangir, cir_tac, repo_root, file_info)
 
 
 if __name__ == "__main__":
