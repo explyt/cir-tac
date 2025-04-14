@@ -1185,7 +1185,7 @@ static bool emitAttrSerializerKotlin(const RecordKeeper &records,
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
 import org.jacodb.api.cir.cfg.*
-import org.jacodb.impl.cfg.serializer
+import org.jacodb.impl.cfg.serializer.*
 import org.jacodb.impl.grpc.Attr)";
 
   const char *const defHedClose = R"()";
@@ -1207,6 +1207,7 @@ for ((index, value) in this.rawData.withIndex()) {
 
   auto serClass = KotlinProtoSerializer(
       "MLIRAttribute", "Attr", serializedObj.str(), defHedOpen, defHedClose);
+  serClass.setDropNamespace(true);
 
   auto mlirDefs = records.getAllDerivedDefinitionsIfDefined("Builtin_Attr");
   auto mlirLocationDefs =

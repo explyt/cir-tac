@@ -97,6 +97,12 @@ inline static std::set<llvm::StringRef> primitiveSerializable = {
     "std::optional<int64_t>",
 };
 
+inline static std::set<llvm::StringRef> stringSerializable = {
+  "APInt",
+  "llvm::APInt",
+  "llvm::StringRef",
+};
+
 inline static std::set<llvm::StringRef> settable = {
     "bool",
     "unsigned",
@@ -363,7 +369,7 @@ static std::map<llvm::StringRef, llvm::StringRef> cppTypeToKotlin = {
 
     {"APInt", "BigInteger"},
     {"llvm::APInt", "BigInteger"},
-    {"llvm::APFloat", "BigDecimal"},
+    {"llvm::APFloat", "MLIRAPFloat"},
 
     {"llvm::StringRef", "String"},
 };
@@ -420,7 +426,7 @@ static std::map<llvm::StringRef, llvm::StringRef> cppTypeToBuilder = {
 
     {"APInt", "BigInteger"},
     {"llvm::APInt", "BigInteger"},
-    {"llvm::APFloat", "BigDecimal"},
+    {"llvm::APFloat", "buildMLIRAPFloat"},
 };
 
 std::string vespa::makeIdentifier(llvm::StringRef str) {
@@ -742,8 +748,12 @@ std::string vespa::deserializeParameters(llvm::StringRef cppTy,
 }
 
 std::string serializeElementKotlin(const ParamData &p, llvm::StringRef elem) {
+  if (stringSerializable.count(p.cppType)) {
+    return formatv("{0}.toString()", elem);
+  }
   if (!primitiveSerializable.count(p.cppType)) {
-    return formatv("{0}.asProtobuf()", elem);
+    auto specifier = p.cppType == "mlir::Value" ? "Value" : "";
+    return formatv("{0}.asProtobuf{1}()", elem, specifier);
   }
   return elem.str();
 }

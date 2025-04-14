@@ -853,7 +853,7 @@ static bool emitOpSerializerKotlin(const std::vector<Operator> &records,
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
 import org.jacodb.api.cir.cfg.*
-import org.jacodb.impl.cfg.serializer
+import org.jacodb.impl.cfg.serializer.*
 import org.jacodb.impl.grpc.Op
 import org.jacodb.impl.grpc.Setup)";
 
@@ -999,14 +999,10 @@ static bool emitOpKotlinInst(const RecordKeeper &records, raw_ostream &os) {
   os << "\n";
   os << "package org.jacodb.api.cir.cfg\n";
   os << "\n";
+  os << "import org.jacodb.api.common.cfg.*\n";
+  os << "\n";
 
   auto defs = getRequestedOpDefinitions(records);
-
-  os << "interface CIRInst : CommonInst {\n";
-  os << "    override val location: CIRInstLocation,\n";
-  os << "    val id: MLIROpID\n";
-  os << "}\n";
-  os << "\n";
 
   os << "data class CIRAssignInst(\n";
   os << "    override val location: CIRInstLocation,\n";
@@ -1106,6 +1102,12 @@ static bool emitOpKotlinExprsBuilder(const RecordKeeper &records,
                                      raw_ostream &os) {
   os << autogenMessage;
   os << jacoDBLicense;
+  os << "\n";
+
+  os << "package org.jacodb.impl.cfg.builder\n";
+  os << "\n";
+  os << "import org.jacodb.api.cir.cfg.*\n";
+  os << "import org.jacodb.impl.grpc.Op\n";
   os << "\n";
 
   auto defs = getRequestedOpDefinitions(records);
@@ -1218,6 +1220,11 @@ static bool emitOpKotlinInstBuilder(const RecordKeeper &records,
   os << autogenMessage;
   os << jacoDBLicense;
   os << "\n";
+  os << "package org.jacodb.impl.cfg.builder\n";
+  os << "\n";
+  os << "import org.jacodb.api.cir.cfg.*\n";
+  os << "import org.jacodb.impl.grpc.Op\n";
+  os << "\n";
 
   auto defs = getRequestedOpDefinitions(records);
 
@@ -1232,10 +1239,13 @@ static bool emitOpKotlinInstBuilder(const RecordKeeper &records,
 
   os << "class CIRInstBuilder(private val function: CIRFunction) {\n";
   os << "\n";
+  os << "    private var indexCounter : Int = 0\n";
+  os << "\n";
   os << "    fun buildInst(inst: Op.MLIROp) : CIRInst {\n";
   os << "        val id = buildMLIROpID(inst.id)\n";
-  os << "        val location = CIRInstLocation(function, "
+  os << "        val location = CIRInstLocation(function, indexCounter, "
         "buildMLIRLocation(inst.location))\n";
+  os << "        indexCounter += 1\n";
   os << "\n";
 
   os << "        if (CIRExpressions.contains(inst.operationCase!!)) {\n";
@@ -1381,21 +1391,21 @@ static mlir::GenRegistration
                                "Generate proto serializer .cpp for ops",
                                &emitOpProtoSerializerSource);
 
-static mlir::GenRegistration genOpKotlinExprs("gen-op-kotlin-expr",
+static mlir::GenRegistration genOpKotlinExprs("gen-expr-kotlin",
                                               "Generate kotlin expr for ops",
                                               &emitOpKotlinExprs);
 
-static mlir::GenRegistration genOpKotlinInst("gen-op-kotlin-inst",
+static mlir::GenRegistration genOpKotlinInst("gen-inst-kotlin",
                                              "Generate kotlin inst for ops",
                                              &emitOpKotlinInst);
 
 static mlir::GenRegistration
-    genOpKotlinExprsBuilder("gen-op-kotlin-expr-builder",
+    genOpKotlinExprsBuilder("gen-expr-kotlin-builder",
                             "Generate kotlin expr builder for ops",
                             &emitOpKotlinExprsBuilder);
 
 static mlir::GenRegistration
-    genOpKotliInstBuilder("gen-op-kotlin-inst-builder",
+    genOpKotliInstBuilder("gen-inst-kotlin-builder",
                           "Generate kotlin inst builder for ops",
                           &emitOpKotlinInstBuilder);
 

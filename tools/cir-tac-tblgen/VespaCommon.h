@@ -3,6 +3,7 @@
 #define MLIR_TOOLS_MLIRTBLGEN_VESPACOMMON_H_
 
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Support/raw_ostream.h"
 #include <utility>
 
 #include <llvm/ADT/ArrayRef.h>
@@ -72,6 +73,8 @@ protected:
   virtual void genClassDef(llvm::raw_ostream &os) = 0;
 
   void printCodeBlock(raw_indented_ostream &os, llvm::StringRef code,
+                      int indent = 2);
+  void printCodeBlock(llvm::raw_ostream &os, llvm::StringRef code,
                       int indent = 2);
 
   void addCase(SwitchCase c) { cases.push_back(c); }
@@ -284,7 +287,7 @@ protected:
   }
 
   void genClassDef(llvm::raw_ostream &os) override;
-  std::string getNeededTypeName(llvm::StringRef rawName);
+  std::string getTypeWithoutNamespace(llvm::StringRef rawName);
 
 public:
   KotlinProtoSerializer(std::string typName, std::string subName,
