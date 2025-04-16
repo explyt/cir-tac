@@ -73,9 +73,9 @@ protected:
   virtual void genClassDef(llvm::raw_ostream &os) = 0;
 
   void printCodeBlock(raw_indented_ostream &os, llvm::StringRef code,
-                      int indent = 2);
+                      int indent);
   void printCodeBlock(llvm::raw_ostream &os, llvm::StringRef code,
-                      int indent = 2);
+                      int indent);
 
   void addCase(SwitchCase c) { cases.push_back(c); }
 
@@ -165,7 +165,7 @@ public:
                        llvm::ArrayRef<MethodParameter> params,
                        std::string returnType, std::string methodBody) {
     auto &md = addMethod(methodName, returnType, params)->body();
-    printCodeBlock(md.getStream(), methodBody);
+    printCodeBlock(md.getStream(), methodBody, 2);
   }
 
   inline void addHelperMethod(std::string methodName, MethodParameter param,

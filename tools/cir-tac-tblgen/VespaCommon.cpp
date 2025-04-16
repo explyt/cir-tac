@@ -10,14 +10,14 @@
 using namespace vespa;
 
 void AbstractSwitchSource::printCodeBlock(raw_indented_ostream &os,
-                                          llvm::StringRef code, int indent) {
+                                          llvm::StringRef code, int indent = 2) {
   os.indent(indent);
   os.printReindented(code);
   os.unindent();
 }
 
 void AbstractSwitchSource::printCodeBlock(llvm::raw_ostream &os,
-                                          llvm::StringRef code, int indent) {
+                                          llvm::StringRef code, int indent = 2) {
   if (code.empty()) return;
   mlir::raw_indented_ostream indentOs(os);
   indentOs << "\n";
@@ -32,7 +32,7 @@ void CppProtoSerializer::dumpSwitchFunc(raw_indented_ostream &os) {
   os << formatv("llvm::TypeSwitch<{0}>({1})\n", resTy.langType, inputName);
   for (auto c : cases) {
     os << formatv(".Case<{0}>([&]({0} {1}) {{\n", c.langType, inputName);
-    printCodeBlock(os, c.caseBody);
+    printCodeBlock(os, c.caseBody, 4);
     os << "})\n";
   }
   os << formatv(".Default([]({0} {1}) {{\n"
@@ -54,7 +54,7 @@ void CppProtoDeserializer::dumpSwitchFunc(raw_indented_ostream &os) {
     raw_indented_ostream::DelimitedScope scope2(os);
     for (auto c : cases) {
       os << formatv("case {0}: {{\n", c.caseValue);
-      printCodeBlock(os, c.caseBody);
+      printCodeBlock(os, c.caseBody, 6);
       os << "} break;\n";
     }
     os << "default:\n";
