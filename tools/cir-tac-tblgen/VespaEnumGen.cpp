@@ -304,8 +304,8 @@ static void createCppEnumerants(std::vector<EnumAttrCase> &enumerants,
                                 std::vector<EnumPairing> &result) {
   std::vector<std::string> enumNames;
   normalizeEnumerants(enumerants, enumNames);
-  for (auto &enumerant : enumNames) {
-    auto enumerantCpp = llvm::convertToCamelFromSnakeCase(enumerant, true);
+  for (auto &enumerantCpp : enumNames) {
+    auto enumerant = llvm::convertToCamelFromSnakeCase(enumerantCpp, true);
     result.push_back({enumerantCpp, enumerant});
   }
 }
@@ -380,7 +380,7 @@ fun {0}{1}.asProtobuf() = when (this) {{)";
   os << "\n";
   os << formatv(methodStart, enumNamespace, enumName);
   for (auto &v : values) {
-    os << formatv(switchCase, enumNamespace, enumName, v.langName);
+    os << formatv(switchCase, enumNamespace, enumName, v.protoName);
   }
   os << formatv(methodEnd, enumNamespace, enumName);
 }
