@@ -70,7 +70,7 @@ def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[Tbl
             subcmd,
             td_file,
             "{0}.proto".format(name),
-            CodeType.Proto,
+            CodeType.CppProto,
         )
     )
     files.append(
@@ -78,7 +78,7 @@ def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[Tbl
             "{0}-serializer-header".format(subcmd),
             td_file,
             "{0}Serializer.h".format(cpp_name),
-            CodeType.Decl,
+            CodeType.CppDecl,
         )
     )
     files.append(
@@ -86,7 +86,7 @@ def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[Tbl
             "{0}-serializer-source".format(subcmd),
             td_file,
             "{0}Serializer.cpp".format(cpp_name),
-            CodeType.Src,
+            CodeType.CppSrc,
         )
     )
 
@@ -98,7 +98,7 @@ def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[Tbl
             "{0}-deserializer-header".format(subcmd),
             td_file,
             "{0}Deserializer.h".format(cpp_name),
-            CodeType.Decl
+            CodeType.CppDecl
         )
     )
     files.append(
@@ -106,7 +106,7 @@ def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[Tbl
             "{0}-deserializer-source".format(subcmd),
             td_file,
             "{0}Deserializer.cpp".format(cpp_name),
-            CodeType.Src
+            CodeType.CppSrc
         )
     )
     return files
