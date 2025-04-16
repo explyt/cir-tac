@@ -35,17 +35,23 @@ def run_tblgen_command(clangir_path, cir_tac, subcmd, td_file, result_path):
     subprocess.run(cmd, check=True, shell=True)
 
 
-def gen_file(clangir_path, cir_tac, result_dir, file_info: cir_tblgen_util.TblgenFileInfo):
+def gen_file(
+    clangir_path, cir_tac, result_dir, file_info: cir_tblgen_util.TblgenFileInfo
+):
     result_path = os.path.join(result_dir, file_info.path)
     subprocess.run("rm -f {0}".format(result_path), shell=True)
-    run_tblgen_command(clangir_path, cir_tac, file_info.subcmd, file_info.td, result_path)
+    run_tblgen_command(
+        clangir_path, cir_tac, file_info.subcmd, file_info.td, result_path
+    )
 
 
 def main():
     argc = len(sys.argv)
     if not (5 == argc):
-        print("Expected paths to clangir, cir-tac, repo directories"
-              "and files type to generate!")
+        print(
+            "Expected paths to clangir, cir-tac, repo directories"
+            "and files type to generate!"
+        )
         return -1
     clangir = os.path.expanduser(sys.argv[1])
     cir_tac = os.path.expanduser(sys.argv[2])

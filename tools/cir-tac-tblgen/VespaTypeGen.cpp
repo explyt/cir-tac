@@ -372,10 +372,10 @@ static bool emitTypeKotlin(const RecordKeeper &records, llvm::raw_ostream &os) {
 
   os << "data class CIRStructType(\n";
   os << "    override val id: MLIRTypeID,\n";
-  os << "    val members : List<MLIRTypeID>,\n";
-  os << "    val name : MLIRStringAttr,\n";
-  os << "    val incomplete : Boolean,\n";
-  os << "    val packed : Boolean,\n";
+  os << "    val members: List<MLIRTypeID>,\n";
+  os << "    val name: MLIRStringAttr,\n";
+  os << "    val incomplete: Boolean,\n";
+  os << "    val packed: Boolean,\n";
   os << "    val kind: CIRRecordKind\n";
   os << ") : MLIRType\n";
 

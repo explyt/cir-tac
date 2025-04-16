@@ -260,7 +260,8 @@ static void serializeValueField(StringRef name, ValueType type,
     os << formatv("  }\n");
     return;
   }
-  case ValueType::EMPTY: llvm_unreachable("unexpected EMPTY in ValueField!");
+  case ValueType::EMPTY:
+    llvm_unreachable("unexpected EMPTY in ValueField!");
   }
 }
 
@@ -300,7 +301,8 @@ static void serializeResultField(StringRef name, ValueType type,
     os << formatv("  }\n");
     return;
   }
-  case ValueType::EMPTY: llvm_unreachable("unexpected EMPTY in ResultField!");
+  case ValueType::EMPTY:
+    llvm_unreachable("unexpected EMPTY in ResultField!");
   }
 }
 
@@ -927,7 +929,8 @@ import org.jacodb.impl.grpc.Setup)";
     aggregateOperationKotlin(op, serializedObj, opKind, serClass);
   }
   if (opKind == "Inst") {
-    serClass.addNoTranslatorCase("CIRAssignInst", "pOp.mergeFrom(this.rhv.asProtobuf())");
+    serClass.addNoTranslatorCase("CIRAssignInst",
+                                 "pOp.mergeFrom(this.rhv.asProtobuf())");
   }
 
   generateKotlinFile(serClass, os);

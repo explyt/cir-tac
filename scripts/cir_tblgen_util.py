@@ -2,8 +2,8 @@
 
 import os
 
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
 
 class CodeType(Enum):
@@ -25,16 +25,39 @@ CPP_PROTO_PREFIX = ["proto"]
 CPP_DECL_PREFIX = ["include", "cir-tac"]
 CPP_SRC_PREFIX = ["src"]
 KOTLIN_SRC_PREFIX = [
-    "jacodb-api-cir", "src", "main", "kotlin", "org", "jacodb", "api", "cir", "cfg"
+    "jacodb-api-cir",
+    "src",
+    "main",
+    "kotlin",
+    "org",
+    "jacodb",
+    "api",
+    "cir",
+    "cfg",
 ]
 KOTLIN_PROTO_PREFIX = ["jacodb-core-cir", "src", "main", "proto"]
 KOTLIN_BUILDER_PREFIX = [
-    "jacodb-core-cir", "src", "main", "kotlin", "org", "jacodb", "impl", "cfg",
-    "builder"
+    "jacodb-core-cir",
+    "src",
+    "main",
+    "kotlin",
+    "org",
+    "jacodb",
+    "impl",
+    "cfg",
+    "builder",
 ]
 KOTLIN_SERIALIZER_PREFIX = [
-    "jacodb-core-cir", "src", "main", "kotlin", "org", "jacodb", "impl", "cfg",
-    "serializer", "tblgenerated"
+    "jacodb-core-cir",
+    "src",
+    "main",
+    "kotlin",
+    "org",
+    "jacodb",
+    "impl",
+    "cfg",
+    "serializer",
+    "tblgenerated",
 ]
 
 
@@ -61,7 +84,9 @@ class TblgenFileInfo:
         self.path: str = os.path.join(*MAP_TYPE_TO_PATH_PREFIX[self.typ], self.name)
 
 
-def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[TblgenFileInfo]:
+def get_subcmd_cpp_file_infos(
+    subcmd, td_file, name, no_deser=False
+) -> list[TblgenFileInfo]:
     cpp_name = str.capitalize(name)
 
     files = []
@@ -98,7 +123,7 @@ def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[Tbl
             "{0}-deserializer-header".format(subcmd),
             td_file,
             "{0}Deserializer.h".format(cpp_name),
-            CodeType.CppDecl
+            CodeType.CppDecl,
         )
     )
     files.append(
@@ -106,13 +131,15 @@ def get_subcmd_cpp_file_infos(subcmd, td_file, name, no_deser=False) -> list[Tbl
             "{0}-deserializer-source".format(subcmd),
             td_file,
             "{0}Deserializer.cpp".format(cpp_name),
-            CodeType.CppSrc
+            CodeType.CppSrc,
         )
     )
     return files
 
 
-def get_subcmd_kotlin_file_infos(td_file, name, inc_proto=True, inc_builder=True) -> list[TblgenFileInfo]:
+def get_subcmd_kotlin_file_infos(
+    td_file, name, inc_proto=True, inc_builder=True
+) -> list[TblgenFileInfo]:
     files = []
     kotlin_name = str.capitalize(name)
 
@@ -121,7 +148,7 @@ def get_subcmd_kotlin_file_infos(td_file, name, inc_proto=True, inc_builder=True
             "gen-{0}-kotlin".format(name),
             td_file,
             "CIR{0}.kt".format(kotlin_name),
-            CodeType.KotlinSrc
+            CodeType.KotlinSrc,
         )
     )
 
@@ -131,7 +158,7 @@ def get_subcmd_kotlin_file_infos(td_file, name, inc_proto=True, inc_builder=True
                 "gen-{0}-kotlin-builder".format(name),
                 td_file,
                 "{0}.kt".format(kotlin_name),
-                CodeType.KotlinBuilder
+                CodeType.KotlinBuilder,
             )
         )
 
@@ -140,7 +167,7 @@ def get_subcmd_kotlin_file_infos(td_file, name, inc_proto=True, inc_builder=True
             "gen-{0}-proto-serializer-kotlin".format(name),
             td_file,
             "{0}Serializer.kt".format(kotlin_name),
-            CodeType.KotlinSerializer
+            CodeType.KotlinSerializer,
         )
     )
 
@@ -150,7 +177,7 @@ def get_subcmd_kotlin_file_infos(td_file, name, inc_proto=True, inc_builder=True
                 "gen-{0}-proto".format(name),
                 td_file,
                 "{0}.proto".format(name),
-                CodeType.KotlinProto
+                CodeType.KotlinProto,
             )
         )
     return files
@@ -163,9 +190,7 @@ def get_tblgen_file_infos_cpp() -> list[TblgenFileInfo]:
     file_infos += get_subcmd_cpp_file_infos(
         "gen-type-proto", "MLIRCIRTypes.td", "type", no_deser=True
     )
-    file_infos += get_subcmd_cpp_file_infos(
-        "gen-attr-proto", "MLIRCIRAttrs.td", "attr"
-    )
+    file_infos += get_subcmd_cpp_file_infos("gen-attr-proto", "MLIRCIRAttrs.td", "attr")
     return file_infos
 
 
@@ -177,19 +202,14 @@ def get_tblgen_file_infos_kotlin() -> list[TblgenFileInfo]:
     file_infos += get_subcmd_kotlin_file_infos("MLIRCIRTypes.td", "type")
     file_infos += get_subcmd_kotlin_file_infos("MLIRCIRAttrs.td", "attr")
     file_infos.append(
-        TblgenFileInfo(
-            "gen-op-proto",
-            "CIROps.td",
-            "op.proto",
-            CodeType.KotlinProto
-        )
+        TblgenFileInfo("gen-op-proto", "CIROps.td", "op.proto", CodeType.KotlinProto)
     )
     file_infos.append(
         TblgenFileInfo(
             "gen-op-proto-serializer-kotlin",
             "CIROps.td",
             "OpSerializer.kt",
-            CodeType.KotlinSerializer
+            CodeType.KotlinSerializer,
         )
     )
     return file_infos

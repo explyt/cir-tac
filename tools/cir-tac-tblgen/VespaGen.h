@@ -40,9 +40,7 @@ struct ParamData {
     return normalizeFieldName(llvm::convertToCamelFromSnakeCase(name));
   }
 
-  std::string getDeserName() const {
-    return formatv("{0}Deser", name);
-  }
+  std::string getDeserName() const { return formatv("{0}Deser", name); }
 
   std::string getProtoFieldName() const {
     return llvm::convertToCamelFromSnakeCase(name, true);
