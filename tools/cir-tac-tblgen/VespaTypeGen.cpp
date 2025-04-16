@@ -318,8 +318,8 @@ import org.jacodb.impl.grpc.Type)";
   const char *const defHedClose = R"()";
 
   const char *const structSerializer = R"(
-for ((index, member) in this.members.withIndex()) {
-  pTyp.setMembers(index, member.asProtobuf())
+for (member in this.members) {
+  pTyp.addMembers(member.asProtobuf())
 }
 pTyp.setPacked(this.packed)
 pTyp.setIncomplete(this.incomplete)

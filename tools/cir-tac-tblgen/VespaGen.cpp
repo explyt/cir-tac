@@ -781,8 +781,8 @@ std::string serializeArrayKotlin(const ParamData &p, llvm::StringRef serObj,
                                  llvm::StringRef elem,
                                  llvm::StringRef field = "") {
   const char *const serializer = R"(
-for ((index, value) in {2}.withIndex()) {
-    {0}.set{1}(index, {3})
+for (value in {2}) {
+    {0}.add{1}({3})
 })";
 
   auto innerSer = serializeElementKotlin(p, "value");
@@ -794,11 +794,11 @@ for ((index, value) in {2}.withIndex()) {
 std::string serializeVarOfVarKotlin(const ParamData &p, llvm::StringRef serObj,
                                     llvm::StringRef elem) {
   const char *const serializerStart = R"(
-for ((indexOuter, valueOuter) in {0}.withIndex()) {
+for (valueOuter in {0}) {
     val outerList = {1}.newBuilder())";
 
   const char *const serializerEnd = R"(
-    {0}.set{1}(indexOuter, outerList.build())
+    {0}.add{1}(outerList.build())
 })";
 
   auto typ = p.cppType;
