@@ -927,7 +927,7 @@ import org.jacodb.impl.grpc.Setup)";
     aggregateOperationKotlin(op, serializedObj, opKind, serClass);
   }
   if (opKind == "Inst") {
-    serClass.addNoTranslatorCase("CIRAssignInst", "this.rhv.asProtobuf()");
+    serClass.addNoTranslatorCase("CIRAssignInst", "pOp.mergeFrom(this.rhv.asProtobuf())");
   }
 
   generateKotlinFile(serClass, os);
