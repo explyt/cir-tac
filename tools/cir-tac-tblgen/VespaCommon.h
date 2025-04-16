@@ -74,8 +74,7 @@ protected:
 
   void printCodeBlock(raw_indented_ostream &os, llvm::StringRef code,
                       int indent);
-  void printCodeBlock(llvm::raw_ostream &os, llvm::StringRef code,
-                      int indent);
+  void printCodeBlock(llvm::raw_ostream &os, llvm::StringRef code, int indent);
 
   void addCase(SwitchCase c) { cases.push_back(c); }
 

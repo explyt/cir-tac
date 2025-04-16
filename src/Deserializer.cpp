@@ -286,11 +286,10 @@ void Deserializer::defineIncompleteStruct(ModuleInfo &mInfo,
   auto pStruct = pTy.cir_struct_type();
   mlir::StringAttr nameAttr;
   if (pStruct.has_name()) {
-    nameAttr = AttrDeserializer::deserializeMLIRStringAttr(
-      mInfo, pStruct.name());
+    nameAttr =
+        AttrDeserializer::deserializeMLIRStringAttr(mInfo, pStruct.name());
   }
-  auto recordKind =
-      EnumDeserializer::deserializeCIRRecordKind(pStruct.kind());
+  auto recordKind = EnumDeserializer::deserializeCIRRecordKind(pStruct.kind());
   auto incompleteStruct =
       cir::StructType::get(&mInfo.ctx, nameAttr, recordKind);
   mInfo.types[pTy.id().id()] = incompleteStruct;
@@ -304,7 +303,7 @@ void Deserializer::defineCompleteStruct(ModuleInfo &mInfo,
   mlir::StringAttr nameAttr;
   if (pStruct.has_name()) {
     nameAttr =
-      AttrDeserializer::deserializeMLIRStringAttr(mInfo, pStruct.name());
+        AttrDeserializer::deserializeMLIRStringAttr(mInfo, pStruct.name());
   }
   auto pRecordKind = pStruct.kind();
   auto recordKind = EnumDeserializer::deserializeCIRRecordKind(pRecordKind);

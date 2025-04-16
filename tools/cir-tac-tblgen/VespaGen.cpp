@@ -98,9 +98,9 @@ inline static std::set<llvm::StringRef> primitiveSerializable = {
 };
 
 inline static std::set<llvm::StringRef> stringSerializable = {
-  "APInt",
-  "llvm::APInt",
-  "llvm::StringRef",
+    "APInt",
+    "llvm::APInt",
+    "llvm::StringRef",
 };
 
 inline static std::set<llvm::StringRef> settable = {

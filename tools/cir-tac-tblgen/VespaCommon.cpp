@@ -10,15 +10,18 @@
 using namespace vespa;
 
 void AbstractSwitchSource::printCodeBlock(raw_indented_ostream &os,
-                                          llvm::StringRef code, int indent = 2) {
+                                          llvm::StringRef code,
+                                          int indent = 2) {
   os.indent(indent);
   os.printReindented(code);
   os.unindent();
 }
 
 void AbstractSwitchSource::printCodeBlock(llvm::raw_ostream &os,
-                                          llvm::StringRef code, int indent = 2) {
-  if (code.empty()) return;
+                                          llvm::StringRef code,
+                                          int indent = 2) {
+  if (code.empty())
+    return;
   mlir::raw_indented_ostream indentOs(os);
   indentOs << "\n";
   printCodeBlock(indentOs, code, indent);
@@ -139,7 +142,8 @@ const char *const serializerFuncEnd = R"(
     return {0}.build()
 })";
 
-std::string KotlinProtoSerializer::getTypeWithoutNamespace(llvm::StringRef rawName) {
+std::string
+KotlinProtoSerializer::getTypeWithoutNamespace(llvm::StringRef rawName) {
   if (dropNamespace) {
     if (rawName.starts_with("MLIR"))
       rawName = rawName.drop_front(4);
