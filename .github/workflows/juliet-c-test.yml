@@ -19,7 +19,5 @@ jobs:
       CLANGIR_REPOSITORY: ${{ inputs.CLANGIR_REPOSITORY }}
       CLANGIR_VERSION: ${{ inputs.CLANGIR_VERSION }}
       TEST_REPOSITORY: "explyt/juliet-c"
-      TEST_COMMIT: "juliet-db-flat"
+      TEST_COMMIT: "full-flat"
       SEARCH_FOR_CIR: true
-    secrets:
-      TEST_SECRET: ${{ secrets.JULIETC }}

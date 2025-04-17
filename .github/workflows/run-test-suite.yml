@@ -23,9 +23,6 @@ on:
         description: "If set, runner searches for precompiled CIR files"
         type: boolean
         default: false
-    secrets:
-      TEST_SECRET:
-        description: "Token for accessing the test repository"
 
 env:
   TEST_DIRECTORY: "test-suite"
@@ -47,7 +44,6 @@ jobs:
     - name: Checkout test repository
       uses: actions/checkout@v4
       with:
-        ssh-key: ${{ secrets.TEST_SECRET }}
         ref: ${{ inputs.TEST_COMMIT }}
         repository: ${{ inputs.TEST_REPOSITORY }}
         path: ${{ env.TEST_DIRECTORY }}
