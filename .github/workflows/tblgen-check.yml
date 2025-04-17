@@ -13,7 +13,7 @@ on:
         type: string
 
 env:
-  TEST_DIR: "./test"
+  TEST_DIR: "tblgen_files_check"
 
 jobs:
   build:
