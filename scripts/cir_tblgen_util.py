@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import os
-
 from dataclasses import dataclass
 from enum import Enum
 
