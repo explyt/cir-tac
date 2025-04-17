@@ -16,7 +16,7 @@ def main():
     dir2 = os.path.expanduser(sys.argv[2])
 
     res = 0
-    for file_info in cir_tblgen_util.get_tblgen_file_infos():
+    for file_info in cir_tblgen_util.get_tblgen_file_infos_cpp():
         file1 = os.path.join(dir1, file_info.path)
         file2 = os.path.join(dir2, file_info.path)
         if not filecmp.cmp(file1, file2, shallow=False):
