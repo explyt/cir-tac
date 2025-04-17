@@ -50,6 +50,14 @@ jobs:
         echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
         brew install protobuf ninja
 
+    - name: Create dirs for tblgen file copies
+      run: |
+        mkdir ${{ env.TEST_DIR }}
+        mkdir ${{ env.TEST_DIR }}/proto
+        mkdir ${{ env.TEST_DIR }}/include
+        mkdir ${{ env.TEST_DIR }}/include/cir-tac
+        mkdir ${{ env.TEST_DIR }}/src
+
     - name: Generate proto-files
       run: ${{ github.workspace }}/scripts/build_proto_files.py "clangir" ${{ github.workspace }} ${{ env.TEST_DIR }} cpp
 
