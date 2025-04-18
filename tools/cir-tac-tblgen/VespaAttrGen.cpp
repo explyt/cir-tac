@@ -567,9 +567,9 @@ static bool emitAttrProtoSerializerSource(const RecordKeeper &records,
 }
 
 static bool emitAttrKotlin(const RecordKeeper &records, raw_ostream &os) {
-  os << autogenMessage;
-  os << "\n";
   os << jacoDBLicense;
+  os << "\n";
+  os << autogenMessage;
   os << "\n";
   os << "package org.jacodb.api.cir.cfg\n";
   os << "\n";
@@ -698,9 +698,8 @@ static bool emitAttrKotlin(const RecordKeeper &records, raw_ostream &os) {
 
 static bool emitAttrKotlinBuilder(const RecordKeeper &records,
                                   raw_ostream &os) {
-  os << autogenMessage;
-  os << "\n";
   os << jacoDBLicense;
+  os << autogenMessage;
   os << "\n";
   os << "package org.jacodb.impl.cfg.builder\n";
   os << "\n";
