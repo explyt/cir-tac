@@ -19,4 +19,4 @@ jobs:
       CLANGIR_REPOSITORY: ${{ inputs.CLANGIR_REPOSITORY }}
       CLANGIR_VERSION: ${{ inputs.CLANGIR_VERSION }}
       TEST_REPOSITORY: "explyt/GSAC"
-      TEST_COMMIT: "DanielELog/fix_macos_build"
+      TEST_COMMIT: "macos_version"
