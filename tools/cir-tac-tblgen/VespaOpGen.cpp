@@ -873,6 +873,7 @@ static bool emitOpSerializerKotlin(const RecordKeeper &records,
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
 import org.jacodb.api.cir.cfg.*
+import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.cfg.serializer.*
 import org.jacodb.impl.grpc.Op
 import org.jacodb.impl.grpc.Setup)";
@@ -910,9 +911,8 @@ static bool emitOpSwitchSerializerKotlin(const std::vector<Operator> &records,
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
 import org.jacodb.api.cir.cfg.*
-import org.jacodb.impl.cfg.serializer.*
-import org.jacodb.impl.grpc.Op
-import org.jacodb.impl.grpc.Setup)";
+import org.jacodb.api.cir.cfg.tblgenerated.*
+import org.jacodb.impl.grpc.Op)";
 
   const char *const defHedClose = R"()";
 
@@ -979,7 +979,9 @@ static bool emitOpKotlinExprs(const RecordKeeper &records, raw_ostream &os) {
   os << "\n";
   os << autogenMessage;
   os << "\n";
-  os << "package org.jacodb.api.cir.cfg\n";
+  os << "package org.jacodb.api.cir.cfg.tblgenerated\n";
+  os << "\n";
+  os << "import org.jacodb.api.cir.cfg.*\n";
   os << "\n";
 
   auto defs = getRequestedOpDefinitions(records);
@@ -1059,8 +1061,9 @@ static bool emitOpKotlinInst(const RecordKeeper &records, raw_ostream &os) {
   os << "\n";
   os << autogenMessage;
   os << "\n";
-  os << "package org.jacodb.api.cir.cfg\n";
+  os << "package org.jacodb.api.cir.cfg.tblgenerated\n";
   os << "\n";
+  os << "import org.jacodb.api.cir.cfg.*\n";
   os << "import org.jacodb.api.common.cfg.*\n";
   os << "\n";
 
@@ -1164,12 +1167,13 @@ static bool emitOpKotlinExprsBuilder(const RecordKeeper &records,
                                      raw_ostream &os) {
   os << jacoDBLicense;
   os << autogenMessage;
-  os << "\n";
+  const char *const header = R"(
+package org.jacodb.impl.cfg.builder.tblgenerated
 
-  os << "package org.jacodb.impl.cfg.builder\n";
-  os << "\n";
-  os << "import org.jacodb.api.cir.cfg.*\n";
-  os << "import org.jacodb.impl.grpc.Op\n";
+import org.jacodb.api.cir.cfg.tblgenerated.*
+import org.jacodb.impl.cfg.builder.*
+import org.jacodb.impl.grpc.Op)";
+  os << header;
   os << "\n";
 
   auto defs = getRequestedOpDefinitions(records);
@@ -1281,11 +1285,14 @@ static bool emitOpKotlinInstBuilder(const RecordKeeper &records,
                                     raw_ostream &os) {
   os << jacoDBLicense;
   os << autogenMessage;
-  os << "\n";
-  os << "package org.jacodb.impl.cfg.builder\n";
-  os << "\n";
-  os << "import org.jacodb.api.cir.cfg.*\n";
-  os << "import org.jacodb.impl.grpc.Op\n";
+  const char *const header = R"(
+package org.jacodb.impl.cfg.builder.tblgenerated
+
+import org.jacodb.api.cir.cfg.*
+import org.jacodb.api.cir.cfg.tblgenerated.*
+import org.jacodb.impl.cfg.builder.*
+import org.jacodb.impl.grpc.Op)";
+  os << header;
   os << "\n";
 
   auto defs = getRequestedOpDefinitions(records);

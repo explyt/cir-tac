@@ -570,11 +570,13 @@ static bool emitAttrKotlin(const RecordKeeper &records, raw_ostream &os) {
   os << jacoDBLicense;
   os << "\n";
   os << autogenMessage;
-  os << "\n";
-  os << "package org.jacodb.api.cir.cfg\n";
-  os << "\n";
-  os << "import java.math.BigDecimal\n";
-  os << "import java.math.BigInteger\n";
+  const char *const header = R"(
+package org.jacodb.api.cir.cfg.tblgenerated
+
+import org.jacodb.api.cir.cfg.MLIRAPFloat
+import org.jacodb.api.cir.cfg.MLIRTypeID
+import java.math.BigInteger)";
+  os << header;
   os << "\n";
 
   auto mlirDefs = records.getAllDerivedDefinitionsIfDefined("Builtin_Attr");
@@ -700,14 +702,15 @@ static bool emitAttrKotlinBuilder(const RecordKeeper &records,
                                   raw_ostream &os) {
   os << jacoDBLicense;
   os << autogenMessage;
-  os << "\n";
-  os << "package org.jacodb.impl.cfg.builder\n";
-  os << "\n";
-  os << "import org.jacodb.api.cir.cfg.*\n";
-  os << "import org.jacodb.impl.grpc.Attr\n";
-  os << "\n";
-  os << "import java.math.BigDecimal\n";
-  os << "import java.math.BigInteger\n";
+  const char *const header = R"(
+package org.jacodb.impl.cfg.builder.tblgenerated
+
+import org.jacodb.api.cir.cfg.tblgenerated.*
+import org.jacodb.impl.cfg.builder.*
+import org.jacodb.impl.grpc.Attr
+
+import java.math.BigInteger)";
+  os << header;
   os << "\n";
 
   auto mlirDefs = records.getAllDerivedDefinitionsIfDefined("Builtin_Attr");
@@ -1183,7 +1186,7 @@ static bool emitAttrSerializerKotlin(const RecordKeeper &records,
   const char *const defHedOpen = R"(
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
-import org.jacodb.api.cir.cfg.*
+import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.cfg.serializer.*
 import org.jacodb.impl.grpc.Attr)";
 

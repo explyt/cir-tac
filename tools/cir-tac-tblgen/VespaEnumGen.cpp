@@ -390,7 +390,7 @@ static bool emitEnumSerializerKotlin(const RecordKeeper &records,
   const char *const header = R"(
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
-import org.jacodb.api.cir.cfg.*
+import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.grpc.Enum)";
 
   os << autogenMessage;
@@ -421,7 +421,7 @@ static bool emitEnumKotlin(const RecordKeeper &records, raw_ostream &os) {
   os << "\n";
   os << autogenMessage;
   os << "\n";
-  os << "package org.jacodb.api.cir.cfg\n";
+  os << "package org.jacodb.api.cir.cfg.tblgenerated\n";
   os << "\n";
 
   auto defs = records.getAllDerivedDefinitionsIfDefined("EnumAttrInfo");
@@ -459,11 +459,12 @@ static bool emitEnumKotlinBuilder(const RecordKeeper &records,
                                   raw_ostream &os) {
   os << jacoDBLicense;
   os << autogenMessage;
-  os << "\n";
-  os << "package org.jacodb.impl.cfg.builder\n";
-  os << "\n";
-  os << "import org.jacodb.api.cir.cfg.*\n";
-  os << "import org.jacodb.impl.grpc.Enum\n";
+  const char *const header = R"(
+package org.jacodb.impl.cfg.builder.tblgenerated
+
+import org.jacodb.api.cir.cfg.tblgenerated.*
+import org.jacodb.impl.grpc.Enum)";
+  os << header;
   os << "\n";
 
   auto defs = records.getAllDerivedDefinitionsIfDefined("EnumAttrInfo");
