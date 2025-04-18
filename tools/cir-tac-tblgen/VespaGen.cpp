@@ -916,11 +916,13 @@ void vespa::buildParameter(mlir::tblgen::AttrOrTypeParameter &p,
 void vespa::generateCodeFile(llvm::ArrayRef<AbstractSwitchSource *> sources,
                              bool disableClang, bool addLicense, bool emitDecl,
                              llvm::raw_ostream &os) {
+  if (addLicense) {
+    os << jacoDBLicense;
+    os << "\n";
+  }
   os << autogenMessage;
   if (disableClang)
     os << clangOff;
-  if (addLicense)
-    os << jacoDBLicense;
 
   for (auto *source : sources) {
     if (emitDecl)

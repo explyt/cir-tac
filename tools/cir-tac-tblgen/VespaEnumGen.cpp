@@ -417,9 +417,9 @@ import org.jacodb.impl.grpc.Enum)";
 }
 
 static bool emitEnumKotlin(const RecordKeeper &records, raw_ostream &os) {
-  os << autogenMessage;
-  os << "\n";
   os << jacoDBLicense;
+  os << "\n";
+  os << autogenMessage;
   os << "\n";
   os << "package org.jacodb.api.cir.cfg\n";
   os << "\n";
@@ -457,9 +457,8 @@ static bool emitEnumKotlin(const RecordKeeper &records, raw_ostream &os) {
 
 static bool emitEnumKotlinBuilder(const RecordKeeper &records,
                                   raw_ostream &os) {
-  os << autogenMessage;
-  os << "\n";
   os << jacoDBLicense;
+  os << autogenMessage;
   os << "\n";
   os << "package org.jacodb.impl.cfg.builder\n";
   os << "\n";
