@@ -312,6 +312,7 @@ static bool emitTypeSerializerKotlin(const RecordKeeper &records,
 package org.jacodb.impl.cfg.serializer.tblgenerated
 
 import org.jacodb.api.cir.cfg.*
+import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.cfg.serializer.*
 import org.jacodb.impl.grpc.Type)";
 
@@ -351,8 +352,12 @@ static bool emitTypeKotlin(const RecordKeeper &records, llvm::raw_ostream &os) {
   os << jacoDBLicense;
   os << "\n";
   os << autogenMessage;
-  os << "\n";
-  os << "package org.jacodb.api.cir.cfg\n";
+  const char *const header = R"(
+package org.jacodb.api.cir.cfg.tblgenerated
+
+import org.jacodb.api.cir.cfg.MLIRType
+import org.jacodb.api.cir.cfg.MLIRTypeID)";
+  os << header;
   os << "\n";
 
   auto defs = getDefs(records);
@@ -391,11 +396,14 @@ static bool emitTypeKotlinBuilder(const RecordKeeper &records,
                                   llvm::raw_ostream &os) {
   os << jacoDBLicense;
   os << autogenMessage;
-  os << "\n";
-  os << "package org.jacodb.impl.cfg.builder\n";
-  os << "\n";
-  os << "import org.jacodb.api.cir.cfg.*\n";
-  os << "import org.jacodb.impl.grpc.Type\n";
+  const char *const header = R"(
+package org.jacodb.impl.cfg.builder.tblgenerated
+
+import org.jacodb.api.cir.cfg.*
+import org.jacodb.api.cir.cfg.tblgenerated.*
+import org.jacodb.impl.cfg.builder.*
+import org.jacodb.impl.grpc.Type)";
+  os << header;
   os << "\n";
 
   auto defs = records.getAllDerivedDefinitionsIfDefined("TypeDef");

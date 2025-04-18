@@ -33,6 +33,7 @@ KOTLIN_SRC_PREFIX = [
     "api",
     "cir",
     "cfg",
+    "tblgenerated",
 ]
 KOTLIN_PROTO_PREFIX = ["jacodb-core-cir", "src", "main", "proto"]
 KOTLIN_BUILDER_PREFIX = [
@@ -45,6 +46,7 @@ KOTLIN_BUILDER_PREFIX = [
     "impl",
     "cfg",
     "builder",
+    "tblgenerated",
 ]
 KOTLIN_SERIALIZER_PREFIX = [
     "jacodb-core-cir",
