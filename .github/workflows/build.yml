@@ -5,11 +5,11 @@ on:
     inputs:
       CLANGIR_REPOSITORY:
         description: "Name of ClangIR repository"
-        required: true
+        default: "explyt/clangir"
         type: string
       CLANGIR_VERSION:
         description: "ClangIR version to use"
-        required: true
+        default: "21.03.2025-rc"
         type: string
 
 jobs:
