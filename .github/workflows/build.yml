@@ -97,8 +97,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: cir-tac-${{ matrix.os }}-${{ runner.arch }}
-        path: |
-          main/build/tools/
+        path:  |
+          main/build/tools/cir-ser-proto/cir-ser-proto
+          main/build/tools/cir-deser-proto/cir-deser-proto
         retention-days: 1
 
   build-ubuntu-legacy:
