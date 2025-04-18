@@ -167,16 +167,14 @@ int main(int argc, char *argv[]) {
     }
     // we do not generate serializers/deserializers for other attribute types
     // saving them in their printed form to preserve all information
-    else {
-      std::string strValue;
-      llvm::raw_string_ostream os(strValue);
-      attr.getValue().print(os);
-      MLIRRawNamedAttr pRawAttr;
-      *pRawAttr.mutable_name() =
-          attributeSerializer.serializeMLIRStringAttr(attr.getName());
-      *pRawAttr.mutable_raw_value() = strValue;
-      *pModule.add_raw_attrs() = pRawAttr;
-    }
+    std::string strValue;
+    llvm::raw_string_ostream os(strValue);
+    attr.getValue().print(os);
+    MLIRRawNamedAttr pRawAttr;
+    *pRawAttr.mutable_name() =
+        attributeSerializer.serializeMLIRStringAttr(attr.getName());
+    *pRawAttr.mutable_raw_value() = strValue;
+    *pModule.add_raw_attrs() = pRawAttr;
   }
 
   std::string binary;

@@ -476,10 +476,9 @@ mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
   auto mInfo = ModuleInfo(ctx, builder, dataLayout, newModule);
 
   aggregateTypes(mInfo, pModule);
-  for (const auto &pAttr : pModule.attributes()) {
-    auto namedAttr = AttrDeserializer::deserializeMLIRNamedAttr(mInfo, pAttr);
-    newModule->setAttr(namedAttr.getName(), namedAttr.getValue());
-  }
+  // right now, all attributes are saved in their raw stringified form,
+  // including serializeable attributes; that is to preserve order of their
+  // appearance without adding new messages and abstractions
   for (const auto &pRawAttr : pModule.raw_attrs()) {
     mlir::ParserConfig config(&ctx);
     auto desValue = mlir::parseAttribute(pRawAttr.raw_value(), &ctx);
