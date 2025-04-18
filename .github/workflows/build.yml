@@ -1,18 +1,16 @@
 name: Build
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-  schedule:
-    - cron: '0 12 * * 1,4'
   workflow_call:
-
-env:
-  CLANGIR_REPOSITORY: "explyt/clangir"
-  CLANGIR_VERSION: "27.11.2024"
+    inputs:
+      CLANGIR_REPOSITORY:
+        description: "Name of ClangIR repository"
+        required: true
+        type: string
+      CLANGIR_VERSION:
+        description: "ClangIR version to use"
+        required: true
+        type: string
 
 jobs:
   build:
@@ -26,8 +24,8 @@ jobs:
     - name: Checkout clangir repo
       uses: actions/checkout@v4
       with:
-        ref: ${{ env.CLANGIR_VERSION }}
-        repository: ${{ env.CLANGIR_REPOSITORY }}
+        ref: ${{ inputs.CLANGIR_VERSION }}
+        repository: ${{ inputs.CLANGIR_REPOSITORY }}
         path: clangir
 
     - name: Install Packages (Linux)
@@ -74,7 +72,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ${{ matrix.os }}-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ${{ matrix.os }}-${{ inputs.CLANGIR_REPOSITORY }}-${{ inputs.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |
@@ -99,7 +97,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: cir-tac-${{ matrix.os }}-${{ runner.arch }}
-        path: main/build/tools/cir-ser-proto/cir-ser-proto
+        path:  |
+          main/build/tools/cir-ser-proto/cir-ser-proto
+          main/build/tools/cir-deser-proto/cir-deser-proto
         retention-days: 1
 
   build-ubuntu-legacy:
@@ -110,8 +110,8 @@ jobs:
     - name: Checkout clangir repo
       uses: actions/checkout@v4
       with:
-        ref: ${{ env.CLANGIR_VERSION }}
-        repository: ${{ env.CLANGIR_REPOSITORY }}
+        ref: ${{ inputs.CLANGIR_VERSION }}
+        repository: ${{ inputs.CLANGIR_REPOSITORY }}
         path: clangir
 
     - name: Install Packages
@@ -161,7 +161,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: clangir/llvm/build
-        key: ubuntu-20.04-${{ env.CLANGIR_REPOSITORY }}-${{ env.CLANGIR_VERSION }}-clangir-build
+        key: ubuntu-20.04-${{ inputs.CLANGIR_REPOSITORY }}-${{ inputs.CLANGIR_VERSION }}-clangir-build
 
     - name: Build clangir
       run: |

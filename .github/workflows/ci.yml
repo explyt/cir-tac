@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 1,4'
+  workflow_call:
+
+env:
+  CLANGIR_REPOSITORY: "explyt/clangir"
+  CLANGIR_VERSION: "21.03.2025-rc"
+
+jobs:
+  env-setup:
+    runs-on: macos-latest
+    outputs:
+      clangir-repository: ${{ steps.set.outputs.clangir-repository }}
+      clangir-version: ${{ steps.set.outputs.clangir-version }}
+    steps:
+    - name: Set ClangIR version identification
+      id: set
+      run: |
+        echo "clangir-repository=${{ env.CLANGIR_REPOSITORY }}" >> $GITHUB_OUTPUT
+        echo "clangir-version=${{ env.CLANGIR_VERSION }}" >> $GITHUB_OUTPUT
+
+  build-clangir:
+    needs: env-setup
+    uses: ./.github/workflows/build.yml
+    with:
+      CLANGIR_REPOSITORY: ${{ needs.env-setup.outputs.clangir-repository }}
+      CLANGIR_VERSION: ${{ needs.env-setup.outputs.clangir-version }}
+
+  run-gsac-tests:
+    needs: [env-setup, build-clangir]
+    uses: ./.github/workflows/gsac-test.yml
+    with:
+      CLANGIR_REPOSITORY: ${{ needs.env-setup.outputs.clangir-repository }}
+      CLANGIR_VERSION: ${{ needs.env-setup.outputs.clangir-version }}
+
+  run-juliet-tests:
+    if: github.event_name == 'workflow_dispatch'
+    needs: [env-setup, build-clangir]
+    uses: ./.github/workflows/juliet-c-test.yml
+    with:
+      CLANGIR_REPOSITORY: ${{ needs.env-setup.outputs.clangir-repository }}
+      CLANGIR_VERSION: ${{ needs.env-setup.outputs.clangir-version }}

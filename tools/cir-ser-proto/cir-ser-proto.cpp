@@ -3,7 +3,6 @@
 #include "cir-tac/TypeSerializer.h"
 #include "cir-tac/Util.h"
 #include "proto/model.pb.h"
-#include "llvm/Support/raw_ostream.h"
 
 #include <clang/CIR/Dialect/IR/CIRDialect.h>
 #include <clang/CIR/Passes.h>
@@ -11,7 +10,7 @@
 #include <llvm/ADT/TypeSwitch.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
-#include <mlir/Dialect/DLTI/DLTIDialect.h.inc>
+#include <llvm/Support/raw_ostream.h>
 #include <mlir/Dialect/LLVMIR/LLVMDialect.h>
 #include <mlir/IR/BuiltinOps.h>
 #include <mlir/IR/Dialect.h>
@@ -21,6 +20,8 @@
 #include <mlir/IR/Types.h>
 #include <mlir/IR/Visitors.h>
 #include <mlir/Parser/Parser.h>
+
+#include <stdexcept>
 
 using namespace protocir;
 
@@ -32,6 +33,10 @@ int main(int argc, char *argv[]) {
   context.appendDialectRegistry(registry);
   context.allowUnregisteredDialects();
 
+  if (argc < 2) {
+    throw std::runtime_error("no clangir source file path was given");
+  }
+
   std::filesystem::path relPath = argv[1];
 
   auto absPath = std::filesystem::absolute(relPath);
@@ -42,6 +47,9 @@ int main(int argc, char *argv[]) {
   mlir::ParserConfig parseConfig(&context);
   auto module =
       mlir::parseSourceFile<mlir::ModuleOp>(relPath.c_str(), parseConfig);
+  if (module.get() == nullptr) {
+    throw std::runtime_error("Module was parsed incorrectly! Aborting...");
+  }
   MLIRModule pModule;
   MLIRModuleID pModuleID;
   std::string moduleId = (*module).getName().value_or("").str();
