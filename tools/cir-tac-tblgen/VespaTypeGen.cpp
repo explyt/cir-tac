@@ -324,7 +324,10 @@ for (member in this.members) {
 pTyp.setPacked(this.packed)
 pTyp.setIncomplete(this.incomplete)
 pTyp.setKind(this.kind.asProtobuf())
-pTyp.setName(this.name.asProtobuf()))";
+pTyp.setName(this.name.asProtobuf())
+if (this.rawAst != null) {
+    pTyp.setRawAst(this.rawAst)
+})";
 
   llvm::StringRef serializedObj = "pTyp";
 
@@ -377,7 +380,8 @@ static bool emitTypeKotlin(const RecordKeeper &records, llvm::raw_ostream &os) {
   os << "    val name: MLIRStringAttr,\n";
   os << "    val incomplete: Boolean,\n";
   os << "    val packed: Boolean,\n";
-  os << "    val kind: CIRRecordKind\n";
+  os << "    val kind: CIRRecordKind\n",
+  os << "    val rawAst: String?,\n";
   os << ") : MLIRType\n";
 
   return false;
@@ -443,6 +447,7 @@ static bool emitTypeKotlinBuilder(const RecordKeeper &records,
   os << "        type.incomplete,\n";
   os << "        type.packed,\n";
   os << "        buildCIRRecordKind(type.kind),\n";
+  os << "        if (type.hasRawAst()) type.rawAst else null,\n";
   os << "    )\n";
 
   return false;
