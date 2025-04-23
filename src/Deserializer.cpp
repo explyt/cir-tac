@@ -476,15 +476,9 @@ mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
   auto mInfo = ModuleInfo(ctx, builder, dataLayout, newModule);
 
   aggregateTypes(mInfo, pModule);
-  // right now, all attributes are saved in their raw stringified form,
-  // including serializeable attributes; that is to preserve order of their
-  // appearance without adding new messages and abstractions
-  for (const auto &pRawAttr : pModule.raw_attrs()) {
-    mlir::ParserConfig config(&ctx);
-    auto desValue = mlir::parseAttribute(pRawAttr.raw_value(), &ctx);
-    newModule->setAttr(
-        AttrDeserializer::deserializeMLIRStringAttr(mInfo, pRawAttr.name()),
-        desValue);
+  for (const auto &pAttr : pModule.attributes().list()) {
+    auto desValue = AttrDeserializer::deserializeMLIRNamedAttr(mInfo, pAttr);
+    newModule->setAttr(desValue.getName(), desValue.getValue());
   }
   newModule->setLoc(
       AttrDeserializer::deserializeMLIRLocation(mInfo, pModule.loc()));
@@ -496,7 +490,7 @@ mlir::ModuleOp Deserializer::deserializeModule(mlir::MLIRContext &ctx,
     deserializeFunc(mInfo, pFunc);
   }
 
-  for (const auto &pOp : pModule.op_order()) {
+  for (const auto &pOp : pModule.op_order().list()) {
     if (pOp.has_function()) {
       auto &funcId = pOp.function().id();
       assert(mInfo.funcs.count(funcId) &&

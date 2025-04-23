@@ -3,16 +3,29 @@
 
 #include "cir-tac/AttrDeserializer.h"
 #include "cir-tac/EnumDeserializer.h"
+#include "mlir/IR/Attributes.h"
 #include "proto/attr.pb.h"
 
 #include <llvm/ADT/TypeSwitch.h>
+#include <mlir/AsmParser/AsmParser.h>
 
 using namespace protocir;
 using mlir::Attribute;
 
 mlir::NamedAttribute AttrDeserializer::deserializeMLIRNamedAttr(ModuleInfo &mInfo, MLIRNamedAttr pAttr) {
   auto nameDeser = AttrDeserializer::deserializeMLIRStringAttr(mInfo, pAttr.name());
-  auto valueDeser = AttrDeserializer::deserializeMLIRAttribute(mInfo, pAttr.value());
+  mlir::Attribute valueDeser;
+  switch (pAttr.value_case()) {
+    case (MLIRNamedAttr::ValueCase::kValueAttr):
+      valueDeser = AttrDeserializer::deserializeMLIRAttribute(mInfo, pAttr.value_attr());
+      break;
+    case (MLIRNamedAttr::ValueCase::kRawAttr):
+      valueDeser = mlir::parseAttribute(pAttr.raw_attr(), &mInfo.ctx);
+      break;
+    case (MLIRNamedAttr::ValueCase::VALUE_NOT_SET):
+      llvm_unreachable("NYI!");
+      break;
+  }
   return mlir::NamedAttribute(nameDeser, valueDeser);
 }
 

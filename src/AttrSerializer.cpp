@@ -366,7 +366,16 @@ MLIRUnitAttr AttributeSerializer::serializeMLIRUnitAttr(mlir::UnitAttr attr) {
 MLIRNamedAttr AttributeSerializer::serializeMLIRNamedAttr(mlir::NamedAttribute attr) {
   MLIRNamedAttr serialized;
   *serialized.mutable_name() = serializeMLIRStringAttr(attr.getName());
-  *serialized.mutable_value() = serializeMLIRAttribute(attr.getValue());
+  if (attr.getValue().getDialect().getNamespace() == "cir") {
+    *serialized.mutable_value_attr() = serializeMLIRAttribute(attr.getValue());
+    return serialized;
+  }
+  // we do not generate serializers/deserializers for other attribute types
+  // saving them in their printed form to preserve all information
+  std::string strValue;
+  llvm::raw_string_ostream os(strValue);
+  attr.getValue().print(os);
+  *serialized.mutable_raw_attr() = strValue;
   return serialized;
 }
 

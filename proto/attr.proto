@@ -122,7 +122,10 @@ message MLIRUnitAttr {
 
 message MLIRNamedAttr {
   MLIRStringAttr name = 1;
-  MLIRAttribute value = 2;
+  oneof value {
+    MLIRAttribute value_attr = 2;
+    string raw_attr = 3;
+  }
 }
 
 message MLIRFlatSymbolRefAttr {

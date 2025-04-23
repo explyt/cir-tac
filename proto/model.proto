@@ -36,11 +36,6 @@ message CIRGlobal {
   MLIRLocation loc = 4;
 }
 
-message MLIRRawNamedAttr {
-  MLIRStringAttr name = 1;
-  string raw_value = 2;
-}
-
 message MLIRModuleOp {
   oneof op {
     CIRFunctionID function = 1;
@@ -48,14 +43,21 @@ message MLIRModuleOp {
   }
 }
 
+message MLIRNamedAttrList {
+  repeated MLIRNamedAttr list = 1;
+}
+
+message MLIRModuleOpList {
+  repeated MLIRModuleOp list = 1;
+}
+
 message MLIRModule {
   MLIRModuleID id = 1;
-  repeated MLIRNamedAttr attributes = 2;
+  MLIRNamedAttrList attributes = 2;
   repeated CIRFunction functions = 3;
   repeated CIRGlobal globals = 4;
   repeated MLIRType types = 5;
   MLIRLocation loc = 6;
-  repeated MLIRRawNamedAttr raw_attrs = 7;
-  repeated MLIRModuleOp op_order = 8;
+  MLIRModuleOpList op_order = 8;
 }
 // clang-format on

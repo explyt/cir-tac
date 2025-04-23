@@ -112,6 +112,10 @@ static bool emitAttrProto(const RecordKeeper &records, raw_ostream &os) {
     os << formatv("    CIR{0} {1} = {2};\n", name, nameSnake, count++);
   }
 
+  // raw attributes are needed in Module serialization, since it may use
+  // attributes from other MLIR namespaces
+  os << formatv("    MLIRRawNamedAttr = {0};\n", count++);
+
   os << "\n";
 
   for (auto *def : cirEnumDefs) {
@@ -436,24 +440,24 @@ static bool emitAttrProtoSerializerSource(const RecordKeeper &records,
       os << "\n";
     }
   }
+  const char *const namedAttrSerializer = R"(
+MLIRNamedAttr serialized;
+*serialized.mutable_name() = serializeMLIRStringAttr(attr.getName());
+if (attr.getValue().getDialect().getNamespace() == "cir") {
+  *serialized.mutable_value_attr() = serializeMLIRAttribute(attr.getValue());
+  return serialized;
+}
+// we do not generate serializers/deserializers for other attribute types
+// saving them in their printed form to preserve all information
+std::string strValue;
+llvm::raw_string_ostream os(strValue);
+attr.getValue().print(os);
+*serialized.mutable_raw_attr() = strValue;
+return serialized;)";
   os << "MLIRNamedAttr "
         "AttributeSerializer::serializeMLIRNamedAttr(mlir::NamedAttribute "
-        "attr) {\n";
-  os << "  MLIRNamedAttr serialized;\n";
-  os << "  *serialized.mutable_name() = "
-        "serializeMLIRStringAttr(attr.getName());\n";
-  os << "  *serialized.mutable_value() = "
-        "serializeMLIRAttribute(attr.getValue());\n";
-  os << "  return serialized;\n";
-  os << "}\n";
-  os << "\n";
-  os << "MLIRFlatSymbolRefAttr "
-        "AttributeSerializer::serializeMLIRFlatSymbolRefAttr(mlir::"
-        "FlatSymbolRefAttr attr) {\n";
-  os << "  MLIRFlatSymbolRefAttr serialized;\n";
-  os << "  *serialized.mutable_root_reference() = "
-        "serializeMLIRStringAttr(attr.getRootReference());\n";
-  os << "  return serialized;\n";
+        "attr) {";
+  os << namedAttrSerializer << "\n";
   os << "}\n";
   os << "\n";
   os << "MLIRDenseI32ArrayAttr "
@@ -632,6 +636,11 @@ import java.math.BigInteger
 
   os << "interface MLIRLocation : MLIRAttribute\n";
   os << "\n";
+  os << "data class MLIRRawNamedAttr(\n";
+  os << "    val name: MLIRStringAttr,\n";
+  os << "    val rawValue: String,\n";
+  os << ") : MLIRAttribute\n";
+  os << "\n";
 
   for (auto *def : mlirLocationDefs) {
     AttrDef attr(def);
@@ -795,10 +804,15 @@ import java.math.BigInteger
     }
   }
 
-  os << "fun buildMLIRNamedAttr(attr: Attr.MLIRNamedAttr) = MLIRNamedAttr(\n";
-  os << "    buildMLIRStringAttr(attr.name),\n";
-  os << "    buildMLIRAttribute(attr.value),\n";
-  os << ")\n";
+  os << "fun buildMLIRNamedAttr(attr: Attr.MLIRNamedAttr): MLIRNamedAttr {\n";
+  os << "    if (attr.hasRawAttr) {";
+  os << "        error(\"Raw Attribute builders are NYI!\")";
+  os << "    }";
+  os << "    return MLIRNamedAttr(\n";
+  os << "        buildMLIRStringAttr(attr.name),\n";
+  os << "        buildMLIRAttribute(attr.value),\n";
+  os << "    )";
+  os << "}\n";
   os << "\n";
   os << "fun buildMLIRFlatSymbolRefAttr(attr: Attr.MLIRFlatSymbolRefAttr) = "
         "MLIRFlatSymbolRefAttr(\n";
@@ -975,9 +989,11 @@ static bool emitAttrProtoDeserializer(const RecordKeeper &records,
   const char *const defHeaderOpen = R"(
 #include "cir-tac/AttrDeserializer.h"
 #include "cir-tac/EnumDeserializer.h"
+#include "mlir/IR/Attributes.h"
 #include "proto/attr.pb.h"
 
 #include <llvm/ADT/TypeSwitch.h>
+#include <mlir/AsmParser/AsmParser.h>
 
 using namespace protocir;
 using mlir::Attribute;
@@ -1003,7 +1019,18 @@ namespace protocir {
 
   const char *const namedAttrDeserializer = R"(
 auto nameDeser = AttrDeserializer::deserializeMLIRStringAttr(mInfo, pAttr.name());
-auto valueDeser = AttrDeserializer::deserializeMLIRAttribute(mInfo, pAttr.value());
+mlir::Attribute valueDeser;
+switch (pAttr.value_case()) {
+  case (MLIRNamedAttr::ValueCase::kValueAttr):
+    valueDeser = AttrDeserializer::deserializeMLIRAttribute(mInfo, pAttr.value_attr());
+    break;
+  case (MLIRNamedAttr::ValueCase::kRawAttr):
+    valueDeser = mlir::parseAttribute(pAttr.raw_attr(), &mInfo.ctx);
+    break;
+  case (MLIRNamedAttr::ValueCase::VALUE_NOT_SET):
+    llvm_unreachable("NYI!");
+    break;
+}
 return mlir::NamedAttribute(nameDeser, valueDeser);)";
 
   const char *const flatSymbolDeserializer = R"(
