@@ -112,10 +112,6 @@ static bool emitAttrProto(const RecordKeeper &records, raw_ostream &os) {
     os << formatv("    CIR{0} {1} = {2};\n", name, nameSnake, count++);
   }
 
-  // raw attributes are needed in Module serialization, since it may use
-  // attributes from other MLIR namespaces
-  os << formatv("    MLIRRawNamedAttr = {0};\n", count++);
-
   os << "\n";
 
   for (auto *def : cirEnumDefs) {
@@ -155,7 +151,10 @@ static bool emitAttrProto(const RecordKeeper &records, raw_ostream &os) {
 
   os << "message MLIRNamedAttr {\n";
   os << "  MLIRStringAttr name = 1;\n";
-  os << "  MLIRAttribute value = 2;\n";
+  os << "  oneof value {\n";
+  os << "    MLIRAttribute value_attr = 2;\n";
+  os << "    string raw_attr = 3;\n";
+  os << "  }\n";
   os << "}\n";
   os << "\n";
 
@@ -441,23 +440,32 @@ static bool emitAttrProtoSerializerSource(const RecordKeeper &records,
     }
   }
   const char *const namedAttrSerializer = R"(
-MLIRNamedAttr serialized;
-*serialized.mutable_name() = serializeMLIRStringAttr(attr.getName());
-if (attr.getValue().getDialect().getNamespace() == "cir") {
-  *serialized.mutable_value_attr() = serializeMLIRAttribute(attr.getValue());
-  return serialized;
-}
-// we do not generate serializers/deserializers for other attribute types
-// saving them in their printed form to preserve all information
-std::string strValue;
-llvm::raw_string_ostream os(strValue);
-attr.getValue().print(os);
-*serialized.mutable_raw_attr() = strValue;
-return serialized;)";
+  MLIRNamedAttr serialized;
+  *serialized.mutable_name() = serializeMLIRStringAttr(attr.getName());
+  if (attr.getValue().getDialect().getNamespace() == "cir") {
+    *serialized.mutable_value_attr() = serializeMLIRAttribute(attr.getValue());
+    return serialized;
+  }
+  // we do not generate serializers/deserializers for other attribute types
+  // saving them in their printed form to preserve all information
+  std::string strValue;
+  llvm::raw_string_ostream os(strValue);
+  attr.getValue().print(os);
+  *serialized.mutable_raw_attr() = strValue;
+  return serialized;)";
   os << "MLIRNamedAttr "
         "AttributeSerializer::serializeMLIRNamedAttr(mlir::NamedAttribute "
         "attr) {";
   os << namedAttrSerializer << "\n";
+  os << "}\n";
+  os << "\n";
+  os << "MLIRFlatSymbolRefAttr "
+        "AttributeSerializer::serializeMLIRFlatSymbolRefAttr(mlir::"
+        "FlatSymbolRefAttr attr) {\n";
+  os << "  MLIRFlatSymbolRefAttr serialized;\n";
+  os << "  *serialized.mutable_root_reference() = "
+        "serializeMLIRStringAttr(attr.getRootReference());\n";
+  os << "  return serialized;\n";
   os << "}\n";
   os << "\n";
   os << "MLIRDenseI32ArrayAttr "
@@ -635,11 +643,6 @@ import java.math.BigInteger
   os << "\n";
 
   os << "interface MLIRLocation : MLIRAttribute\n";
-  os << "\n";
-  os << "data class MLIRRawNamedAttr(\n";
-  os << "    val name: MLIRStringAttr,\n";
-  os << "    val rawValue: String,\n";
-  os << ") : MLIRAttribute\n";
   os << "\n";
 
   for (auto *def : mlirLocationDefs) {
