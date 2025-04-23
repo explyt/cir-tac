@@ -629,7 +629,8 @@ import java.math.BigInteger
 
   os << "data class MLIRNamedAttr(\n";
   os << "    val name: MLIRStringAttr,\n";
-  os << "    val value: MLIRAttribute,\n";
+  os << "    val value: MLIRAttribute?,\n";
+  os << "    val raw: String?,\n";
   os << ") : MLIRAttribute\n";
   os << "\n";
   os << "data class MLIRFlatSymbolRefAttr(\n";
@@ -807,15 +808,11 @@ import java.math.BigInteger
     }
   }
 
-  os << "fun buildMLIRNamedAttr(attr: Attr.MLIRNamedAttr): MLIRNamedAttr {\n";
-  os << "    if (attr.hasRawAttr) {";
-  os << "        error(\"Raw Attribute builders are NYI!\")";
-  os << "    }";
-  os << "    return MLIRNamedAttr(\n";
-  os << "        buildMLIRStringAttr(attr.name),\n";
-  os << "        buildMLIRAttribute(attr.value),\n";
-  os << "    )";
-  os << "}\n";
+  os << "fun buildMLIRNamedAttr(attr: Attr.MLIRNamedAttr) = MLIRNamedAttr(\n";
+  os << "    buildMLIRStringAttr(attr.name),\n";
+  os << "    if (attr.hasValueAttr()) buildMLIRAttribute(attr.valueAttr) else null,\n";
+  os << "    if (attr.hasRawAttr()) attr.rawAttr else null,\n";
+  os << ")\n";
   os << "\n";
   os << "fun buildMLIRFlatSymbolRefAttr(attr: Attr.MLIRFlatSymbolRefAttr) = "
         "MLIRFlatSymbolRefAttr(\n";
