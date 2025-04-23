@@ -573,9 +573,9 @@ static bool emitAttrKotlin(const RecordKeeper &records, raw_ostream &os) {
   const char *const header = R"(
 package org.jacodb.api.cir.cfg.tblgenerated
 
-import org.jacodb.api.cir.cfg.MLIRAPFloat
-import org.jacodb.api.cir.cfg.MLIRTypeID
-import java.math.BigInteger)";
+import org.jacodb.api.cir.cfg.*
+import java.math.BigInteger
+)";
   os << header;
   os << "\n";
 
@@ -701,6 +701,7 @@ import java.math.BigInteger)";
 static bool emitAttrKotlinBuilder(const RecordKeeper &records,
                                   raw_ostream &os) {
   os << jacoDBLicense;
+  os << "\n";
   os << autogenMessage;
   const char *const header = R"(
 package org.jacodb.impl.cfg.builder.tblgenerated
@@ -709,7 +710,8 @@ import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.cfg.builder.*
 import org.jacodb.impl.grpc.Attr
 
-import java.math.BigInteger)";
+import java.math.BigInteger
+)";
   os << header;
   os << "\n";
 

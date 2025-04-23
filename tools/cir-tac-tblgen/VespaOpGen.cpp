@@ -1166,13 +1166,15 @@ static bool emitOpKotlinInst(const RecordKeeper &records, raw_ostream &os) {
 static bool emitOpKotlinExprsBuilder(const RecordKeeper &records,
                                      raw_ostream &os) {
   os << jacoDBLicense;
+  os << "\n";
   os << autogenMessage;
   const char *const header = R"(
 package org.jacodb.impl.cfg.builder.tblgenerated
 
 import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.cfg.builder.*
-import org.jacodb.impl.grpc.Op)";
+import org.jacodb.impl.grpc.Op
+)";
   os << header;
   os << "\n";
 
@@ -1284,6 +1286,7 @@ import org.jacodb.impl.grpc.Op)";
 static bool emitOpKotlinInstBuilder(const RecordKeeper &records,
                                     raw_ostream &os) {
   os << jacoDBLicense;
+  os << "\n";
   os << autogenMessage;
   const char *const header = R"(
 package org.jacodb.impl.cfg.builder.tblgenerated
@@ -1291,7 +1294,8 @@ package org.jacodb.impl.cfg.builder.tblgenerated
 import org.jacodb.api.cir.cfg.*
 import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.cfg.builder.*
-import org.jacodb.impl.grpc.Op)";
+import org.jacodb.impl.grpc.Op
+)";
   os << header;
   os << "\n";
 

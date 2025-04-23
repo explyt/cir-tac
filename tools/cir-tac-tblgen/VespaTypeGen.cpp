@@ -355,8 +355,8 @@ static bool emitTypeKotlin(const RecordKeeper &records, llvm::raw_ostream &os) {
   const char *const header = R"(
 package org.jacodb.api.cir.cfg.tblgenerated
 
-import org.jacodb.api.cir.cfg.MLIRType
-import org.jacodb.api.cir.cfg.MLIRTypeID)";
+import org.jacodb.api.cir.cfg.*
+)";
   os << header;
   os << "\n";
 
@@ -385,7 +385,7 @@ import org.jacodb.api.cir.cfg.MLIRTypeID)";
   os << "    val name: MLIRStringAttr,\n";
   os << "    val incomplete: Boolean,\n";
   os << "    val packed: Boolean,\n";
-  os << "    val kind: CIRRecordKind\n",
+  os << "    val kind: CIRRecordKind,\n",
   os << "    val rawAst: String?,\n";
   os << ") : MLIRType\n";
 
@@ -395,6 +395,7 @@ import org.jacodb.api.cir.cfg.MLIRTypeID)";
 static bool emitTypeKotlinBuilder(const RecordKeeper &records,
                                   llvm::raw_ostream &os) {
   os << jacoDBLicense;
+  os << "\n";
   os << autogenMessage;
   const char *const header = R"(
 package org.jacodb.impl.cfg.builder.tblgenerated
@@ -402,7 +403,8 @@ package org.jacodb.impl.cfg.builder.tblgenerated
 import org.jacodb.api.cir.cfg.*
 import org.jacodb.api.cir.cfg.tblgenerated.*
 import org.jacodb.impl.cfg.builder.*
-import org.jacodb.impl.grpc.Type)";
+import org.jacodb.impl.grpc.Type
+)";
   os << header;
   os << "\n";
 
