@@ -17,12 +17,12 @@ def main():
     res = 0
     for test in test_files:
         print("Checking file [{0}]\n".format(test))
-        utils.filter_ast_attrs(test)
         original = test[:-6] + "cir"
         if not os.path.exists(original):
             print("Could not find original .cir for [{0}]!".format(test))
             res = 1
             continue
+        utils.filter_ast_attrs(original)
         if not filecmp.cmp(test, original):
             print("Failure! Files are different\n\n")
             res = 1
