@@ -1223,7 +1223,12 @@ import org.jacodb.impl.grpc.Attr)";
 
   const char *const namedAttrSerializer = R"(
 pAttr.setName(this.name.asProtobuf())
-pAttr.setValue(this.value.asProtobuf()))";
+this.value ?.let{
+    pAttr.setValueAttr(this.value!!.asProtobuf())
+}
+this.raw ?.let{
+    pAttr.setRawAttr(this.raw!!)
+})";
 
   const char *const flatSymbolSerializer = R"(
 pAttr.setRootReference(this.rootReference.asProtobuf()))";
