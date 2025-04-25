@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import os
-
 from dataclasses import dataclass
 from enum import Enum
 
@@ -39,7 +38,7 @@ class TblgenFileInfo:
     typ: CodeType
 
     def __post_init__(self):
-        self.path: str = os.path.join(*MAP_TYPE_TO_PATH_GETTER[self.typ], self.name)
+        self.path: str = MAP_TYPE_TO_PATH_GETTER[self.typ](self.name)
 
 
 def get_subcmd_file_infos(
