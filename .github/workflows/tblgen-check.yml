@@ -30,6 +30,8 @@ jobs:
     - name: Download ClangIR
       uses: actions/checkout@v4
       with:
+        ref: ${{ inputs.CLANGIR_VERSION }}
+        repository: ${{ inputs.CLANGIR_REPOSITORY }}
         path: "clangir"
 
     - name: Download cir-tac precompiled tools
