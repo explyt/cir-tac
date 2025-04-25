@@ -63,4 +63,4 @@ jobs:
       run: ${{ github.workspace }}/scripts/build_proto_files.py "clangir" ${{ github.workspace }} ${{ env.TEST_DIR }}
 
     - name: Compare proto-files
-      run: ${{ github.workspace }}/scripts/cmp_tblgen_files.py "clangir" ${{ env.TEST_DIR }}
+      run: ${{ github.workspace }}/scripts/cmp_tblgen_files.py ${{ github.workspace }} ${{ env.TEST_DIR }}

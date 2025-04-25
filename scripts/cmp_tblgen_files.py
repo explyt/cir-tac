@@ -9,7 +9,7 @@ import cir_tblgen_util
 
 def main():
     argc = len(sys.argv)
-    if argc != 2:
+    if argc != 3:
         print("Expected paths to two directories for comparison!")
         return -1
     dir1 = os.path.expanduser(sys.argv[1])
