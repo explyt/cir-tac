@@ -100,6 +100,7 @@ jobs:
         path:  |
           main/build/tools/cir-ser-proto/cir-ser-proto
           main/build/tools/cir-deser-proto/cir-deser-proto
+          main/build/tools/cir-tac-tblgen/cir-tac-tblgen
         retention-days: 1
 
   build-ubuntu-legacy:
