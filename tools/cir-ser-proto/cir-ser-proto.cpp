@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
 
   auto &bodyRegion = (*module).getBodyRegion();
 
+  MLIRModuleOpList pOpList;
   for (auto &bodyBlock : bodyRegion) {
     for (auto &topOp : bodyBlock) {
       if (auto cirFunc = llvm::dyn_cast<cir::FuncOp>(topOp)) {
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]) {
 
         MLIRModuleOp pModuleOp;
         *pModuleOp.mutable_function() = pFunctionID;
-        *pModule.add_op_order() = pModuleOp;
+        *pOpList.add_list() = pModuleOp;
       } else if (auto cirGlobal = llvm::dyn_cast<cir::GlobalOp>(topOp)) {
         CIRGlobal *pGlobal = pModule.add_globals();
         CIRGlobalID pGlobalID;
@@ -136,10 +137,12 @@ int main(int argc, char *argv[]) {
 
         MLIRModuleOp pModuleOp;
         *pModuleOp.mutable_global() = pGlobalID;
-        *pModule.add_op_order() = pModuleOp;
+        *pOpList.add_list() = pModuleOp;
       }
     }
   }
+
+  *pModule.mutable_op_order() = pOpList;
 
   TypeSerializer typeSerializer(pModuleID, typeCache);
 
@@ -160,23 +163,9 @@ int main(int argc, char *argv[]) {
   *pModule.mutable_loc() =
       attributeSerializer.serializeMLIRLocation(module->getLoc());
 
+  MLIRNamedAttrList pAttrs;
   for (auto &attr : module->getOperation()->getAttrs()) {
-    if (attr.getValue().getDialect().getNamespace() == "cir") {
-      pModule.mutable_attributes()->Add(
-          attributeSerializer.serializeMLIRNamedAttr(attr));
-    }
-    // we do not generate serializers/deserializers for other attribute types
-    // saving them in their printed form to preserve all information
-    else {
-      std::string strValue;
-      llvm::raw_string_ostream os(strValue);
-      attr.getValue().print(os);
-      MLIRRawNamedAttr pRawAttr;
-      *pRawAttr.mutable_name() =
-          attributeSerializer.serializeMLIRStringAttr(attr.getName());
-      *pRawAttr.mutable_raw_value() = strValue;
-      *pModule.add_raw_attrs() = pRawAttr;
-    }
+    *pAttrs.add_list() = attributeSerializer.serializeMLIRNamedAttr(attr);
   }
 
   std::string binary;
