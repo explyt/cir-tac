@@ -42,8 +42,10 @@ def gen_file(clangir_path, result_dir, file_info: cir_tblgen_util.TblgenFileInfo
 def main():
     argc = len(sys.argv)
     if not (3 <= argc <= 4):
-        print("Expected paths to clangir, cir-tac directories"
-              "and optionally resulting dir!")
+        print(
+            "Expected paths to clangir, cir-tac directories"
+            "and optionally resulting dir!"
+        )
         return -1
     clangir = os.path.expanduser(sys.argv[1])
     cir_tac = os.path.expanduser(sys.argv[2])

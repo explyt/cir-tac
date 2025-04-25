@@ -2,8 +2,8 @@
 
 import os
 
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
 
 class CodeType(Enum):
@@ -37,10 +37,14 @@ class TblgenFileInfo:
     td: str
     name: str
     typ: CodeType
-    path: str = MAP_TYPE_TO_PATH_GETTER[typ](name)
+
+    def __post_init__(self):
+        self.path: str = os.path.join(*MAP_TYPE_TO_PATH_GETTER[self.typ], self.name)
 
 
-def get_subcmd_file_infos(subcmd, td_file, name, no_deser=False) -> list[TblgenFileInfo]:
+def get_subcmd_file_infos(
+    subcmd, td_file, name, no_deser=False
+) -> list[TblgenFileInfo]:
     cpp_name = str.capitalize(name)
 
     files = []
@@ -77,7 +81,7 @@ def get_subcmd_file_infos(subcmd, td_file, name, no_deser=False) -> list[TblgenF
             "{0}-deserializer-header".format(subcmd),
             td_file,
             "{0}Deserializer.h".format(cpp_name),
-            CodeType.Decl
+            CodeType.Decl,
         )
     )
     files.append(
@@ -85,7 +89,7 @@ def get_subcmd_file_infos(subcmd, td_file, name, no_deser=False) -> list[TblgenF
             "{0}-deserializer-source".format(subcmd),
             td_file,
             "{0}Deserializer.cpp".format(cpp_name),
-            CodeType.Src
+            CodeType.Src,
         )
     )
     return files
