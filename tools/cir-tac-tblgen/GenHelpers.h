@@ -1,6 +1,5 @@
 // -*- C++ -*-
-#ifndef MLIR_TOOLS_MLIRTBLGEN_GEN_H_
-#define MLIR_TOOLS_MLIRTBLGEN_GEN_H_
+#pragma once
 
 #include "mlir/TableGen/AttrOrTypeDef.h"
 #include "llvm/ADT/ArrayRef.h"
@@ -110,5 +109,3 @@ void generateCodeFile(CppSwitchSource &source, bool disableClang,
                       bool addLicense, bool emitDecl, llvm::raw_ostream &os);
 
 } // namespace ctgen
-
-#endif // MLIR_TOOLS_MLIRTBLGEN_GEN_H_

@@ -1,6 +1,5 @@
 // -*- C++ -*-
-#ifndef MLIR_TOOLS_MLIRTBLGEN_COMMON_H_
-#define MLIR_TOOLS_MLIRTBLGEN_COMMON_H_
+#pragma once
 
 #include <utility>
 
@@ -238,5 +237,3 @@ public:
 };
 
 } // namespace ctgen
-
-#endif // MLIR_TOOLS_MLIRTBLGEN_COMMON_H_
