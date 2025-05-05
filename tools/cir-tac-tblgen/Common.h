@@ -1,6 +1,6 @@
 // -*- C++ -*-
-#ifndef MLIR_TOOLS_MLIRTBLGEN_VESPACOMMON_H_
-#define MLIR_TOOLS_MLIRTBLGEN_VESPACOMMON_H_
+#ifndef MLIR_TOOLS_MLIRTBLGEN_COMMON_H_
+#define MLIR_TOOLS_MLIRTBLGEN_COMMON_H_
 
 #include <utility>
 
@@ -20,7 +20,7 @@ using namespace mlir::tblgen;
 using namespace mlir;
 using namespace llvm;
 
-namespace vespa {
+namespace ctgen {
 
 struct PrivateField {
   std::string typ;
@@ -237,6 +237,6 @@ public:
   }
 };
 
-} // namespace vespa
+} // namespace ctgen
 
-#endif // MLIR_TOOLS_MLIRTBLGEN_VESPACOMMON_H_
+#endif // MLIR_TOOLS_MLIRTBLGEN_COMMON_H_

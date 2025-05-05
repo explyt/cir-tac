@@ -6,12 +6,12 @@ set(LIBS
 
 add_executable(cir-tac-tblgen
   cir-tac-tblgen.cpp
-  VespaCommon.cpp
-  VespaAttrGen.cpp
-  VespaEnumGen.cpp
-  VespaGen.cpp
-  VespaOpGen.cpp
-  VespaTypeGen.cpp
+  Common.cpp
+  AttrGen.cpp
+  EnumGen.cpp
+  GenHelpers.cpp
+  OpGen.cpp
+  TypeGen.cpp
 )
 
 target_link_libraries(cir-tac-tblgen ${LIBS})

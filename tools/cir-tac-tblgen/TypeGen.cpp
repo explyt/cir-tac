@@ -1,4 +1,4 @@
-#include "VespaGen.h"
+#include "GenHelpers.h"
 
 #include "mlir/TableGen/AttrOrTypeDef.h"
 #include "mlir/TableGen/Dialect.h"
@@ -14,7 +14,7 @@ using llvm::RecordKeeper;
 using llvm::StringRef;
 using mlir::tblgen::AttrOrTypeDef;
 
-using namespace vespa;
+using namespace ctgen;
 
 static std::string normalizeTypeName(StringRef name) {
   if (name.ends_with("Type")) {

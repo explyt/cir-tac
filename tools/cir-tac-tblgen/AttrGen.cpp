@@ -1,5 +1,5 @@
-#include "VespaCommon.h"
-#include "VespaGen.h"
+#include "Common.h"
+#include "GenHelpers.h"
 
 #include "mlir/TableGen/AttrOrTypeDef.h"
 #include "mlir/TableGen/Attribute.h"
@@ -21,7 +21,7 @@ using llvm::StringRef;
 using mlir::tblgen::AttrDef;
 using mlir::tblgen::EnumAttr;
 
-using namespace vespa;
+using namespace ctgen;
 
 std::set<StringRef> mlirAttributeWhitelist = {
     "ArrayAttr", "StringAttr",     "IntegerAttr", "FloatAttr",

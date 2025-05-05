@@ -1,8 +1,8 @@
-#include "VespaCommon.h"
+#include "Common.h"
 #include "mlir/TableGen/Class.h"
 #include "llvm/ADT/SmallVector.h"
 
-using namespace vespa;
+using namespace ctgen;
 
 void CppSwitchSource::printCodeBlock(raw_indented_ostream &os,
                                      std::string code) {

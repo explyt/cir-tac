@@ -1,4 +1,4 @@
-#include "VespaGen.h"
+#include "GenHelpers.h"
 
 #include "mlir/TableGen/Attribute.h"
 #include "mlir/TableGen/GenInfo.h"
@@ -16,7 +16,7 @@ using llvm::raw_ostream;
 using llvm::RecordKeeper;
 using mlir::tblgen::EnumAttr;
 
-using namespace vespa;
+using namespace ctgen;
 
 static std::string normalizeName(llvm::StringRef name) {
   if (name == "TLS_Model") {

@@ -1,4 +1,4 @@
-#include "VespaGen.h"
+#include "GenHelpers.h"
 #include "mlir/Support/IndentedOstream.h"
 
 #include "llvm/ADT/ArrayRef.h"
@@ -12,7 +12,7 @@
 #include <map>
 #include <set>
 
-using namespace vespa;
+using namespace ctgen;
 
 static std::map<llvm::StringRef, llvm::StringRef> cppTypeToProto = {
     {"ArrayRef<Type>", "repeated MLIRTypeID"},
@@ -422,7 +422,7 @@ static std::map<llvm::StringRef, llvm::StringRef> cppTypeToBuilder = {
     {"llvm::APFloat", "BigDecimal"},
 };
 
-std::string vespa::makeIdentifier(llvm::StringRef str) {
+std::string ctgen::makeIdentifier(llvm::StringRef str) {
   if (!str.empty() && llvm::isDigit(static_cast<unsigned char>(str.front()))) {
     std::string newStr = std::string("_") + str.str();
     return newStr;
@@ -430,11 +430,11 @@ std::string vespa::makeIdentifier(llvm::StringRef str) {
   return str.str();
 }
 
-std::string vespa::makeProtoSymbol(llvm::StringRef symbol) {
+std::string ctgen::makeProtoSymbol(llvm::StringRef symbol) {
   return llvm::convertToCamelFromSnakeCase(symbol, true);
 }
 
-std::string vespa::makeFullProtoSymbol(llvm::StringRef enumName,
+std::string ctgen::makeFullProtoSymbol(llvm::StringRef enumName,
                                        llvm::StringRef symbol) {
   return llvm::formatv("{0}_{1}", enumName, symbol).str();
 }
@@ -445,14 +445,14 @@ std::string makeFullCppType(llvm::StringRef cppType) {
   return cppType.str();
 }
 
-llvm::StringRef vespa::removeGlobalScopeQualifier(llvm::StringRef type) {
+llvm::StringRef ctgen::removeGlobalScopeQualifier(llvm::StringRef type) {
   if (type.starts_with("::")) {
     return type.drop_front(2);
   }
   return type;
 }
 
-llvm::StringRef vespa::removeArray(llvm::StringRef &type) {
+llvm::StringRef ctgen::removeArray(llvm::StringRef &type) {
   if (type.starts_with("llvm::ArrayRef")) {
     return type.drop_front(15).drop_back(1);
   }
@@ -463,17 +463,17 @@ llvm::StringRef vespa::removeArray(llvm::StringRef &type) {
   return "";
 }
 
-llvm::StringRef vespa::getProtoType(mlir::tblgen::AttrOrTypeParameter &p) {
+llvm::StringRef ctgen::getProtoType(mlir::tblgen::AttrOrTypeParameter &p) {
   auto type = p.getCppType();
   return cppTypeToProto.at(removeGlobalScopeQualifier(type));
 }
 
-llvm::StringRef vespa::getKotlinType(mlir::tblgen::AttrOrTypeParameter &p) {
+llvm::StringRef ctgen::getKotlinType(mlir::tblgen::AttrOrTypeParameter &p) {
   auto type = p.getCppType();
   return cppTypeToKotlin.at(removeGlobalScopeQualifier(type));
 }
 
-void vespa::serializeParameter(mlir::tblgen::AttrOrTypeParameter &p,
+void ctgen::serializeParameter(mlir::tblgen::AttrOrTypeParameter &p,
                                llvm::StringRef varName, llvm::raw_ostream &os) {
   auto name = p.getName();
   auto snake = llvm::convertToSnakeFromCamelCase(name);
@@ -544,7 +544,7 @@ void vespa::serializeParameter(mlir::tblgen::AttrOrTypeParameter &p,
 }
 
 std::string
-vespa::serializeParameters(llvm::StringRef ty,
+ctgen::serializeParameters(llvm::StringRef ty,
                            llvm::ArrayRef<mlir::tblgen::AttrOrTypeParameter> ps,
                            llvm::StringRef varName) {
   std::string serializerRaw;
@@ -582,7 +582,7 @@ std::string deserializeElement(const ParamData &p, llvm::StringRef varName) {
   llvm_unreachable("no deserializer specified!");
 }
 
-void vespa::checkType(llvm::StringRef typ, llvm::raw_ostream &os) {
+void ctgen::checkType(llvm::StringRef typ, llvm::raw_ostream &os) {
   if (!cppTypeToDeserializerCall.count(typ) &&
       !primitiveSerializable.count(typ))
     os << formatv("{0} has no deserializer nor is primitive!\n\n");
@@ -669,7 +669,7 @@ std::string deserializeEmpty(const ParamData &p) {
   return formatv("{0} {1};\n", p.cppType, p.deserName);
 }
 
-void vespa::deserializeParameter(const ParamData &p, llvm::StringRef varName,
+void ctgen::deserializeParameter(const ParamData &p, llvm::StringRef varName,
                                  llvm::raw_ostream &os) {
   auto name = p.name;
   auto protoField = llvm::convertToSnakeFromCamelCase(name);
@@ -698,7 +698,7 @@ void vespa::deserializeParameter(const ParamData &p, llvm::StringRef varName,
   os << elDeser;
 }
 
-std::string vespa::deserializeParameters(
+std::string ctgen::deserializeParameters(
     llvm::StringRef ty, llvm::StringRef cppTy, llvm::ArrayRef<ParamData> ps,
     llvm::StringRef varName, const char *finisher, bool doesNeedCtx) {
   std::string serializerRaw;
@@ -736,7 +736,7 @@ std::string vespa::deserializeParameters(
   return serializerRaw;
 }
 
-void vespa::buildParameter(mlir::tblgen::AttrOrTypeParameter &p,
+void ctgen::buildParameter(mlir::tblgen::AttrOrTypeParameter &p,
                            llvm::StringRef varName, llvm::raw_ostream &os,
                            size_t padding) {
   auto camel = llvm::convertToCamelFromSnakeCase(p.getName(), false);
@@ -761,7 +761,7 @@ void vespa::buildParameter(mlir::tblgen::AttrOrTypeParameter &p,
   }
 }
 
-void vespa::generateCodeFile(llvm::ArrayRef<CppSwitchSource *> sources,
+void ctgen::generateCodeFile(llvm::ArrayRef<CppSwitchSource *> sources,
                              bool disableClang, bool addLicense, bool emitDecl,
                              llvm::raw_ostream &os) {
   os << autogenMessage;
@@ -781,7 +781,7 @@ void vespa::generateCodeFile(llvm::ArrayRef<CppSwitchSource *> sources,
     os << clangOn;
 }
 
-void vespa::generateCodeFile(CppSwitchSource &source, bool disableClang,
+void ctgen::generateCodeFile(CppSwitchSource &source, bool disableClang,
                              bool addLicense, bool emitDecl,
                              llvm::raw_ostream &os) {
   generateCodeFile({&source}, disableClang, addLicense, emitDecl, os);

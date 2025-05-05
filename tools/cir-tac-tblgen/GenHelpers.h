@@ -1,6 +1,6 @@
 // -*- C++ -*-
-#ifndef MLIR_TOOLS_MLIRTBLGEN_VESPAGEN_H_
-#define MLIR_TOOLS_MLIRTBLGEN_VESPAGEN_H_
+#ifndef MLIR_TOOLS_MLIRTBLGEN_GEN_H_
+#define MLIR_TOOLS_MLIRTBLGEN_GEN_H_
 
 #include "mlir/TableGen/AttrOrTypeDef.h"
 #include "llvm/ADT/ArrayRef.h"
@@ -9,13 +9,13 @@
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "VespaCommon.h"
+#include "Common.h"
 #include "mlir/TableGen/Operator.h"
 
 #include <cassert>
 #include <optional>
 
-namespace vespa {
+namespace ctgen {
 
 const CppTypeInfo mlirNaming = {"mlir", "MLIR"};
 const CppTypeInfo cirNaming = {"cir", "CIR"};
@@ -109,6 +109,6 @@ void generateCodeFile(llvm::ArrayRef<CppSwitchSource *> sources,
 void generateCodeFile(CppSwitchSource &source, bool disableClang,
                       bool addLicense, bool emitDecl, llvm::raw_ostream &os);
 
-} // namespace vespa
+} // namespace ctgen
 
-#endif // MLIR_TOOLS_MLIRTBLGEN_VESPAGEN_H_
+#endif // MLIR_TOOLS_MLIRTBLGEN_GEN_H_

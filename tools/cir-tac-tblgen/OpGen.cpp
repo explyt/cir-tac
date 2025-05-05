@@ -1,5 +1,5 @@
-#include "VespaCommon.h"
-#include "VespaGen.h"
+#include "Common.h"
+#include "GenHelpers.h"
 
 #include "mlir/TableGen/Attribute.h"
 #include "mlir/TableGen/Class.h"
@@ -27,7 +27,7 @@ using mlir::tblgen::Attribute;
 using mlir::tblgen::NamedSuccessor;
 using mlir::tblgen::Operator;
 
-using namespace vespa;
+using namespace ctgen;
 
 cl::OptionCategory opDefGenCat("Options for op definition generators");
 
@@ -244,6 +244,9 @@ static void serializeValueField(StringRef name, ValueType type,
     os << formatv("  }\n");
     return;
   }
+  case ValueType::EMPTY: {
+    return;
+  }
   }
 }
 
@@ -281,6 +284,9 @@ static void serializeResultField(StringRef name, ValueType type,
     os << formatv("      *protoTT = typeCache.getMLIRTypeID(tt.getType());\n");
     os << formatv("    }\n");
     os << formatv("  }\n");
+    return;
+  }
+  case ValueType::EMPTY: {
     return;
   }
   }
@@ -752,31 +758,6 @@ static void prepareParameters(std::vector<ParamData> &data,
     auto serType = successor.isVariadic() ? ValueType::VAR : ValueType::REG;
 
     data.push_back({paramCppType, paramName, deserName, serType});
-  }
-}
-
-static bool checker(const RecordKeeper &records, llvm::raw_ostream &os) {
-  auto defs = getRequestedOpDefinitions(records);
-  checkType("mlir::Block *", os);
-  checkType("mlir::Value", os);
-  for (auto *def : defs) {
-    Operator op(def);
-
-    auto resultsAndOperands = op.getNumResults() + op.getNumOperands();
-    for (int i = 0; i != resultsAndOperands; ++i) {
-      auto operandArg = op.getArgToOperandOrAttribute(i);
-      auto operandKind = operandArg.kind();
-      auto operandId = operandArg.operandOrAttributeIndex();
-      switch (operandKind) {
-      case mlir::tblgen::Operator::OperandOrAttribute::Kind::Operand:
-        break;
-      case mlir::tblgen::Operator::OperandOrAttribute::Kind::Attribute:
-        checkType(removeGlobalScopeQualifier(
-                      op.getAttribute(operandId).attr.getStorageType()),
-                  os);
-        break;
-      }
-    }
   }
 }
 
@@ -1380,7 +1361,3 @@ static mlir::GenRegistration
     genOpProtoDeserializerSource("gen-op-proto-deserializer-source",
                                  "Generate proto deserializer .cpp for ops",
                                  &emitOpProtoDeserializerSource);
-
-static mlir::GenRegistration
-    genOpProtoChecker("gen-op-proto-check-types",
-                      "Check types are correctly matched", &checker);
