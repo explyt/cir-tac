@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 import os
-from dataclasses import dataclass
+import csv
+from dataclasses import asdict, dataclass
 from enum import Enum
 
 
@@ -34,11 +35,12 @@ MAP_TYPE_TO_PATH_GETTER = {
 class TblgenFileInfo:
     subcmd: str
     td: str
-    name: str
-    typ: CodeType
+    path: str
 
-    def __post_init__(self):
-        self.path: str = MAP_TYPE_TO_PATH_GETTER[self.typ](self.name)
+
+def create_file_info(subcmd, td, name, typ):
+    path = MAP_TYPE_TO_PATH_GETTER[typ](name)
+    return TblgenFileInfo(subcmd, td, path)
 
 
 def get_subcmd_file_infos(
@@ -48,7 +50,7 @@ def get_subcmd_file_infos(
 
     files = []
     files.append(
-        TblgenFileInfo(
+        create_file_info(
             subcmd,
             td_file,
             "{0}.proto".format(name),
@@ -56,7 +58,7 @@ def get_subcmd_file_infos(
         )
     )
     files.append(
-        TblgenFileInfo(
+        create_file_info(
             "{0}-serializer-header".format(subcmd),
             td_file,
             "{0}Serializer.h".format(cpp_name),
@@ -64,7 +66,7 @@ def get_subcmd_file_infos(
         )
     )
     files.append(
-        TblgenFileInfo(
+        create_file_info(
             "{0}-serializer-source".format(subcmd),
             td_file,
             "{0}Serializer.cpp".format(cpp_name),
@@ -76,7 +78,7 @@ def get_subcmd_file_infos(
         return files
 
     files.append(
-        TblgenFileInfo(
+        create_file_info(
             "{0}-deserializer-header".format(subcmd),
             td_file,
             "{0}Deserializer.h".format(cpp_name),
@@ -84,7 +86,7 @@ def get_subcmd_file_infos(
         )
     )
     files.append(
-        TblgenFileInfo(
+        create_file_info(
             "{0}-deserializer-source".format(subcmd),
             td_file,
             "{0}Deserializer.cpp".format(cpp_name),
@@ -102,4 +104,25 @@ def get_tblgen_file_infos() -> list[TblgenFileInfo]:
         "gen-type-proto", "MLIRCIRTypes.td", "type", no_deser=True
     )
     file_infos += get_subcmd_file_infos("gen-attr-proto", "MLIRCIRAttrs.td", "attr")
+    return file_infos
+
+
+def write_infos_to_csv(path):
+    file_infos = get_tblgen_file_infos()
+    if len(file_infos) == 0:
+        return
+    header = list(asdict(file_infos[0]).keys())
+    with open(path, "w") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=header)
+        writer.writeheader()
+        for file_info in file_infos:
+            writer.writerow(asdict(file_info))
+
+
+def read_infos_from_csv(path) -> list[TblgenFileInfo]:
+    file_infos = []
+    with open(path, "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for file_info in reader:
+            file_infos.append(TblgenFileInfo(**file_info))
     return file_infos

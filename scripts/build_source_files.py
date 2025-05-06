@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import argparse
 import os
 import subprocess
 import sys
@@ -40,20 +41,21 @@ def gen_file(clangir_path, result_dir, file_info: cir_tblgen_util.TblgenFileInfo
 
 
 def main():
-    argc = len(sys.argv)
-    if not (3 <= argc <= 4):
-        print(
-            "Expected paths to clangir, cir-tac directories"
-            "and optionally resulting dir!"
-        )
-        return -1
-    clangir = os.path.expanduser(sys.argv[1])
-    cir_tac = os.path.expanduser(sys.argv[2])
-    result_dir = cir_tac if argc == 3 else os.path.expanduser(sys.argv[3])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("clangir", help="path to the clangir repository")
+    parser.add_argument("cir_tac", help="path to the cir-tac directory")
+    parser.add_argument("csv", help="csv containing definitions for file generation")
+    parser.add_argument("-o", "--out", help="resulting path")
+    args = parser.parse_args()
+
+    clangir = os.path.expanduser(args.clangir)
+    cir_tac = os.path.expanduser(args.cir_tac)
+    csv_path = os.path.expanduser(args.csv)
+    result_dir = cir_tac if not args.out else os.path.expanduser(args.out)
 
     os.chdir(cir_tac)
 
-    for file_info in cir_tblgen_util.get_tblgen_file_infos():
+    for file_info in cir_tblgen_util.read_infos_from_csv(csv_path):
         gen_file(clangir, result_dir, file_info)
 
 
