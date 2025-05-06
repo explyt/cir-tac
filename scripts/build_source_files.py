@@ -3,7 +3,6 @@
 import argparse
 import os
 import subprocess
-import sys
 
 import cir_tblgen_util
 

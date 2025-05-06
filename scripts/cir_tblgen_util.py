@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-import os
 import csv
+import os
 from dataclasses import asdict, dataclass
 from enum import Enum
 

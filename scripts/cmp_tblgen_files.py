@@ -10,8 +10,10 @@ import cir_tblgen_util
 def main():
     argc = len(sys.argv)
     if argc != 4:
-        print("Expected paths to two directories for comparison"
-              "and csv file with definitions!")
+        print(
+            "Expected paths to two directories for comparison"
+            "and csv file with definitions!"
+        )
         return -1
     dir1 = os.path.expanduser(sys.argv[1])
     dir2 = os.path.expanduser(sys.argv[2])

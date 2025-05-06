@@ -52,6 +52,9 @@ jobs:
         repository: ${{ inputs.CLANGIR_REPOSITORY }}
         path: "clangir"
 
+    - name: debug
+      run: ls -R
+
     - name: Tblgen'erate files by their definitions
       run: ${{ github.workspace }}/scripts/build_source_files.py "clangir" ${{ github.workspace }} \
             "${{ github.workspace }}/scripts/cpp_gen_defs.csv" -o ${{ env.TEST_DIR }}
