@@ -36,7 +36,7 @@ jobs:
 
       - name: Create image tag
         run: |
-          echo "IMAGE_TAG=clangir_ubuntu-latest_build:${{ matrix.clangir.normalized_repo }}-${{ matrix.clangir.version }}" \
+          echo "IMAGE_TAG=clangir_ubuntu-latest_build:${{ matrix.clangir.organization }}_${{ matrix.clangir.repository }}-${{ matrix.clangir.version }}" \
             >> $GITHUB_ENV
 
       - name: Build and push Docker image with clangir
@@ -48,5 +48,5 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_TAG }}
           build-args: |
-            CLANGIR_REPOSITORY=https://github.com/${{ matrix.clangir.repository }}
+            CLANGIR_REPOSITORY=https://github.com/${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
             CLANGIR_VERSION=${{ matrix.clangir.version }}

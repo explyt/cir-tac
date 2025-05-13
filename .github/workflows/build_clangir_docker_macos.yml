@@ -30,14 +30,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: clangir
-          key: macos-latest-${{ matrix.clangir.repository }}-${{ matrix.clangir.version }}-clangir-build
+          key: macos-latest-${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}-${{ matrix.clangir.version }}-clangir-build
 
       - name: Checkout clangir repo
         if: steps.cache-clangir-build.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.clangir.version }}
-          repository: ${{ matrix.clangir.repository }}
+          repository: ${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
           path: clangir
 
       - name: Build clangir
@@ -61,7 +61,7 @@ jobs:
       - name: Restore clangir built on macOS
         uses: actions/cache/restore@v4
         with:
-          key: macos-latest-${{ matrix.clangir.repository }}-${{ matrix.clangir.version }}-clangir-build
+          key: macos-latest-${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}-${{ matrix.clangir.version }}-clangir-build
           path: clangir
           fail-on-cache-miss: true
 
@@ -73,7 +73,7 @@ jobs:
 
       - name: Create image tag
         run: |
-          echo "IMAGE_TAG=clangir_macos-latest_build:${{ matrix.clangir.normalized_repo }}-${{ matrix.clangir.version }}" \
+          echo "IMAGE_TAG=clangir_macos-latest_build:${{ matrix.clangir.organization }}_${{ matrix.clangir.repository }}-${{ matrix.clangir.version }}" \
             >> $GITHUB_ENV
 
       - name: Build and push Docker image with clangir
