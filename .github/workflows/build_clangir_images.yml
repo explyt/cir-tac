@@ -1,0 +1,11 @@
+name: Build clangir docker images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    uses: ./.github/workflows/build_clangir_docker_linux.yml
+
+  build-macos:
+    uses: ./.github/workflows/build_clangir_docker_macos.yml
