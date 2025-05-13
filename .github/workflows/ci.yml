@@ -27,8 +27,18 @@ jobs:
     uses: ./.github/workflows/build.yml
     secrets: inherit
 
-  run-gsac-tests:
+  cmp-tblgen-files:
     needs: [get-clangir-id, build]
+    strategy:
+      matrix:
+        clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
+    uses: ./.github/workflows/tblgen-check.yml
+    with:
+      CLANGIR_REPOSITORY: ${{ matrix.clangir.repository }}
+      CLANGIR_VERSION: ${{ matrix.clangir.version }}
+
+  run-gsac-tests:
+    needs: [get-clangir-id, build, cmp-tblgen-files]
     strategy:
       matrix:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
@@ -41,7 +51,7 @@ jobs:
 
   run-juliet-tests:
     if: github.event_name == 'workflow_dispatch'
-    needs: [get-clangir-id, build]
+    needs: [get-clangir-id, build, cmp-tblgen-files]
     strategy:
       matrix:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
