@@ -1,4 +1,4 @@
-name: Build and push docker image of ClangIR (Linux)
+name: Build and push docker image of ClangIR (Linux legacy)
 
 on:
   workflow_dispatch:
