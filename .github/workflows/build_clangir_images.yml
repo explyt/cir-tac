@@ -8,6 +8,10 @@ jobs:
     uses: ./.github/workflows/build_clangir_docker_linux.yml
     secrets: inherit
 
+  build-linux-legacy:
+    uses: ./.github/workflows/build_clangir_docker_linux_legacy.yml
+    secrets: inherit
+
   build-macos:
     uses: ./.github/workflows/build_clangir_docker_macos.yml
     secrets: inherit
