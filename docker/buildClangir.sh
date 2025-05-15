@@ -12,11 +12,7 @@ function checkEnvVar() {
 
 function gitCloneAndCheckout() {
   GIT_ERROR_CODE=0
-  GIT_OUTPUT=$(git clone -c http.sslVerify=false "$1" --branch "$2" 2>&1) || GIT_ERROR_CODE=$?
-  if [ "$GIT_ERROR_CODE" -ne 0 ]; then
-    GIT_ERROR_CODE=0
-    GIT_OUTPUT=$(git clone -c http.sslVerify=false  "$1" 2>&1) || GIT_ERROR_CODE=$?
-  fi
+  GIT_OUTPUT=$(git clone --depth 1 -c http.sslVerify=false "$1" --branch "$2" 2>&1) || GIT_ERROR_CODE=$?
 
   if [ "$GIT_ERROR_CODE" -eq 0 ]; then
     DESTINATION_DIR=$(echo "$GIT_OUTPUT" | sed -nr "s/Cloning into '([^\.']*)'\.\.\./\1/p")
@@ -41,10 +37,12 @@ function gitCloneAndCheckout() {
 }
 
 function buildClangir() {
-  echo "Compiling clangir..."
+  echo "Cloning clangir..."
   CLANGIR_SOURCES_PATH=$(gitCloneAndCheckout "$CLANGIR_REPOSITORY" "$CLANGIR_VERSION")
   export CLANGIR_SOURCES_PATH
+  rm -rf $CLANGIR_SOURCES_PATH/.github
   echo "Successfully cloned clangir!"
+  echo "Starting compilation..."
 
   # -> clangir/llvm/build
   mkdir -p "$CLANGIR_SOURCES_PATH"/llvm/build
