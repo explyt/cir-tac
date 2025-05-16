@@ -103,10 +103,13 @@ jobs:
     container: ubuntu:20.04
 
     steps:
+    - name: Update git
+      run: |
+        apt-get update
+        apt-get install -y git
+
     - name: Checkout cir-tac
       uses: actions/checkout@v4
-
-    - run: ls
 
     - name: Checkout test repository
       uses: actions/checkout@v4
