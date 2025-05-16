@@ -81,7 +81,7 @@ jobs:
 
     - name: Run Test Suite
       run: |
-        ./workflow-scripts/run_test_suite.py "." \
+        ./scripts/workflow/run_test_suite.py "." \
         ${{ env.TEST_DIRECTORY }} \
         -c ${{ env.CUSTOM_CLANG_PATH }} \
         ${{ inputs.SEARCH_FOR_CIR && '--search-for-cir' || '' }}
@@ -135,7 +135,7 @@ jobs:
 
     - name: Run Test Suite
       run: |
-        ./workflow-scripts/run_test_suite.py "." \
+        ./scripts/workflow/run_test_suite.py "." \
         ${{ env.TEST_DIRECTORY }} \
         -c ${{ env.CUSTOM_CLANG_PATH }} \
         ${{ inputs.SEARCH_FOR_CIR && '--search-for-cir' || '' }}
