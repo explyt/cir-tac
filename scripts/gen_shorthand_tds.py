@@ -6,18 +6,22 @@ import textwrap
 
 
 ATTRS_FILE_REL_PATH = "clang/include/clang/CIR/Dialect/IR/MLIRCIRAttrs.td"
-ATTRS_FILE_CONTENTS = textwrap.dedent('''\
+ATTRS_FILE_CONTENTS = textwrap.dedent(
+    """\
     include "mlir/IR/BuiltinAttributes.td"
     include "mlir/IR/BuiltinLocationAttributes.td"
     include "clang/CIR/Dialect/IR/CIRAttrs.td"
     include "clang/CIR/Dialect/IR/CIROps.td"
-''')
+"""
+)
 
 TYPES_FILE_REL_PATH = "clang/include/clang/CIR/Dialect/IR/MLIRCIRTypes.td"
-TYPES_FILE_CONTENTS = textwrap.dedent('''\
+TYPES_FILE_CONTENTS = textwrap.dedent(
+    """\
     include "mlir/IR/BuiltinTypes.td"
     include "clang/CIR/Dialect/IR/CIRTypes.td"
-''')
+"""
+)
 
 
 def write_file(path, contents):
