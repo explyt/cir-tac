@@ -26,7 +26,7 @@ on:
 
 env:
   TEST_DIRECTORY: "test-suite"
-  CUSTOM_CLANG_PATH: "clangir/llvm/build/bin/clang"
+  CUSTOM_CLANG_PATH: "./clangir/llvm/build/bin/clang"
 
 jobs:
   run-tests:
