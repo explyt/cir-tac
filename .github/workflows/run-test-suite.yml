@@ -92,3 +92,57 @@ jobs:
       with:
         name: failed-tests
         path: failures
+
+  run-tests-on-legacy:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+
+    name: Run Tests
+    runs-on: ubunru-latest
+    container: ubuntu:20.04
+
+    steps:
+    - name: Checkout cir-tac
+      uses: actions/checkout@v4
+
+    - name: Checkout test repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.TEST_COMMIT }}
+        repository: ${{ inputs.TEST_REPOSITORY }}
+        path: ${{ env.TEST_DIRECTORY }}
+
+    - name: Download clangir build
+      uses: actions/download-artifact@v4
+      with:
+        name: clangir_${{ matrix.os }}_build
+        path: clangir/llvm/build
+
+    - name: Add permissions to clang tools
+      run: |
+        chmod -R +x clangir/llvm/build/bin
+
+    - name: Download cir-tac precompiled tools
+      uses: actions/download-artifact@v4
+      with:
+        name: cir-tac-${{ matrix.os }}-${{ runner.arch }}
+        path: ${{ github.workspace }}/build/tools
+
+    - name: Add permissions to cir-tac tools
+      run: |
+        chmod -R +x ./build/tools/
+
+    - name: Run Test Suite
+      run: |
+        ./.github/workflows/run_test_suite.py "." \
+        ${{ env.TEST_DIRECTORY }} \
+        -c ${{ env.CUSTOM_CLANG_PATH }} \
+        ${{ inputs.SEARCH_FOR_CIR && '--search-for-cir' || '' }}
+
+    - name: Upload failed test outputs to GitHub artifacts
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: failed-tests
+        path: failures
