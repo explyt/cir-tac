@@ -116,7 +116,7 @@ jobs:
     - name: Download clangir build
       uses: actions/download-artifact@v4
       with:
-        name: clangir_${{ matrix.os }}_build
+        name: clangir_ubuntu-legacy_build
         path: clangir/llvm/build
 
     - name: Add permissions to clang tools
