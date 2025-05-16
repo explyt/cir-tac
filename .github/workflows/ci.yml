@@ -34,7 +34,7 @@ jobs:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
     uses: ./.github/workflows/tblgen-check.yml
     with:
-      CLANGIR_REPOSITORY: ${{ matrix.clangir.repository }}
+      CLANGIR_REPOSITORY: ${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
       CLANGIR_VERSION: ${{ matrix.clangir.version }}
 
   run-gsac-tests:
@@ -44,7 +44,7 @@ jobs:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
     uses: ./.github/workflows/run-test-suite.yml
     with:
-      CLANGIR_REPOSITORY: ${{ matrix.clangir.repository }}
+      CLANGIR_REPOSITORY: ${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
       CLANGIR_VERSION: ${{ matrix.clangir.version }}
       TEST_REPOSITORY: "explyt/GSAC"
       TEST_COMMIT: "macos_version"
@@ -57,7 +57,7 @@ jobs:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
     uses: ./.github/workflows/run-test-suite.yml
     with:
-      CLANGIR_REPOSITORY: ${{ matrix.clangir.repository }}
+      CLANGIR_REPOSITORY: ${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
       CLANGIR_VERSION: ${{ matrix.clangir.version }}
       TEST_REPOSITORY: "explyt/juliet-c"
       TEST_COMMIT: "full-flat"

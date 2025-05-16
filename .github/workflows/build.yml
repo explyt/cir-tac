@@ -32,21 +32,22 @@ jobs:
         run: |
           echo "ubuntu=$(printf "%s" \
               clangir_ubuntu-latest_build:\
-              ${{ matrix.clangir.normalized_repo }}-\
+              ${{ matrix.clangir.organization }}_\
+              ${{ matrix.clangir.repository }}-\
               ${{ matrix.clangir.version }} \
             )" >> $GITHUB_OUTPUT
           echo "ubuntu-legacy=$(printf "%s" \
               clangir_ubuntu-legacy_build:\
-              ${{ matrix.clangir.normalized_repo }}-\
+              ${{ matrix.clangir.organization }}_\
+              ${{ matrix.clangir.repository }}-\
               ${{ matrix.clangir.version }} \
             )" >> $GITHUB_OUTPUT
           echo "macos=$(printf "%s" \
               clangir_macos-latest_build:\
-              ${{ matrix.clangir.normalized_repo }}-\
+              ${{ matrix.clangir.organization }}_\
+              ${{ matrix.clangir.repository }}-\
               ${{ matrix.clangir.version }} \
             )" >> $GITHUB_OUTPUT
-
-      - run: echo ${{ steps.set-image.outputs.ubuntu }}
 
   pull-clangir-build:
     runs-on: ubuntu-latest
@@ -54,13 +55,18 @@ jobs:
     strategy:
       matrix:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, ubuntu-legacy]
 
     steps:
       - name: Get image tag (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu-latest')
         run: |
           echo "IMAGE_TAG=${{ needs.get-image-tags.outputs.ubuntu }}" >> $GITHUB_ENV
+
+      - name: Get image tag (Linux legacy)
+        if: startsWith(matrix.os, 'ubuntu-legacy')
+        run: |
+          echo "IMAGE_TAG=${{ needs.get-image-tags.outputs.ubuntu-legacy }}" >> $GITHUB_ENV
 
       - name: Get image tag (macOS)
         if: startsWith(matrix.os, 'macos')
@@ -100,7 +106,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         ref: ${{ matrix.clangir.version }}
-        repository: ${{ matrix.clangir.repository }}
+        repository: ${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
         path: ${{ github.workspace }}/clangir
 
     - name: Fetch clangir build
@@ -135,8 +141,6 @@ jobs:
       matrix:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
         os: [ubuntu-latest]
-    env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     container: explyt/${{ needs.get-image-tags.outputs.ubuntu }}
 
     runs-on: ${{ matrix.os }}
@@ -181,7 +185,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.clangir.version }}
-          repository: ${{ matrix.clangir.repository }}
+          repository: ${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
           path: clangir
 
       - name: Copy clangir to root
@@ -221,8 +225,6 @@ jobs:
       matrix:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
         os: [ubuntu-legacy]
-    env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     container: explyt/${{ needs.get-image-tags.outputs.ubuntu-legacy }}
 
     runs-on: ubuntu-latest
@@ -267,7 +269,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.clangir.version }}
-          repository: ${{ matrix.clangir.repository }}
+          repository: ${{ matrix.clangir.organization }}/${{ matrix.clangir.repository }}
           path: clangir
 
       - name: Copy clangir to root
@@ -277,8 +279,8 @@ jobs:
 
       - name: Copy clangir build
         run: |
-          mkdir -p /clangir/llvm/build
-          cp -r /clangir_build/* /clangir/llvm/build
+          mkdir -p /mnt/dist/clangir/llvm/build
+          cp -r /clangir_build/* /mnt/dist/clangir/llvm/build
 
       - uses: actions/checkout@v4
         with:
@@ -289,7 +291,7 @@ jobs:
         run: |
           mkdir build && cd build
           PROTOBUF_INSTALL_DIR=/protobuf-install
-          cmake -DCLANGIR_BUILD_DIR=/clangir/llvm/build \
+          cmake -DCLANGIR_BUILD_DIR=/mnt/dist/clangir/llvm/build \
                 -DProtobuf_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/protobuf \
                 -Dutf8_range_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/utf8_range \
                 -Dabsl_DIR="$PROTOBUF_INSTALL_DIR"/lib/cmake/absl \
@@ -298,7 +300,7 @@ jobs:
       - name: Upload cir-tac build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cir-tac-${{ matrix.os }}-${{ runner.arch }}
+          name: cir-tac-ubuntu-20.04-${{ runner.arch }}
           path:  |
             main/build/tools/cir-ser-proto/cir-ser-proto
             main/build/tools/cir-deser-proto/cir-deser-proto
