@@ -274,8 +274,8 @@ jobs:
 
       - name: Copy clangir to root
         run: |
-          mkdir /clangir
-          cp -r clangir/* /clangir
+          mkdir -p /mnt/dist/clangir
+          cp -r clangir/* /mnt/dist/clangir
 
       - name: Copy clangir build
         run: |
