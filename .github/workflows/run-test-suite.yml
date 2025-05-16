@@ -26,7 +26,7 @@ on:
 
 env:
   TEST_DIRECTORY: "test-suite"
-  CUSTOM_CLANG_PATH: "./clangir/llvm/build/bin/clang"
+  CUSTOM_CLANG_PATH: "clangir/llvm/build/bin/clang"
 
 jobs:
   run-tests:
@@ -105,6 +105,8 @@ jobs:
     steps:
     - name: Checkout cir-tac
       uses: actions/checkout@v4
+
+    - run: ls
 
     - name: Checkout test repository
       uses: actions/checkout@v4
