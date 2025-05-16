@@ -4,7 +4,6 @@ import argparse
 import os
 import textwrap
 
-
 ATTRS_FILE_REL_PATH = "clang/include/clang/CIR/Dialect/IR/MLIRCIRAttrs.td"
 ATTRS_FILE_CONTENTS = textwrap.dedent(
     """\
