@@ -53,7 +53,7 @@ jobs:
         path: "clangir"
 
     - name: Generate shorthand .td files for cir-tac-tblgen
-      run: ${{ github.workspace }}/scripts/gen_shorthand_tds.py "clangir"
+      run: ${{ github.workspace }}/scripts/gen_shorthand_tds.py -p "clangir"
 
     - name: Tblgen'erate files by their definitions
       run: ${{ github.workspace }}/scripts/build_source_files.py "clangir" ${{ github.workspace }} "${{ github.workspace }}/scripts/cpp_gen_defs.csv" -o ${{ env.TEST_DIR }}
