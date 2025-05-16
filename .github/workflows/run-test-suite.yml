@@ -99,7 +99,7 @@ jobs:
         os: [ubuntu-20.04]
 
     name: Run Tests
-    runs-on: ubunru-latest
+    runs-on: ubuntu-latest
     container: ubuntu:20.04
 
     steps:
