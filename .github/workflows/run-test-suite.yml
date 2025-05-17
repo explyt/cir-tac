@@ -144,6 +144,17 @@ jobs:
       run: |
         chmod -R +x ./build/tools/
 
+    - run: |
+        ls
+        echo "______________"
+        ls scripts
+        echo "______________"
+        ls scripts/workflow
+        echo "______________"
+        pwd
+        echo "______________"
+        cat scripts/workflow/run_test_suite.py
+
     - name: Run Test Suite
       run: |
         ./scripts/workflow/run_test_suite.py "." \
