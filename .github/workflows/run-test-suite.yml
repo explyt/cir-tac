@@ -109,7 +109,9 @@ jobs:
     - run: |
         ls
         echo "______________"
-        sudo ls
+        ls scripts
+        echo "______________"
+        ls scripts/workflow
 
     - name: Checkout test repository
       uses: actions/checkout@v4
