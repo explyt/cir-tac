@@ -112,6 +112,10 @@ jobs:
         ls scripts
         echo "______________"
         ls scripts/workflow
+        echo "______________"
+        pwd
+        echo "______________"
+        cat scripts/workflow/run_test_suite.py
 
     - name: Checkout test repository
       uses: actions/checkout@v4
