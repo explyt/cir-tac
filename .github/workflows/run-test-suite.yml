@@ -154,6 +154,7 @@ jobs:
         pwd
         echo "______________"
         cat scripts/workflow/run_test_suite.py
+        chmod +x scripts/workflow/run_test_suite.py
 
     - name: Run Test Suite
       run: |
