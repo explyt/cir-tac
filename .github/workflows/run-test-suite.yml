@@ -106,6 +106,13 @@ jobs:
     - name: Checkout cir-tac
       uses: actions/checkout@v4
 
+    - name: Install packages
+      run: |
+        apt-get update
+        apt-get install python3 g++ -y
+        rm /bin/sh
+        ln -s /bin/bash /bin/sh
+
     - name: Checkout test repository
       uses: actions/checkout@v4
       with:
