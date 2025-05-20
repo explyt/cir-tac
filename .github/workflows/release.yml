@@ -16,6 +16,7 @@ permissions: write-all
 jobs:
   build:
     uses: ./.github/workflows/build.yml
+    secrets: inherit
 
   release:
     name: 'Release'
@@ -49,6 +50,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ${{ github.workspace }}/artifacts
+          pattern: cir-tac-*
 
       - name: Compress release files
         working-directory: ${{ github.workspace }}/artifacts
@@ -56,9 +58,9 @@ jobs:
           chmod -R +x cir-tac-macos-latest-ARM64
           chmod -R +x cir-tac-ubuntu-latest-X64
           chmod -R +x cir-tac-ubuntu-20.04-X64
-          tar -czvf cir-tac-macos-latest-ARM64.tar.gz -C cir-tac-macos-latest-ARM64 *
-          tar -czvf cir-tac-ubuntu-latest-X64.tar.gz -C cir-tac-ubuntu-latest-X64 *
-          tar -czvf cir-tac-ubuntu-20.04-X64.tar.gz -C cir-tac-ubuntu-20.04-X64 *
+          tar -czvf cir-tac-macos-latest-ARM64.tar.gz -C cir-tac-macos-latest-ARM64 .
+          tar -czvf cir-tac-ubuntu-latest-X64.tar.gz -C cir-tac-ubuntu-latest-X64 .
+          tar -czvf cir-tac-ubuntu-20.04-X64.tar.gz -C cir-tac-ubuntu-20.04-X64 .
 
       - name: 'Release'
         if: ${{ github.event_name == 'push' }}
