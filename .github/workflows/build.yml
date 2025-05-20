@@ -23,31 +23,25 @@ jobs:
       matrix:
         clangir: ${{ fromJSON(needs.get-clangir-id.outputs.matrix) }}
     outputs:
-      ubuntu: ${{ steps.set-image.outputs.ubuntu }}
+      ubuntu: ${{ steps.set-image.outputs.ubuntu-latest }}
       ubuntu-legacy: ${{ steps.set-image.outputs.ubuntu-legacy }}
-      macos: ${{ steps.set-image.outputs.macos }}
+      macos: ${{ steps.set-image.outputs.macos-latest }}
     steps:
       - name: Concat image tags
         id: set-image
         run: |
-          echo "ubuntu=$(printf "%s" \
-              clangir_ubuntu-latest_build:\
-              ${{ matrix.clangir.organization }}_\
-              ${{ matrix.clangir.repository }}-\
-              ${{ matrix.clangir.version }} \
-            )" >> $GITHUB_OUTPUT
-          echo "ubuntu-legacy=$(printf "%s" \
-              clangir_ubuntu-legacy_build:\
-              ${{ matrix.clangir.organization }}_\
-              ${{ matrix.clangir.repository }}-\
-              ${{ matrix.clangir.version }} \
-            )" >> $GITHUB_OUTPUT
-          echo "macos=$(printf "%s" \
-              clangir_macos-latest_build:\
-              ${{ matrix.clangir.organization }}_\
-              ${{ matrix.clangir.repository }}-\
-              ${{ matrix.clangir.version }} \
-            )" >> $GITHUB_OUTPUT
+          generate_tag() {
+            local os=$1
+            local image_name="clangir_${os}_build"
+            local prefix="${{ matrix.clangir.organization }}_${{ matrix.clangir.repository }}"
+            local version="${{ matrix.clangir.version }}"
+            local tag="${image_name}:${prefix}-${version}"
+            echo "${os}=${tag}" >> $GITHUB_OUTPUT
+          }
+
+          generate_tag "ubuntu-latest"
+          generate_tag "ubuntu-legacy"
+          generate_tag "macos-latest"
 
   pull-clangir-build:
     runs-on: ubuntu-latest
