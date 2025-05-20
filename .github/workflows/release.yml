@@ -50,6 +50,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ${{ github.workspace }}/artifacts
+          pattern: cir-tac-*
 
       - name: Compress release files
         working-directory: ${{ github.workspace }}/artifacts
